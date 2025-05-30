@@ -15,7 +15,6 @@ build/
 .env.production.local
 
 # IDE
-.vscode/settings.json
 .idea/
 *.swp
 *.swo
