@@ -1,14 +1,8 @@
 {
-  "github.copilot.chat.codeGeneration.instructionFiles": [
-    ".github/copilot-instructions.md"
-  ],
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "chat.promptFiles": true,
   "biome.enabled": true,
-  "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit"
-  },
   "typescript.preferences.importModuleSpecifier": "relative",
   "typescript.suggest.autoImports": true,
   "emmet.includeLanguages": {
