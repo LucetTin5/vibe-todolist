@@ -28,7 +28,6 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 **목표**: 기본적인 Todo CRUD 기능과 리스트 뷰 완성
 
 **백엔드 구현:**
-- [ ] TailwindCSS v4 설정
 - [ ] TypeScript 타입 정의 (`backend/src/types/todo.types.ts`)
 - [ ] 인메모리 스토리지 구현 (`backend/src/utils/in-memory-storage.ts`)
 - [ ] Todo 리포지토리 구현 (`backend/src/repositories/todo.repository.ts`)
@@ -37,6 +36,7 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 - [ ] CORS 및 미들웨어 설정
 
 **프론트엔드 구현:**
+- [x] TailwindCSS v4 설정
 - [ ] React Query 설정
 - [ ] API 클라이언트 구현 (`frontend/src/utils/api.ts`)
 - [ ] useTodos 훅 구현 (`frontend/src/hooks/useTodos.ts`)
