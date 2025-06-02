@@ -9,12 +9,14 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 ## 📋 프로젝트 개요
 
 **기술 스택:**
+
 - Frontend: React 19 + TypeScript + Vite 6 + TailwindCSS v4
 - Backend: Hono + TypeScript + Bun 런타임
 - 모노레포: Bun Workspaces
 - 코드 품질: Biome (ESLint + Prettier 대체)
 
 **프로젝트 범위:**
+
 - 기본 Todo CRUD 기능
 - Kanban 보드 뷰 (드래그앤드롭)
 - 서브태스크 및 계층 구조
@@ -25,17 +27,20 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 ## 🎯 개발 페이즈 계획
 
 ### Phase 1: 핵심 기능 구현
+
 **목표**: 기본적인 Todo CRUD 기능과 리스트 뷰 완성
 
 **백엔드 구현:**
-- [ ] TypeScript 타입 정의 (`backend/src/types/todo.types.ts`)
-- [ ] 인메모리 스토리지 구현 (`backend/src/utils/in-memory-storage.ts`)
-- [ ] Todo 리포지토리 구현 (`backend/src/repositories/todo.repository.ts`)
-- [ ] Todo 서비스 로직 구현 (`backend/src/services/todo.service.ts`)
-- [ ] REST API 엔드포인트 구현 (`backend/src/routes/todos.ts`)
-- [ ] CORS 및 미들웨어 설정
+
+- [x] TypeScript 타입 정의 (`backend/src/types/todo.types.ts`)
+- [x] 인메모리 스토리지 구현 (`backend/src/utils/in-memory-storage.ts`)
+- [x] Todo 리포지토리 구현 (`backend/src/repositories/todo.repository.ts`)
+- [x] Todo 서비스 로직 구현 (`backend/src/services/todo.service.ts`)
+- [x] REST API 엔드포인트 구현 (`backend/src/routes/todos.ts`)
+- [x] CORS 및 미들웨어 설정
 
 **프론트엔드 구현:**
+
 - [x] TailwindCSS v4 설정
 - [ ] React Query 설정
 - [ ] API 클라이언트 구현 (`frontend/src/utils/api.ts`)
@@ -48,24 +53,29 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 - [ ] 에러 핸들링 구현
 
 ### Phase 2: 고급 기능 구현
+
 **목표**: 칸반 뷰, 드래그앤드롭, 서브태스크 기능 추가
 
 **칸반 뷰:**
+
 - [ ] 칸반 보드 레이아웃
 - [ ] 드래그앤드롭 구현 (useDragAndDrop 훅)
 - [ ] 상태 간 태스크 이동 로직
 
 **서브태스크 기능:**
+
 - [ ] 계층 구조 데이터 모델
 - [ ] 서브태스크 생성 UI
 - [ ] 진행률 계산 로직
 
 **캘린더 뷰:**
+
 - [ ] 캘린더 컴포넌트 구현
 - [ ] 날짜별 태스크 표시
 - [ ] 마감일 기반 필터링
 
 ### Phase 3: 대시보드 및 분석
+
 **목표**: 종합 대시보드와 분석 차트 구현
 
 - [ ] 대시보드 레이아웃
@@ -73,6 +83,7 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 - [ ] 분석 데이터 API
 
 ### Phase 4: 최적화 및 확장
+
 **목표**: 성능 최적화 및 추가 기능
 
 - [ ] 성능 최적화 (React.memo, 가상화)
@@ -82,6 +93,7 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 ## 🎨 디자인 시스템 규칙
 
 ### 반응형 브레이크포인트
+
 ```css
 sm: 480px   /* 모바일 가로 */
 md: 768px   /* 태블릿 */
@@ -90,13 +102,15 @@ xl: 1280px  /* 큰 데스크톱 */
 ```
 
 ### 12컬럼 그리드 시스템
+
 - **모바일**: 4컬럼 기본
 - **sm(480px+)**: 6컬럼
 - **md(768px+)**: 8컬럼
-- **lg(1024px+)**: 10컬럼  
+- **lg(1024px+)**: 10컬럼
 - **xl(1280px+)**: 12컬럼
 
 ### 필수 그리드 패턴
+
 ```tsx
 // 대시보드 레이아웃
 <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-6">
@@ -118,7 +132,9 @@ xl: 1280px  /* 큰 데스크톱 */
 ```
 
 ### 다크모드 패턴
+
 모든 컴포넌트는 다크모드를 지원해야 합니다:
+
 ```tsx
 <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700">
   {/* 컨텐츠 */}
@@ -126,6 +142,7 @@ xl: 1280px  /* 큰 데스크톱 */
 ```
 
 ### 접근성 요구사항
+
 - 모든 버튼에 `focus:ring-2 focus:ring-blue-500` 추가
 - 최소 44px 터치 영역 확보
 - 시맨틱 HTML 사용
@@ -135,6 +152,7 @@ xl: 1280px  /* 큰 데스크톱 */
 ## 📂 파일 구조 규칙
 
 ### 백엔드 구조
+
 ```
 backend/src/
 ├── types/           # TypeScript 타입 정의
@@ -147,6 +165,7 @@ backend/src/
 ```
 
 ### 프론트엔드 구조
+
 ```
 frontend/src/
 ├── components/
@@ -164,16 +183,19 @@ frontend/src/
 ## 💻 코딩 표준
 
 ### TypeScript 규칙
+
 - 엄격 모드 사용, `any` 타입 금지
 - 명시적 타입 정의 필수
 - 인터페이스명은 PascalCase
 
 ### React 규칙
+
 - 함수형 컴포넌트만 사용
 - React Hooks 활용
 - Props는 destructuring 사용
 
 ### 네이밍 컨벤션
+
 - 컴포넌트: PascalCase (`TodoItem.tsx`)
 - 훅: camelCase + use 접두사 (`useTodo.ts`)
 - 유틸함수: camelCase
@@ -181,6 +203,7 @@ frontend/src/
 - 타입/인터페이스: PascalCase
 
 ### Biome 설정 준수
+
 - 2칸 들여쓰기
 - 싱글 쿼트 사용
 - 줄길이 100자 제한
@@ -190,22 +213,25 @@ frontend/src/
 **지금 즉시 시작해야 할 작업:**
 
 1. **TailwindCSS v4 설정**
+
    ```bash
    cd frontend
    bun add @tailwindcss/vite@next
    ```
 
 2. **Vite 설정 업데이트**
+
    ```typescript
    // frontend/vite.config.ts
-   import tailwindcss from '@tailwindcss/vite'
-   
+   import tailwindcss from "@tailwindcss/vite";
+
    export default defineConfig({
      plugins: [react(), tailwindcss()],
-   })
+   });
    ```
 
 3. **글로벌 CSS 생성**
+
    ```css
    /* frontend/src/styles/globals.css */
    @import "tailwindcss";
@@ -239,6 +265,7 @@ frontend/src/
 ## 🔄 다음 단계
 
 **현재 우선순위:**
+
 1. TailwindCSS v4 설정 완료
 2. 백엔드 타입 정의 및 기본 구조 구현
 3. 프론트엔드 기본 컴포넌트 구현

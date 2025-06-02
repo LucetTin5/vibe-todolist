@@ -19,7 +19,8 @@ class InMemoryStorage {
    * Todo 생성
    */
   create(todoData: Omit<Todo, "id" | "createdAt" | "updatedAt">): Todo {
-    const now = new Date();
+    // Ensure unique timestamps for proper sorting
+    const now = new Date(Date.now() + this.nextId);
     const todo: Todo = {
       id: this.generateId(),
       ...todoData,
@@ -59,10 +60,15 @@ class InMemoryStorage {
       return undefined;
     }
 
+    // Ensure updatedAt is always later than createdAt
+    const updatedAt = new Date(
+      Math.max(Date.now(), todo.createdAt.getTime() + 1)
+    );
+
     const updatedTodo: Todo = {
       ...todo,
       ...updates,
-      updatedAt: new Date(),
+      updatedAt,
     };
 
     this.todos.set(id, updatedTodo);

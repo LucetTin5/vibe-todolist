@@ -35,18 +35,19 @@ export interface PaginationParams {
 }
 
 export interface TodoListResponse {
-  success: boolean;
-  data: {
-    todos: Todo[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  };
-  message?: string;
-  error?: string;
+  todos: Todo[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface TodoStats {
+  total: number;
+  completed: number;
+  active: number;
+  completionRate: number;
 }
 
 export type TodoFilter = "all" | "active" | "completed";
