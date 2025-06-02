@@ -9,7 +9,9 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "hono": "^4.7.10"
+    "@hono/zod-validator": "^0.7.0",
+    "hono": "^4.7.11",
+    "zod": "^3.25.46"
   },
   "devDependencies": {
     "@types/bun": "^1.2.15",
