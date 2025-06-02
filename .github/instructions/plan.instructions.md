@@ -39,13 +39,18 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 - [x] REST API 엔드포인트 구현 (`backend/src/routes/todos.ts`)
 - [x] CORS 및 미들웨어 설정
 
+**백엔드 확장:**
+
+- [ ] OpenAPI 스키마 생성 (`@hono/zod-openapi` 도입)
+- [ ] Swagger UI 설정 (`@hono/swagger-ui`)
+- [ ] API 문서화 및 스키마 검증
+
 **프론트엔드 구현:**
 
 - [x] TailwindCSS v4 설정
-- [ ] React Query 설정
-- [ ] API 클라이언트 구현 (`frontend/src/utils/api.ts`)
-- [ ] useTodos 훅 구현 (`frontend/src/hooks/useTodos.ts`)
-- [ ] useTodoForm 훅 구현 (`frontend/src/hooks/useTodoForm.ts`)
+- [ ] OpenAPI 코드젠 설정 (Orval + React Query)
+- [ ] API 클라이언트 자동 생성 (`frontend/src/api/`)
+- [ ] Todo 관련 훅 자동 생성 (`useTodos`, `useCreateTodo` 등)
 - [ ] 기본 UI 컴포넌트 (Button, Input, Modal)
 - [ ] TodoList 컴포넌트 구현
 - [ ] TodoForm 컴포넌트 구현

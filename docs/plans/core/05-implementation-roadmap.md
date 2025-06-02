@@ -8,9 +8,30 @@
 
 #### 백엔드 기반 구축
 
-- [ ] 프로젝트 설정 완료 및 TailwindCSS v4 설정
-- [ ] 백엔드 API 엔드포인트 구현
-- [ ] 프론트엔드 기본 컴포넌트 및 훅 구현
+- [x] 프로젝트 기본 설정 완료
+- [x] TypeScript 타입 정의 완료
+- [x] 인메모리 스토리지 구현
+- [x] Todo 리포지토리 구현
+- [x] Todo 서비스 로직 구현
+- [x] REST API 엔드포인트 구현
+- [x] CORS 및 미들웨어 설정
+- [x] API 테스트 완료
+
+#### 백엔드 OpenAPI 확장
+
+- [ ] @hono/zod-openapi 패키지 설치 및 설정
+- [ ] 기존 Zod 스키마를 OpenAPI 호환으로 변환
+- [ ] OpenAPI JSON 스키마 자동 생성
+- [ ] Swagger UI 엔드포인트 추가 (/docs)
+- [ ] API 문서화 완료
+
+#### 프론트엔드 코드젠 설정
+
+- [x] TailwindCSS v4 설정 완료
+- [ ] Orval 코드젠 라이브러리 설치 및 설정
+- [ ] OpenAPI 스키마 기반 API 클라이언트 자동 생성
+- [ ] React Query와 통합된 커스텀 훅 자동 생성
+- [ ] TypeScript 타입 및 Zod 스키마 자동 생성
 
 #### 프론트엔드 완성
 

@@ -1,0 +1,242 @@
+/**
+ * OpenAPI 라우트 정의
+ */
+import { z } from 'zod'
+import { createRoute } from '@hono/zod-openapi'
+import {
+  TodoSchema,
+  CreateTodoSchema,
+  UpdateTodoSchema,
+  TodoQuerySchema,
+  TodoListResponseSchema,
+  TodoStatsResponseSchema,
+  SuccessResponseSchema,
+  ErrorResponseSchema,
+} from '../schemas/todo.schemas'
+
+// Todo 목록 조회 라우트
+export const getTodosRoute = createRoute({
+  method: 'get',
+  path: '/todos',
+  tags: ['Todos'],
+  summary: 'Todo 목록 조회',
+  description: '페이징, 필터링, 검색을 지원하는 Todo 목록을 조회합니다.',
+  request: {
+    query: TodoQuerySchema,
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TodoListResponseSchema,
+        },
+      },
+      description: 'Todo 목록 조회 성공',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '잘못된 요청 파라미터',
+    },
+  },
+})
+
+// Todo 생성 라우트
+export const createTodoRoute = createRoute({
+  method: 'post',
+  path: '/todos',
+  tags: ['Todos'],
+  summary: 'Todo 생성',
+  description: '새로운 Todo를 생성합니다.',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: CreateTodoSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        'application/json': {
+          schema: TodoSchema,
+        },
+      },
+      description: 'Todo 생성 성공',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '잘못된 요청 데이터',
+    },
+  },
+})
+
+// 특정 Todo 조회 라우트
+export const getTodoRoute = createRoute({
+  method: 'get',
+  path: '/todos/{id}',
+  tags: ['Todos'],
+  summary: '특정 Todo 조회',
+  description: 'ID로 특정 Todo를 조회합니다.',
+  request: {
+    params: z.object({
+      id: z.string().openapi({
+        param: { name: 'id', in: 'path' },
+        example: 'todo_1737606271352',
+        description: 'Todo ID',
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TodoSchema,
+        },
+      },
+      description: 'Todo 조회 성공',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: 'Todo를 찾을 수 없음',
+    },
+  },
+})
+
+// Todo 업데이트 라우트
+export const updateTodoRoute = createRoute({
+  method: 'put',
+  path: '/todos/{id}',
+  tags: ['Todos'],
+  summary: 'Todo 업데이트',
+  description: '기존 Todo를 업데이트합니다.',
+  request: {
+    params: z.object({
+      id: z.string().openapi({
+        param: { name: 'id', in: 'path' },
+        example: 'todo_1737606271352',
+        description: 'Todo ID',
+      }),
+    }),
+    body: {
+      content: {
+        'application/json': {
+          schema: UpdateTodoSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TodoSchema,
+        },
+      },
+      description: 'Todo 업데이트 성공',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '잘못된 요청 데이터',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: 'Todo를 찾을 수 없음',
+    },
+  },
+})
+
+// Todo 삭제 라우트
+export const deleteTodoRoute = createRoute({
+  method: 'delete',
+  path: '/todos/{id}',
+  tags: ['Todos'],
+  summary: 'Todo 삭제',
+  description: '특정 Todo를 삭제합니다.',
+  request: {
+    params: z.object({
+      id: z.string().openapi({
+        param: { name: 'id', in: 'path' },
+        example: 'todo_1737606271352',
+        description: 'Todo ID',
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: SuccessResponseSchema,
+        },
+      },
+      description: 'Todo 삭제 성공',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: 'Todo를 찾을 수 없음',
+    },
+  },
+})
+
+// Todo 통계 조회 라우트
+export const getTodoStatsRoute = createRoute({
+  method: 'get',
+  path: '/todos/stats',
+  tags: ['Stats'],
+  summary: 'Todo 통계 조회',
+  description: 'Todo 완료율 및 개수 통계를 조회합니다.',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TodoStatsResponseSchema,
+        },
+      },
+      description: 'Todo 통계 조회 성공',
+    },
+  },
+})
+
+// 모든 Todo 삭제 라우트
+export const deleteAllTodosRoute = createRoute({
+  method: 'delete',
+  path: '/todos',
+  tags: ['Todos'],
+  summary: '모든 Todo 삭제',
+  description: '모든 Todo를 삭제합니다. (주의: 되돌릴 수 없습니다)',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: SuccessResponseSchema,
+        },
+      },
+      description: '모든 Todo 삭제 성공',
+    },
+  },
+})

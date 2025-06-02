@@ -2,10 +2,7 @@
   "name": "@todolist/root",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
+  "workspaces": ["frontend", "backend"],
   "scripts": {
     "dev": "bun run --filter='*' dev",
     "build": "bun run --filter='*' build",

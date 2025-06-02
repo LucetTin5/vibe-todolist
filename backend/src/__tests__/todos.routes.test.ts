@@ -153,7 +153,9 @@ describe("Todo API Routes", () => {
       expect(response.status).toBe(200);
 
       const result = await response.json();
-      expect(result.todos.every((todo: any) => !todo.completed)).toBe(true);
+      expect(
+        result.todos.every((todo: { completed: boolean }) => !todo.completed)
+      ).toBe(true);
       expect(result.total).toBe(3); // 1, 3, 5번이 활성 상태
     });
 
@@ -163,7 +165,9 @@ describe("Todo API Routes", () => {
       expect(response.status).toBe(200);
 
       const result = await response.json();
-      expect(result.todos.every((todo: any) => todo.completed)).toBe(true);
+      expect(
+        result.todos.every((todo: { completed: boolean }) => todo.completed)
+      ).toBe(true);
       expect(result.total).toBe(2); // 2, 4번이 완료 상태
     });
 
