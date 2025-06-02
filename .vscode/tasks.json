@@ -35,7 +35,7 @@
       "problemMatcher": []
     },
     {
-      "label": "⚡ Backend Dev", 
+      "label": "⚡ Backend Dev",
       "type": "shell",
       "command": "bun",
       "args": ["run", "dev"],
@@ -45,7 +45,7 @@
       "group": "build",
       "presentation": {
         "echo": true,
-        "reveal": "always", 
+        "reveal": "always",
         "focus": false,
         "panel": "shared"
       },
@@ -67,7 +67,7 @@
     },
     {
       "label": "🔍 Lint Code",
-      "type": "shell", 
+      "type": "shell",
       "command": "bun",
       "args": ["run", "lint"],
       "group": "build",

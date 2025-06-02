@@ -1,4 +1,21 @@
 {
+  "name": "@todolist/root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "bun run --filter='*' dev",
+    "build": "bun run --filter='*' build",
+    "start": "bun run backend start",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --apply .",
+    "check": "biome check .",
+    "type-check": "bun run --filter='*' type-check"
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "typescript": "^5.8.3"
