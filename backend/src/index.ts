@@ -22,6 +22,6 @@ app.notFound((c) => {
 })
 
 export default {
-  port: 3001,
+  port: 3300,
   fetch: app.fetch,
 }

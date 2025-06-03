@@ -1,34 +1,34 @@
 /**
  * OpenAPI Hono 앱 설정
  */
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { swaggerUI } from "@hono/swagger-ui";
-import { cors } from "hono/cors";
-import { logger } from "hono/logger";
-import { prettyJSON } from "hono/pretty-json";
-import { todoOpenApiRoutes } from "./routes/todos.openapi";
+import { OpenAPIHono } from '@hono/zod-openapi'
+import { swaggerUI } from '@hono/swagger-ui'
+import { cors } from 'hono/cors'
+import { logger } from 'hono/logger'
+import { prettyJSON } from 'hono/pretty-json'
+import { todoOpenApiRoutes } from './routes/todos.openapi'
 
 // OpenAPI 앱 생성
-export const app = new OpenAPIHono();
+export const app = new OpenAPIHono()
 
 // 미들웨어 설정
-app.use("*", logger());
-app.use("*", prettyJSON());
+app.use('*', logger())
+app.use('*', prettyJSON())
 app.use(
-  "*",
+  '*',
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   })
-);
+)
 
 // OpenAPI 문서 정의
-app.doc("/openapi.json", {
-  openapi: "3.0.0",
+app.doc('/openapi.json', {
+  openapi: '3.0.0',
   info: {
-    version: "1.0.0",
-    title: "TodoList API",
+    version: '1.0.0',
+    title: 'TodoList API',
     description: `
 TodoList 애플리케이션의 REST API입니다.
 
@@ -52,54 +52,54 @@ TodoList 애플리케이션의 REST API입니다.
 \`\`\`
     `.trim(),
     license: {
-      name: "MIT",
-      url: "https://opensource.org/licenses/MIT",
+      name: 'MIT',
+      url: 'https://opensource.org/licenses/MIT',
     },
   },
   servers: [
     {
-      url: "http://localhost:3001",
-      description: "개발 서버",
+      url: 'http://localhost:3300',
+      description: '개발 서버',
     },
   ],
   tags: [
     {
-      name: "Todos",
-      description: "Todo 관리 API",
+      name: 'Todos',
+      description: 'Todo 관리 API',
     },
     {
-      name: "Stats",
-      description: "Todo 통계 API",
+      name: 'Stats',
+      description: 'Todo 통계 API',
     },
   ],
-});
+})
 
 // Swagger UI 설정
 app.get(
-  "/docs",
+  '/docs',
   swaggerUI({
-    url: "/openapi.json",
+    url: '/openapi.json',
     persistAuthorization: true,
   })
-);
+)
 
 // 기본 라우트
-app.get("/", (c) => {
+app.get('/', (c) => {
   return c.json({
-    message: "TodoList API Server",
-    version: "1.0.0",
-    docs: "/docs",
-    openapi: "/openapi.json",
-  });
-});
+    message: 'TodoList API Server',
+    version: '1.0.0',
+    docs: '/docs',
+    openapi: '/openapi.json',
+  })
+})
 
 // 헬스체크 엔드포인트
-app.get("/health", (c) => {
+app.get('/health', (c) => {
   return c.json({
-    status: "ok",
+    status: 'ok',
     timestamp: new Date().toISOString(),
-  });
-});
+  })
+})
 
 // OpenAPI Todo 라우터 등록
-app.route("/", todoOpenApiRoutes);
+app.route('/', todoOpenApiRoutes)

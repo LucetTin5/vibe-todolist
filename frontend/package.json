@@ -6,9 +6,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "orval": "orval --config src/orval/orval.config.ts",
+    "format": "bun run --cwd .. format",
+    "lint": "bun run --cwd .. lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.80.2",
+    "@tanstack/react-query-devtools": "^5.80.2",
+    "axios": "^1.9.0",
+    "orval": "^7.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.8"
