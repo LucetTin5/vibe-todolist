@@ -41,21 +41,22 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 
 **백엔드 확장:**
 
-- [ ] OpenAPI 스키마 생성 (`@hono/zod-openapi` 도입)
-- [ ] Swagger UI 설정 (`@hono/swagger-ui`)
-- [ ] API 문서화 및 스키마 검증
+- [x] OpenAPI 스키마 생성 (`@hono/zod-openapi` 도입)
+- [x] Swagger UI 설정 (`@hono/swagger-ui`)
+- [x] API 문서화 및 스키마 검증
 
 **프론트엔드 구현:**
 
 - [x] TailwindCSS v4 설정
-- [ ] OpenAPI 코드젠 설정 (Orval + React Query)
-- [ ] API 클라이언트 자동 생성 (`frontend/src/api/`)
-- [ ] Todo 관련 훅 자동 생성 (`useTodos`, `useCreateTodo` 등)
-- [ ] 기본 UI 컴포넌트 (Button, Input, Modal)
-- [ ] TodoList 컴포넌트 구현
-- [ ] TodoForm 컴포넌트 구현
-- [ ] ListView 완성
-- [ ] 에러 핸들링 구현
+- [x] OpenAPI 코드젠 설정 (Orval + React Query)
+- [x] API 클라이언트 자동 생성 (`frontend/src/api/`)
+- [x] Todo 관련 훅 자동 생성 (`useTodos`, `useCreateTodo` 등)
+- [x] 기본 UI 컴포넌트 (Button, Input, Modal)
+- [x] TodoList 컴포넌트 구현
+- [x] TodoForm 컴포넌트 구현
+- [x] ListView 완성
+
+**✅ Phase 1 완료** - 기본적인 Todo CRUD 기능과 리스트 뷰 구현 완료
 
 ### Phase 2: 고급 기능 구현
 
@@ -92,6 +93,7 @@ AI 어시스턴트가 이 프로젝트를 개발할 때 반드시 준수해야 �
 **목표**: 성능 최적화 및 추가 기능
 
 - [ ] 성능 최적화 (React.memo, 가상화)
+- [ ] 에러 핸들링 구현 (Toast, Error Boundary)
 - [ ] PWA 기능
 - [ ] 오프라인 지원
 
