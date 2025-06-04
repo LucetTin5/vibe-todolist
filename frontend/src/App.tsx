@@ -1,37 +1,82 @@
-import { useState } from 'react'
+import { useState } from "react";
+import { TodoList } from "./components/todo";
+import {
+  useTodos,
+  useCreateTodo,
+  useUpdateTodo,
+  useToggleTodo,
+  useDeleteTodo,
+} from "./hooks/useTodos";
+import type { GetTodosParams, PostTodosBody } from "./api/model";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [filters, setFilters] = useState<GetTodosParams>({});
+
+  // Queries and Mutations
+  const { data: todosResponse, isLoading } = useTodos(filters);
+  const todos = todosResponse?.data?.todos || [];
+  const createTodoMutation = useCreateTodo();
+  const updateTodoMutation = useUpdateTodo();
+  const toggleTodoMutation = useToggleTodo();
+  const deleteTodoMutation = useDeleteTodo();
+
+  // Event Handlers
+  const handleCreateTodo = (todoData: PostTodosBody) => {
+    createTodoMutation.mutate({ data: todoData });
+  };
+
+  const handleUpdateTodo = (todoData: { id: string } & PostTodosBody) => {
+    const { id, ...data } = todoData;
+    updateTodoMutation.mutate({ id, data });
+  };
+
+  const handleToggleTodo = (id: string) => {
+    toggleTodoMutation.mutate({ id });
+  };
+
+  const handleDeleteTodo = (id: string) => {
+    deleteTodoMutation.mutate({ id });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container-responsive py-8">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">TodoList</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            TodoList
+          </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">
             Modern Todo Management Application
           </p>
         </header>
 
-        <main className="max-w-md mx-auto">
-          <div className="card-base p-6 text-center">
-            <button
-              type="button"
-              onClick={() => setCount((count) => count + 1)}
-              className="btn-base bg-blue-600 hover:bg-blue-700 text-white mb-4"
-            >
-              count is {count}
-            </button>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              TailwindCSS v4 is working! Edit{' '}
-              <code className="text-blue-600 dark:text-blue-400">src/App.tsx</code> to start
-              building.
-            </p>
-          </div>
+        <main>
+          <TodoList
+            todos={todos}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onToggleTodo={handleToggleTodo}
+            onCreateTodo={handleCreateTodo}
+            onUpdateTodo={handleUpdateTodo}
+            onDeleteTodo={handleDeleteTodo}
+            isLoading={isLoading}
+            isCreating={createTodoMutation.isPending}
+            isUpdating={updateTodoMutation.isPending}
+            togglingIds={
+              toggleTodoMutation.isPending && toggleTodoMutation.variables
+                ? [toggleTodoMutation.variables.id]
+                : []
+            }
+            deletingIds={
+              deleteTodoMutation.isPending && deleteTodoMutation.variables
+                ? [deleteTodoMutation.variables.id]
+                : []
+            }
+          />
         </main>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
