@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { TodoList } from "./components/todo";
 import {
   useTodos,
@@ -6,19 +7,53 @@ import {
   useUpdateTodo,
   useToggleTodo,
   useDeleteTodo,
+  getTodosQueryKey,
 } from "./hooks/useTodos";
 import type { GetTodosParams, PostTodosBody } from "./api/model";
 
 function App() {
   const [filters, setFilters] = useState<GetTodosParams>({});
+  const queryClient = useQueryClient();
 
   // Queries and Mutations
   const { data: todosResponse, isLoading } = useTodos(filters);
   const todos = todosResponse?.data?.todos || [];
-  const createTodoMutation = useCreateTodo();
-  const updateTodoMutation = useUpdateTodo();
-  const toggleTodoMutation = useToggleTodo();
-  const deleteTodoMutation = useDeleteTodo();
+
+  const createTodoMutation = useCreateTodo({
+    mutation: {
+      onSuccess: () => {
+        // Todo 목록 쿼리 무효화하여 새로고침
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() });
+      },
+    },
+  });
+
+  const updateTodoMutation = useUpdateTodo({
+    mutation: {
+      onSuccess: () => {
+        // Todo 목록 쿼리 무효화하여 새로고침
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() });
+      },
+    },
+  });
+
+  const toggleTodoMutation = useToggleTodo({
+    mutation: {
+      onSuccess: () => {
+        // Todo 목록 쿼리 무효화하여 새로고침
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() });
+      },
+    },
+  });
+
+  const deleteTodoMutation = useDeleteTodo({
+    mutation: {
+      onSuccess: () => {
+        // Todo 목록 쿼리 무효화하여 새로고침
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() });
+      },
+    },
+  });
 
   // Event Handlers
   const handleCreateTodo = (todoData: PostTodosBody) => {
