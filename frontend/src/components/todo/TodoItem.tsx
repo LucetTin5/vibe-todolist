@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { Button } from "../ui";
-import type { GetTodos200TodosItem } from "../../api/model";
+import { useState } from 'react'
+import { Button } from '../ui'
+import type { GetTodos200TodosItem } from '../../api/model'
 
 export interface TodoItemProps {
-  todo: GetTodos200TodosItem;
-  onToggle: (id: string) => void;
-  onEdit: (todo: GetTodos200TodosItem) => void;
-  onDelete: (id: string) => void;
-  isToggling?: boolean;
-  isDeleting?: boolean;
+  todo: GetTodos200TodosItem
+  onToggle: (id: string) => void
+  onEdit: (todo: GetTodos200TodosItem) => void
+  onDelete: (id: string) => void
+  isToggling?: boolean
+  isDeleting?: boolean
 }
 
 export function TodoItem({
@@ -19,29 +19,29 @@ export function TodoItem({
   isToggling = false,
   isDeleting = false,
 }: TodoItemProps) {
-  const [showActions, setShowActions] = useState(false);
+  const [showActions, setShowActions] = useState(false)
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ko-KR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+    return new Date(dateString).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
 
   return (
     <div
       className={[
-        "group relative bg-white dark:bg-gray-800 rounded-lg border shadow-sm transition-shadow hover:shadow-md p-4",
+        'group relative bg-white dark:bg-gray-800 rounded-lg border shadow-sm transition-shadow hover:shadow-md p-4',
         todo.completed
-          ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
-          : "border-gray-200 dark:border-gray-700",
-        isDeleting ? "opacity-50" : "",
+          ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
+          : 'border-gray-200 dark:border-gray-700',
+        isDeleting ? 'opacity-50' : '',
       ]
         .filter(Boolean)
-        .join(" ")}
+        .join(' ')}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
@@ -52,15 +52,15 @@ export function TodoItem({
           onClick={() => onToggle(todo.id)}
           disabled={isToggling}
           className={[
-            "flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+            'flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
             todo.completed
-              ? "bg-green-500 border-green-500 text-white"
-              : "border-gray-300 dark:border-gray-600 hover:border-green-500",
-            isToggling ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+              ? 'bg-green-500 border-green-500 text-white'
+              : 'border-gray-300 dark:border-gray-600 hover:border-green-500',
+            isToggling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           ]
             .filter(Boolean)
-            .join(" ")}
-          title={todo.completed ? "Mark as incomplete" : "Mark as complete"}
+            .join(' ')}
+          title={todo.completed ? 'Mark as incomplete' : 'Mark as complete'}
         >
           {isToggling ? (
             <svg
@@ -84,12 +84,7 @@ export function TodoItem({
               />
             </svg>
           ) : todo.completed ? (
-            <svg
-              className="h-3 w-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-            >
+            <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path
                 fillRule="evenodd"
                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -104,11 +99,11 @@ export function TodoItem({
           {/* Title */}
           <h3
             className={[
-              "text-sm font-medium text-gray-900 dark:text-white",
-              todo.completed ? "line-through opacity-75" : "",
+              'text-sm font-medium text-gray-900 dark:text-white',
+              todo.completed ? 'line-through opacity-75' : '',
             ]
               .filter(Boolean)
-              .join(" ")}
+              .join(' ')}
           >
             {todo.title}
           </h3>
@@ -117,11 +112,11 @@ export function TodoItem({
           {todo.description && (
             <p
               className={[
-                "mt-1 text-sm text-gray-600 dark:text-gray-400",
-                todo.completed ? "line-through opacity-75" : "",
+                'mt-1 text-sm text-gray-600 dark:text-gray-400',
+                todo.completed ? 'line-through opacity-75' : '',
               ]
                 .filter(Boolean)
-                .join(" ")}
+                .join(' ')}
             >
               {todo.description}
             </p>
@@ -139,11 +134,11 @@ export function TodoItem({
         {/* Actions */}
         <div
           className={[
-            "flex items-center gap-2 transition-opacity duration-200",
-            showActions ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+            'flex items-center gap-2 transition-opacity duration-200',
+            showActions ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
           ]
             .filter(Boolean)
-            .join(" ")}
+            .join(' ')}
         >
           <Button
             variant="ghost"
@@ -214,5 +209,5 @@ export function TodoItem({
         </div>
       </div>
     </div>
-  );
+  )
 }

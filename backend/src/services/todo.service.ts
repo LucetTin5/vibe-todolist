@@ -1,225 +1,351 @@
+/**
+ * Enhanced Todo Service - 고급 기능 포함
+ */
+import { InMemoryStorage } from "../utils/in-memory-storage";
 import type {
   Todo,
   CreateTodoRequest,
   UpdateTodoRequest,
-  TodoFilter,
-  TodoQueryParams,
   TodoListResponse,
-  TodoStats,
-} from '../types/todo.types'
-import { TodoRepository } from '../repositories/todo.repository'
+  TodoStatsResponse,
+  TodoQuery,
+  Priority,
+  Category,
+} from "../schemas/todo.schemas";
 
-/**
- * Todo 비즈니스 로직 레이어
- * 비즈니스 규칙과 검증을 담당
- */
+interface PaginationOptions {
+  page: number;
+  limit: number;
+}
+
 export class TodoService {
-  private todoRepository: TodoRepository
-
-  constructor() {
-    this.todoRepository = new TodoRepository()
-  }
+  private storage = InMemoryStorage.getInstance();
 
   /**
-   * 새 Todo 생성
-   */
-  async createTodo(data: CreateTodoRequest): Promise<Todo> {
-    // 입력 검증
-    if (!data.title || data.title.trim().length === 0) {
-      throw new Error('제목은 필수입니다')
-    }
-
-    if (data.title.length > 200) {
-      throw new Error('제목은 200자를 초과할 수 없습니다')
-    }
-
-    if (data.description && data.description.length > 1000) {
-      throw new Error('설명은 1000자를 초과할 수 없습니다')
-    }
-
-    const todo = await this.todoRepository.create({
-      title: data.title.trim(),
-      description: data.description?.trim(),
-    })
-
-    return todo
-  }
-
-  /**
-   * Todo 목록 조회 (페이지네이션, 필터링, 검색 지원)
+   * 고급 필터링 및 정렬 기능이 포함된 Todo 목록 조회
    */
   async getTodos(
-    params: TodoQueryParams,
-    filter: TodoFilter = 'all',
-    search?: string
+    pagination: PaginationOptions,
+    filter: "all" | "active" | "completed" = "all",
+    search?: string,
+    priority?: Priority,
+    category?: Category,
+    sortBy:
+      | "createdAt"
+      | "updatedAt"
+      | "dueDate"
+      | "priority"
+      | "title" = "createdAt",
+    sortOrder: "asc" | "desc" = "desc",
+    dueDateFrom?: string,
+    dueDateTo?: string
   ): Promise<TodoListResponse> {
-    // 입력 검증
-    if (params.page <= 0) {
-      throw new Error('페이지 번호는 1 이상이어야 합니다')
+    if (pagination.page <= 0) {
+      throw new Error("페이지 번호는 1 이상이어야 합니다");
+    }
+    if (pagination.limit <= 0 || pagination.limit > 100) {
+      throw new Error("페이지 크기는 1-100 사이여야 합니다");
     }
 
-    if (params.limit <= 0) {
-      throw new Error('페이지 크기는 1 이상이어야 합니다')
+    let todos = await this.storage.findAll<Todo>();
+
+    // 상태 필터링
+    if (filter === "active") {
+      todos = todos.filter((todo) => !todo.completed);
+    } else if (filter === "completed") {
+      todos = todos.filter((todo) => todo.completed);
     }
 
-    if (params.limit > 100) {
-      throw new Error('페이지 크기는 100 이하여야 합니다')
+    // 검색 필터링
+    if (search) {
+      const searchLower = search.toLowerCase();
+      todos = todos.filter(
+        (todo) =>
+          todo.title.toLowerCase().includes(searchLower) ||
+          todo.description?.toLowerCase().includes(searchLower) ||
+          todo.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+      );
     }
 
-    // 기본값 설정
-    const pagination = {
-      page: Math.max(1, params.page || 1),
-      limit: Math.min(50, Math.max(1, params.limit || 10)),
+    // 우선순위 필터링
+    if (priority) {
+      todos = todos.filter((todo) => todo.priority === priority);
     }
 
-    const searchQuery = search?.trim()
+    // 카테고리 필터링
+    if (category) {
+      todos = todos.filter((todo) => todo.category === category);
+    }
 
-    const result = await this.todoRepository.findMany(pagination, filter, searchQuery)
+    // 마감일 범위 필터링
+    if (dueDateFrom || dueDateTo) {
+      todos = todos.filter((todo) => {
+        if (!todo.dueDate) return false;
 
-    const { todos, total } = result
-    const totalPages = Math.ceil(total / pagination.limit)
+        const dueDate = new Date(todo.dueDate);
+
+        if (dueDateFrom) {
+          const fromDate = new Date(dueDateFrom);
+          if (dueDate < fromDate) return false;
+        }
+
+        if (dueDateTo) {
+          const toDate = new Date(dueDateTo);
+          if (dueDate > toDate) return false;
+        }
+
+        return true;
+      });
+    }
+
+    // 정렬
+    todos.sort((a, b) => {
+      let aValue: string | number | Date;
+      let bValue: string | number | Date;
+
+      switch (sortBy) {
+        case "title":
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case "priority": {
+          const priorityOrder = { low: 1, medium: 2, high: 3, urgent: 4 };
+          aValue = priorityOrder[a.priority];
+          bValue = priorityOrder[b.priority];
+          break;
+        }
+        case "dueDate":
+          aValue = a.dueDate ? new Date(a.dueDate) : new Date(0);
+          bValue = b.dueDate ? new Date(b.dueDate) : new Date(0);
+          break;
+        case "updatedAt":
+          aValue = new Date(a.updatedAt);
+          bValue = new Date(b.updatedAt);
+          break;
+        default:
+          aValue = new Date(a.createdAt);
+          bValue = new Date(b.createdAt);
+          break;
+      }
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    // 페이지네이션 적용
+    const total = todos.length;
+    const totalPages = Math.ceil(total / pagination.limit);
+    const currentPage = pagination.page;
+    const startIndex = (currentPage - 1) * pagination.limit;
+    const endIndex = startIndex + pagination.limit;
+
+    const paginatedTodos = todos.slice(startIndex, endIndex);
 
     return {
-      todos,
+      todos: paginatedTodos,
       total,
-      currentPage: pagination.page,
+      currentPage,
       totalPages,
-      hasNext: pagination.page < totalPages,
-      hasPrev: pagination.page > 1,
-    }
+      hasNext: currentPage < totalPages,
+      hasPrev: currentPage > 1,
+    };
   }
 
   /**
-   * ID로 Todo 조회
+   * Todo 생성 (enhanced 필드 포함)
+   */
+  async createTodo(data: CreateTodoRequest): Promise<Todo> {
+    const now = new Date();
+
+    const todo: Todo = {
+      id: crypto.randomUUID(),
+      title: data.title,
+      description: data.description,
+      completed: false,
+      priority: data.priority || "medium",
+      category: data.category || "other",
+      dueDate: data.dueDate,
+      tags: data.tags || [],
+      estimatedMinutes: data.estimatedMinutes,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    await this.storage.create(todo.id, todo);
+    return todo;
+  }
+
+  /**
+   * Todo 조회
    */
   async getTodoById(id: string): Promise<Todo> {
-    if (!id || id.trim().length === 0) {
-      throw new Error('유효하지 않은 Todo ID입니다')
-    }
-
-    const todo = await this.todoRepository.findById(id)
-
+    const todo = await this.storage.findById<Todo>(id);
     if (!todo) {
-      throw new Error('Todo를 찾을 수 없습니다')
+      throw new Error("Todo를 찾을 수 없습니다");
     }
-
-    return todo
+    return todo;
   }
 
   /**
-   * Todo 업데이트
+   * Todo 업데이트 (enhanced 필드 포함)
    */
   async updateTodo(id: string, data: UpdateTodoRequest): Promise<Todo> {
-    if (!id || id.trim().length === 0) {
-      throw new Error('유효하지 않은 Todo ID입니다')
-    }
+    const existingTodo = await this.getTodoById(id);
 
-    // 입력 검증
-    if (data.title !== undefined) {
-      if (!data.title || data.title.trim().length === 0) {
-        throw new Error('제목은 필수입니다')
-      }
+    // 업데이트 시간이 생성 시간과 다르도록 약간의 지연 추가
+    await new Promise((resolve) => setTimeout(resolve, 1));
 
-      if (data.title.length > 200) {
-        throw new Error('제목은 200자를 초과할 수 없습니다')
-      }
-    }
+    const updatedTodo: Todo = {
+      ...existingTodo,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
 
-    if (data.description !== undefined && data.description.length > 1000) {
-      throw new Error('설명은 1000자를 초과할 수 없습니다')
-    }
-
-    // 존재 여부 확인
-    const exists = await this.todoRepository.exists(id)
-    if (!exists) {
-      throw new Error('Todo를 찾을 수 없습니다')
-    }
-
-    // 업데이트 데이터 준비
-    const updateData: Partial<Todo> = {}
-
-    if (data.title !== undefined) {
-      updateData.title = data.title.trim()
-    }
-    if (data.description !== undefined) {
-      updateData.description = data.description.trim()
-    }
-    if (data.completed !== undefined) {
-      updateData.completed = data.completed
-    }
-
-    const updatedTodo = await this.todoRepository.update(id, updateData)
-
-    if (!updatedTodo) {
-      throw new Error('Todo 업데이트에 실패했습니다')
-    }
-
-    return updatedTodo
+    await this.storage.update(id, updatedTodo);
+    return updatedTodo;
   }
 
   /**
    * Todo 삭제
    */
   async deleteTodo(id: string): Promise<void> {
-    if (!id || id.trim().length === 0) {
-      throw new Error('유효하지 않은 Todo ID입니다')
-    }
-
-    const exists = await this.todoRepository.exists(id)
+    const exists = await this.storage.findById<Todo>(id);
     if (!exists) {
-      throw new Error('Todo를 찾을 수 없습니다')
+      throw new Error("Todo를 찾을 수 없습니다");
     }
-
-    const deleted = await this.todoRepository.delete(id)
-
-    if (!deleted) {
-      throw new Error('Todo 삭제에 실패했습니다')
-    }
+    await this.storage.delete(id);
   }
 
   /**
    * Todo 완료 상태 토글
    */
   async toggleTodo(id: string): Promise<Todo> {
-    if (!id || id.trim().length === 0) {
-      throw new Error('유효하지 않은 Todo ID입니다')
-    }
-
-    const todo = await this.todoRepository.findById(id)
-    if (!todo) {
-      throw new Error('Todo를 찾을 수 없습니다')
-    }
-
-    const updatedTodo = await this.todoRepository.update(id, {
-      completed: !todo.completed,
-    })
-
-    if (!updatedTodo) {
-      throw new Error('Todo 토글에 실패했습니다')
-    }
-
-    return updatedTodo
+    const todo = await this.getTodoById(id);
+    return this.updateTodo(id, { completed: !todo.completed });
   }
 
   /**
-   * Todo 통계 조회
+   * 고급 통계 정보 조회
    */
-  async getStats(): Promise<TodoStats> {
-    const stats = await this.todoRepository.getStats()
+  async getStats(): Promise<TodoStatsResponse> {
+    const todos = await this.storage.findAll<Todo>();
 
-    // 완료율 계산 (0-100 사이의 백분율)
-    const completionRate = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
+    const total = todos.length;
+    const completed = todos.filter((todo) => todo.completed).length;
+    const active = total - completed;
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
+
+    // 우선순위별 통계
+    const byPriority = {
+      low: todos.filter((todo) => todo.priority === "low").length,
+      medium: todos.filter((todo) => todo.priority === "medium").length,
+      high: todos.filter((todo) => todo.priority === "high").length,
+      urgent: todos.filter((todo) => todo.priority === "urgent").length,
+    };
+
+    // 카테고리별 통계
+    const byCategory = {
+      work: todos.filter((todo) => todo.category === "work").length,
+      personal: todos.filter((todo) => todo.category === "personal").length,
+      shopping: todos.filter((todo) => todo.category === "shopping").length,
+      health: todos.filter((todo) => todo.category === "health").length,
+      other: todos.filter((todo) => todo.category === "other").length,
+    };
+
+    // 마감일 관련 통계
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const endOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59
+    );
+    const endOfWeek = new Date(startOfToday);
+    endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay() + 1));
+
+    const overdue = todos.filter((todo) => {
+      if (!todo.dueDate || todo.completed) return false;
+      return new Date(todo.dueDate) < startOfToday;
+    }).length;
+
+    const dueToday = todos.filter((todo) => {
+      if (!todo.dueDate || todo.completed) return false;
+      const dueDate = new Date(todo.dueDate);
+      return dueDate >= startOfToday && dueDate <= endOfToday;
+    }).length;
+
+    const dueThisWeek = todos.filter((todo) => {
+      if (!todo.dueDate || todo.completed) return false;
+      const dueDate = new Date(todo.dueDate);
+      return dueDate >= startOfToday && dueDate <= endOfWeek;
+    }).length;
 
     return {
-      ...stats,
-      completionRate,
-    }
+      total,
+      completed,
+      active,
+      completionRate: Math.round(completionRate * 100) / 100,
+      byPriority,
+      byCategory,
+      overdue,
+      dueToday,
+      dueThisWeek,
+    };
   }
 
   /**
-   * 개발용: 모든 Todo 삭제
+   * 모든 Todo 삭제
    */
   async clearTodos(): Promise<void> {
-    await this.todoRepository.clear()
+    await this.storage.clear();
+  }
+
+  /**
+   * 대량 업데이트 (여러 Todo를 한 번에 업데이트)
+   */
+  async bulkUpdate(
+    ids: string[],
+    data: Partial<UpdateTodoRequest>
+  ): Promise<Todo[]> {
+    const updatedTodos: Todo[] = [];
+
+    for (const id of ids) {
+      try {
+        const updatedTodo = await this.updateTodo(id, data);
+        updatedTodos.push(updatedTodo);
+      } catch (error) {
+        // 존재하지 않는 Todo 업데이트 실패는 무시하고 계속 진행
+        console.warn(`Failed to update todo ${id}:`, error);
+      }
+    }
+
+    return updatedTodos;
+  }
+
+  /**
+   * 특정 태그로 Todo 조회
+   */
+  async getTodosByTag(tag: string): Promise<Todo[]> {
+    const todos = await this.storage.findAll<Todo>();
+    return todos.filter((todo) =>
+      todo.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
+    );
+  }
+
+  /**
+   * 사용된 모든 태그 목록 조회
+   */
+  async getAllTags(): Promise<string[]> {
+    const todos = await this.storage.findAll<Todo>();
+    const allTags = todos.flatMap((todo) => todo.tags);
+    return [...new Set(allTags)].sort();
   }
 }

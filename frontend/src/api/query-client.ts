@@ -1,5 +1,5 @@
-import { QueryClient } from "@tanstack/react-query";
-import type { GetTodosParams } from "./model";
+import { QueryClient } from '@tanstack/react-query'
+import type { GetTodosParams } from './model'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,16 +12,15 @@ export const queryClient = new QueryClient({
       retry: 1,
     },
   },
-});
+})
 
 export const QUERY_KEYS = {
   todos: {
-    all: ["todos"] as const,
-    lists: () => [...QUERY_KEYS.todos.all, "list"] as const,
-    list: (filters?: GetTodosParams) =>
-      [...QUERY_KEYS.todos.lists(), { filters }] as const,
-    details: () => [...QUERY_KEYS.todos.all, "detail"] as const,
+    all: ['todos'] as const,
+    lists: () => [...QUERY_KEYS.todos.all, 'list'] as const,
+    list: (filters?: GetTodosParams) => [...QUERY_KEYS.todos.lists(), { filters }] as const,
+    details: () => [...QUERY_KEYS.todos.all, 'detail'] as const,
     detail: (id: string) => [...QUERY_KEYS.todos.details(), id] as const,
-    stats: () => [...QUERY_KEYS.todos.all, "stats"] as const,
+    stats: () => [...QUERY_KEYS.todos.all, 'stats'] as const,
   },
-} as const;
+} as const

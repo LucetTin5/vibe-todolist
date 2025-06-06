@@ -6,7 +6,7 @@ import { swaggerUI } from '@hono/swagger-ui'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
-import { todoOpenApiRoutes } from './routes/todos.openapi'
+import { todoRoutes } from './routes/todos'
 
 // OpenAPI 앱 생성
 export const app = new OpenAPIHono()
@@ -65,7 +65,7 @@ TodoList 애플리케이션의 REST API입니다.
   tags: [
     {
       name: 'Todos',
-      description: 'Todo 관리 API',
+      description: 'Todo 관리 API (Enhanced)',
     },
     {
       name: 'Stats',
@@ -101,5 +101,5 @@ app.get('/health', (c) => {
   })
 })
 
-// OpenAPI Todo 라우터 등록
-app.route('/', todoOpenApiRoutes)
+// Todo 라우터 등록 (Enhanced API)
+app.route('/', todoRoutes)

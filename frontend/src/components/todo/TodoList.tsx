@@ -1,26 +1,22 @@
-import { useState } from "react";
-import { Button } from "../ui";
-import { TodoItem } from "./TodoItem";
-import { TodoForm } from "./TodoForm";
-import type {
-  GetTodos200TodosItem,
-  PostTodosBody,
-  GetTodosParams,
-} from "../../api/model";
+import { useState } from 'react'
+import { Button } from '../ui'
+import { TodoItem } from './TodoItem'
+import { TodoForm } from './TodoForm'
+import type { GetTodos200TodosItem, PostTodosBody, GetTodosParams } from '../../api/model'
 
 export interface TodoListProps {
-  todos: GetTodos200TodosItem[];
-  filters: GetTodosParams;
-  onFiltersChange: (filters: GetTodosParams) => void;
-  onToggleTodo: (id: string) => void;
-  onCreateTodo: (todo: PostTodosBody) => void;
-  onUpdateTodo: (todo: { id: string } & PostTodosBody) => void;
-  onDeleteTodo: (id: string) => void;
-  isLoading?: boolean;
-  isCreating?: boolean;
-  isUpdating?: boolean;
-  togglingIds?: string[];
-  deletingIds?: string[];
+  todos: GetTodos200TodosItem[]
+  filters: GetTodosParams
+  onFiltersChange: (filters: GetTodosParams) => void
+  onToggleTodo: (id: string) => void
+  onCreateTodo: (todo: PostTodosBody) => void
+  onUpdateTodo: (todo: { id: string } & PostTodosBody) => void
+  onDeleteTodo: (id: string) => void
+  isLoading?: boolean
+  isCreating?: boolean
+  isUpdating?: boolean
+  togglingIds?: string[]
+  deletingIds?: string[]
 }
 
 export function TodoList({
@@ -37,31 +33,29 @@ export function TodoList({
   togglingIds = [],
   deletingIds = [],
 }: TodoListProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingTodo, setEditingTodo] = useState<GetTodos200TodosItem | null>(
-    null
-  );
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingTodo, setEditingTodo] = useState<GetTodos200TodosItem | null>(null)
 
   const handleCreateTodo = (todoData: PostTodosBody) => {
-    onCreateTodo(todoData);
-    setIsFormOpen(false);
-  };
+    onCreateTodo(todoData)
+    setIsFormOpen(false)
+  }
 
   const handleUpdateTodo = (todoData: PostTodosBody) => {
     if (editingTodo) {
-      onUpdateTodo({ id: editingTodo.id, ...todoData });
-      setEditingTodo(null);
+      onUpdateTodo({ id: editingTodo.id, ...todoData })
+      setEditingTodo(null)
     }
-  };
+  }
 
   const handleEditTodo = (todo: GetTodos200TodosItem) => {
-    setEditingTodo(todo);
-  };
+    setEditingTodo(todo)
+  }
 
   const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setEditingTodo(null);
-  };
+    setIsFormOpen(false)
+    setEditingTodo(null)
+  }
 
   const filteredTodos = todos.filter((todo) => {
     if (
@@ -69,12 +63,12 @@ export function TodoList({
       !todo.title.toLowerCase().includes(filters.search.toLowerCase()) &&
       !todo.description?.toLowerCase().includes(filters.search.toLowerCase())
     )
-      return false;
-    return true;
-  });
+      return false
+    return true
+  })
 
-  const completedTodos = filteredTodos.filter((todo) => todo.completed);
-  const pendingTodos = filteredTodos.filter((todo) => !todo.completed);
+  const completedTodos = filteredTodos.filter((todo) => todo.completed)
+  const pendingTodos = filteredTodos.filter((todo) => !todo.completed)
 
   if (isLoading) {
     return (
@@ -100,7 +94,7 @@ export function TodoList({
           </div>
         ))}
       </div>
-    );
+    )
   }
 
   return (
@@ -126,10 +120,8 @@ export function TodoList({
             <input
               type="text"
               placeholder="Search todos..."
-              value={filters.search || ""}
-              onChange={(e) =>
-                onFiltersChange({ ...filters, search: e.target.value })
-              }
+              value={filters.search || ''}
+              onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm 
                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                          dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
@@ -138,11 +130,7 @@ export function TodoList({
 
           {/* Clear Filters */}
           <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onFiltersChange({})}
-            >
+            <Button variant="ghost" size="sm" onClick={() => onFiltersChange({})}>
               Clear Filters
             </Button>
           </div>
@@ -166,13 +154,11 @@ export function TodoList({
               d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-            No todos
-          </h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No todos</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {todos.length === 0
-              ? "Get started by creating your first todo."
-              : "No todos match your current filters."}
+              ? 'Get started by creating your first todo.'
+              : 'No todos match your current filters.'}
           </p>
           {todos.length === 0 && (
             <div className="mt-6">
@@ -236,5 +222,5 @@ export function TodoList({
         isLoading={isCreating || isUpdating}
       />
     </div>
-  );
+  )
 }

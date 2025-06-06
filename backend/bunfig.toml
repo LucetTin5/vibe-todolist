@@ -1,2 +1,2 @@
 [test]
-# Test configuration
+exclude = ["../trash/**/*.test.ts"]

@@ -1,130 +1,72 @@
-import type { Todo } from '../types/todo.types'
-
 /**
- * 인메모리 Todo 데이터 스토리지
- * 개발 단계에서 사용하는 임시 저장소
+ * 인메모리 Todo 데이터 스토리지 V2
+ * 개발 단계에서 사용하는 임시 저장소 (Enhanced version)
  */
-class InMemoryStorage {
-  private todos: Map<string, Todo> = new Map()
-  private nextId = 1
+export class InMemoryStorage {
+  private data: Map<string, unknown> = new Map();
+  private static instance: InMemoryStorage;
 
   /**
-   * 새로운 ID 생성
+   * 싱글톤 패턴으로 인스턴스 반환
    */
-  generateId(): string {
-    return `todo_${this.nextId++}`
-  }
-
-  /**
-   * Todo 생성
-   */
-  create(todoData: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>): Todo {
-    // Ensure unique timestamps for proper sorting
-    const now = new Date(Date.now() + this.nextId)
-    const todo: Todo = {
-      id: this.generateId(),
-      ...todoData,
-      createdAt: now,
-      updatedAt: now,
+  static getInstance(): InMemoryStorage {
+    if (!InMemoryStorage.instance) {
+      InMemoryStorage.instance = new InMemoryStorage();
     }
-
-    this.todos.set(todo.id, todo)
-    return todo
+    return InMemoryStorage.instance;
   }
 
   /**
-   * 모든 Todo 조회
+   * 데이터 생성
    */
-  findAll(): Todo[] {
-    return Array.from(this.todos.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    )
+  async create<T>(id: string, data: T): Promise<T> {
+    this.data.set(id, data);
+    return data;
   }
 
   /**
-   * ID로 Todo 조회
+   * ID로 데이터 조회
    */
-  findById(id: string): Todo | undefined {
-    return this.todos.get(id)
+  async findById<T>(id: string): Promise<T | undefined> {
+    return this.data.get(id) as T | undefined;
   }
 
   /**
-   * Todo 업데이트
+   * 모든 데이터 조회
    */
-  update(id: string, updates: Partial<Omit<Todo, 'id' | 'createdAt'>>): Todo | undefined {
-    const todo = this.todos.get(id)
-    if (!todo) {
-      return undefined
-    }
-
-    // Ensure updatedAt is always later than createdAt
-    const updatedAt = new Date(Math.max(Date.now(), todo.createdAt.getTime() + 1))
-
-    const updatedTodo: Todo = {
-      ...todo,
-      ...updates,
-      updatedAt,
-    }
-
-    this.todos.set(id, updatedTodo)
-    return updatedTodo
+  async findAll<T>(): Promise<T[]> {
+    return Array.from(this.data.values()) as T[];
   }
 
   /**
-   * Todo 삭제
+   * 데이터 업데이트
    */
-  delete(id: string): boolean {
-    return this.todos.delete(id)
+  async update<T>(id: string, data: T): Promise<T> {
+    this.data.set(id, data);
+    return data;
   }
 
   /**
-   * 완료 상태별 필터링
+   * 데이터 삭제
    */
-  findByCompleted(completed: boolean): Todo[] {
-    return this.findAll().filter((todo) => todo.completed === completed)
-  }
-
-  /**
-   * 제목으로 검색
-   */
-  search(query: string): Todo[] {
-    const lowerQuery = query.toLowerCase()
-    return this.findAll().filter(
-      (todo) =>
-        todo.title.toLowerCase().includes(lowerQuery) ||
-        todo.description?.toLowerCase().includes(lowerQuery)
-    )
+  async delete(id: string): Promise<void> {
+    this.data.delete(id);
   }
 
   /**
    * 전체 개수 조회
    */
   count(): number {
-    return this.todos.size
-  }
-
-  /**
-   * 완료된 Todo 개수 조회
-   */
-  countCompleted(): number {
-    return this.findByCompleted(true).length
-  }
-
-  /**
-   * 미완료 Todo 개수 조회
-   */
-  countActive(): number {
-    return this.findByCompleted(false).length
+    return this.data.size;
   }
 
   /**
    * 개발용: 모든 데이터 초기화
    */
   clear(): void {
-    this.todos.clear()
-    this.nextId = 1
+    this.data.clear();
   }
 }
 
 // 싱글톤 인스턴스
-export const todoStorage = new InMemoryStorage()
+export const todoStorage = new InMemoryStorage();

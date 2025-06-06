@@ -1,4 +1,4 @@
-/* App τμΈ © ¤ΐ| */
+/* App μ „μ—­ μ¤νƒ€μΌ */
 
 .app-container {
   @apply min-h-screen bg-gray-50;
@@ -36,7 +36,7 @@
   @apply text-sm;
 }
 
-/* React Query DevTools ¤ΐ| $„|tά */
+/* React Query DevTools μ„μΉ μ΅°μ • */
 .react-query-devtools {
   @apply !fixed !bottom-4 !left-4;
 }

@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Button, Input, Textarea, Modal } from "../ui";
-import type { PostTodosBody, GetTodos200TodosItem } from "../../api/model";
+import { useState } from 'react'
+import { Button, Input, Textarea, Modal } from '../ui'
+import type { PostTodosBody, GetTodos200TodosItem } from '../../api/model'
 
 export interface TodoFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (todo: PostTodosBody) => void;
-  initialData?: GetTodos200TodosItem;
-  isLoading?: boolean;
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (todo: PostTodosBody) => void
+  initialData?: GetTodos200TodosItem
+  isLoading?: boolean
 }
 
 export function TodoForm({
@@ -18,22 +18,22 @@ export function TodoForm({
   isLoading = false,
 }: TodoFormProps) {
   const [formData, setFormData] = useState<PostTodosBody>({
-    title: initialData?.title || "",
-    description: initialData?.description || "",
-  });
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title.trim()) return;
+    e.preventDefault()
+    if (!formData.title.trim()) return
 
-    onSubmit(formData);
-  };
+    onSubmit(formData)
+  }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialData ? "Edit Todo" : "Create New Todo"}
+      title={initialData ? 'Edit Todo' : 'Create New Todo'}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -42,9 +42,7 @@ export function TodoForm({
           label="Title"
           placeholder="Enter todo title..."
           value={formData.title}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, title: e.target.value }))
-          }
+          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           required
         />
 
@@ -52,10 +50,8 @@ export function TodoForm({
         <Textarea
           label="Description"
           placeholder="Enter description (optional)..."
-          value={formData.description || ""}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, description: e.target.value }))
-          }
+          value={formData.description || ''}
+          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           rows={4}
         />
 
@@ -65,14 +61,10 @@ export function TodoForm({
             Cancel
           </Button>
           <Button type="submit" disabled={!formData.title.trim() || isLoading}>
-            {isLoading
-              ? "Saving..."
-              : initialData
-              ? "Update Todo"
-              : "Create Todo"}
+            {isLoading ? 'Saving...' : initialData ? 'Update Todo' : 'Create Todo'}
           </Button>
         </div>
       </form>
     </Modal>
-  );
+  )
 }

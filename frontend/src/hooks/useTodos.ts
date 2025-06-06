@@ -7,7 +7,7 @@ export {
   usePutTodosId as useUpdateTodo,
   usePatchTodosIdToggle as useToggleTodo,
   useDeleteTodosId as useDeleteTodo,
-} from "../api/generated";
+} from '../api/generated'
 
 // Export query keys from the generated API
-export { getGetTodosQueryKey as getTodosQueryKey } from "../api/generated";
+export { getGetTodosQueryKey as getTodosQueryKey } from '../api/generated'
