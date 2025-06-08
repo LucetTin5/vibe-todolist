@@ -45,12 +45,16 @@ bun run lint
 
 ### Frontend
 - **React** + **TypeScript**
-- **Vite** - 빌드 도구
+- **Vite** - 빌드 도구 (포트 5173, API 프록시 설정)
 - **TailwindCSS v4** (CSS-first 설정 예정)
+- **React Query** - 서버 상태 관리
+- **Orval** - OpenAPI 기반 API 클라이언트 생성
 
 ### Backend
 - **Hono** + **TypeScript**
-- **Bun** 런타임
+- **Bun** 런타임 (포트 3300)
+- **OpenAPI** - API 스키마 생성 및 문서화
+- **Zod** - 데이터 검증
 
 ### 도구
 - **Bun Workspaces** - 모노레포 관리
@@ -59,8 +63,9 @@ bun run lint
 
 ## 🎯 개발 포트
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3300
+- Swagger UI: http://localhost:3300/docs
 
 ## 📋 다음 단계
 

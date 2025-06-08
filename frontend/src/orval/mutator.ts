@@ -1,15 +1,15 @@
 import axios, { AxiosRequestConfig } from 'axios'
 
-export const AXIOS_INSTANCE = axios.create({
-  baseURL: 'http://localhost:3300',
+// Axios instance for API calls
+export const axiosInstance = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// API 요청 인터셉터
-AXIOS_INSTANCE.interceptors.request.use(
+// Request interceptor for debugging
+axiosInstance.interceptors.request.use(
   (config) => {
     console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
     return config
@@ -20,8 +20,8 @@ AXIOS_INSTANCE.interceptors.request.use(
   }
 )
 
-// API 응답 인터셉터
-AXIOS_INSTANCE.interceptors.response.use(
+// Response interceptor for debugging
+axiosInstance.interceptors.response.use(
   (response) => {
     console.log(`[API Response] ${response.status} ${response.config.url}`)
     return response
@@ -32,9 +32,10 @@ AXIOS_INSTANCE.interceptors.response.use(
   }
 )
 
+// Custom instance for Orval-generated API client
 export const customInstance = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
   const source = axios.CancelToken.source()
-  const promise = AXIOS_INSTANCE({
+  const promise = axiosInstance({
     ...config,
     ...options,
     cancelToken: source.token,

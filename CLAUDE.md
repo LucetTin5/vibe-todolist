@@ -69,18 +69,20 @@ cd frontend && bun run orval
 - **Storage**: In-memory storage via `backend/src/utils/in-memory-storage.ts`
 
 ### Frontend (React + TypeScript + Vite)
-- **Entry Point**: `frontend/src/main.tsx`
+- **Entry Point**: `frontend/src/main.tsx` - runs on port 5173
 - **App Component**: `frontend/src/App.tsx` - Main app with React Query integration
-- **API Layer**: Auto-generated from OpenAPI spec
-  - `frontend/src/api/generated.ts` - Generated API client
+- **API Layer**: Auto-generated from OpenAPI spec with Vite proxy setup
+  - `frontend/src/api/generated.ts` - Generated API client (uses `/api/*` paths)
   - `frontend/src/api/model/` - Generated TypeScript types
+  - `frontend/src/orval/mutator.ts` - Custom axios instance for API calls
 - **Hooks**: `frontend/src/hooks/useTodos.ts` - React Query hooks for API calls
 - **Components**: `frontend/src/components/` - Reusable UI components
+- **Proxy Setup**: Vite config proxies `/api/*` to `localhost:3300/*`
 
 ### Key Integration Points
 - **OpenAPI**: Backend exposes `/openapi.json`, frontend generates client code
 - **React Query**: Frontend uses generated hooks with cache invalidation
-- **CORS**: Backend configured for frontend origins (localhost:5173, localhost:3000)
+- **Vite Proxy**: Frontend `/api/*` requests proxied to `localhost:3300/*` (no CORS issues)
 - **Swagger UI**: Available at `http://localhost:3300/docs`
 
 ## Development Workflow

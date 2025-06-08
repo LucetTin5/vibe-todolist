@@ -13,7 +13,7 @@ export {
 } from '../api/generated'
 
 // Export query keys from the generated API
-export { 
+export {
   getGetApiTodosQueryKey as getTodosQueryKey,
   getGetApiTodosIdQueryKey as getTodoQueryKey,
   getGetApiTodosStatsQueryKey as getTodoStatsQueryKey,

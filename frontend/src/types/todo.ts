@@ -1,30 +1,13 @@
-export interface Todo {
-  id: string
-  title: string
-  description?: string
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-}
+// Re-export generated API types for convenience
+export type {
+  GetApiTodos200TodosItem as Todo,
+  PostApiTodosBody as CreateTodoRequest,
+  PutApiTodosIdBody as UpdateTodoRequest,
+  GetApiTodosStats200 as TodoStats,
+  GetApiTodosParams as TodoFilters,
+  GetApiTodos200 as TodosResponse,
+} from '../api/model'
 
-export interface CreateTodoRequest {
-  title: string
-  description?: string
-}
-
-export interface UpdateTodoRequest {
-  title?: string
-  description?: string
-  completed?: boolean
-}
-
-export interface TodoStats {
-  total: number
-  completed: number
-  active: number
-  completionRate: number
-}
-
-export interface TodoFilters {
-  search?: string
-}
+// Additional helper types
+export type TodoPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type TodoCategory = 'work' | 'personal' | 'shopping' | 'health' | 'other'

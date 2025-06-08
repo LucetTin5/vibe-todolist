@@ -43,13 +43,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import * as axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   DeleteApiTodos200,
   DeleteApiTodosId200,
@@ -75,7 +68,10 @@ import type {
   PutApiTodosIdBody
 } from './model';
 
+import { customInstance } from '../orval/mutator';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -84,31 +80,33 @@ import type {
  * @summary Todo 통계 조회 (Enhanced)
  */
 export const getApiTodosStats = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GetApiTodosStats200>> => {
     
-    
-    return axios.default.get(
-      `/api/todos/stats`,options
-    );
-  }
-
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetApiTodosStats200>(
+      {url: `/api/todos/stats`, method: 'GET', signal
+    },
+      options);
+    }
+  
 
 export const getGetApiTodosStatsQueryKey = () => {
     return [`/api/todos/stats`] as const;
     }
 
     
-export const getGetApiTodosStatsQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetApiTodosStatsQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiTodosStatsQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodosStats>>> = ({ signal }) => getApiTodosStats({ signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodosStats>>> = ({ signal }) => getApiTodosStats(requestOptions, signal);
 
       
 
@@ -118,39 +116,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetApiTodosStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTodosStats>>>
-export type GetApiTodosStatsQueryError = AxiosError<unknown>
+export type GetApiTodosStatsQueryError = unknown
 
 
-export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = AxiosError<unknown>>(
+export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = unknown>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodosStats>>,
           TError,
           Awaited<ReturnType<typeof getApiTodosStats>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = AxiosError<unknown>>(
+export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodosStats>>,
           TError,
           Awaited<ReturnType<typeof getApiTodosStats>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Todo 통계 조회 (Enhanced)
  */
 
-export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodosStats>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -171,31 +169,33 @@ export function useGetApiTodosStats<TData = Awaited<ReturnType<typeof getApiTodo
  * @summary 사용된 태그 목록 조회
  */
 export const getApiTodosTags = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GetApiTodosTags200>> => {
     
-    
-    return axios.default.get(
-      `/api/todos/tags`,options
-    );
-  }
-
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetApiTodosTags200>(
+      {url: `/api/todos/tags`, method: 'GET', signal
+    },
+      options);
+    }
+  
 
 export const getGetApiTodosTagsQueryKey = () => {
     return [`/api/todos/tags`] as const;
     }
 
     
-export const getGetApiTodosTagsQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetApiTodosTagsQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiTodosTagsQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodosTags>>> = ({ signal }) => getApiTodosTags({ signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodosTags>>> = ({ signal }) => getApiTodosTags(requestOptions, signal);
 
       
 
@@ -205,39 +205,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetApiTodosTagsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTodosTags>>>
-export type GetApiTodosTagsQueryError = AxiosError<unknown>
+export type GetApiTodosTagsQueryError = unknown
 
 
-export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = AxiosError<unknown>>(
+export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = unknown>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodosTags>>,
           TError,
           Awaited<ReturnType<typeof getApiTodosTags>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = AxiosError<unknown>>(
+export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodosTags>>,
           TError,
           Awaited<ReturnType<typeof getApiTodosTags>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 사용된 태그 목록 조회
  */
 
-export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodosTags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosTags>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -258,27 +258,28 @@ export function useGetApiTodosTags<TData = Awaited<ReturnType<typeof getApiTodos
  * @summary 모든 Todo 삭제
  */
 export const deleteApiTodos = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<DeleteApiTodos200>> => {
     
-    
-    return axios.default.delete(
-      `/api/todos`,options
-    );
-  }
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<DeleteApiTodos200>(
+      {url: `/api/todos`, method: 'DELETE'
+    },
+      options);
+    }
+  
 
 
-
-export const getDeleteApiTodosMutationOptions = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodos>>, TError,void, TContext>, axios?: AxiosRequestConfig}
+export const getDeleteApiTodosMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodos>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodos>>, TError,void, TContext> => {
 
 const mutationKey = ['deleteApiTodos'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -286,7 +287,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiTodos>>, void> = () => {
           
 
-          return  deleteApiTodos(axiosOptions)
+          return  deleteApiTodos(requestOptions)
         }
 
         
@@ -296,13 +297,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type DeleteApiTodosMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiTodos>>>
     
-    export type DeleteApiTodosMutationError = AxiosError<unknown>
+    export type DeleteApiTodosMutationError = unknown
 
     /**
  * @summary 모든 Todo 삭제
  */
-export const useDeleteApiTodos = <TError = AxiosError<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodos>>, TError,void, TContext>, axios?: AxiosRequestConfig}
+export const useDeleteApiTodos = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodos>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiTodos>>,
         TError,
@@ -320,33 +321,34 @@ export const useDeleteApiTodos = <TError = AxiosError<unknown>,
  * @summary Todo 목록 조회 (Enhanced)
  */
 export const getApiTodos = (
-    params?: GetApiTodosParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GetApiTodos200>> => {
-    
-    
-    return axios.default.get(
-      `/api/todos`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
-
+    params?: GetApiTodosParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetApiTodos200>(
+      {url: `/api/todos`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
 
 export const getGetApiTodosQueryKey = (params?: GetApiTodosParams,) => {
     return [`/api/todos`, ...(params ? [params]: [])] as const;
     }
 
     
-export const getGetApiTodosQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodos>>, TError = AxiosError<GetApiTodos400>>(params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetApiTodosQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiTodosQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodos>>> = ({ signal }) => getApiTodos(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodos>>> = ({ signal }) => getApiTodos(params, requestOptions, signal);
 
       
 
@@ -356,39 +358,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetApiTodosQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTodos>>>
-export type GetApiTodosQueryError = AxiosError<GetApiTodos400>
+export type GetApiTodosQueryError = GetApiTodos400
 
 
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = AxiosError<GetApiTodos400>>(
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
  params: undefined |  GetApiTodosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodos>>,
           TError,
           Awaited<ReturnType<typeof getApiTodos>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = AxiosError<GetApiTodos400>>(
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
  params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodos>>,
           TError,
           Awaited<ReturnType<typeof getApiTodos>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = AxiosError<GetApiTodos400>>(
- params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
+ params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Todo 목록 조회 (Enhanced)
  */
 
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = AxiosError<GetApiTodos400>>(
- params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
+ params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -409,28 +411,31 @@ export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, 
  * @summary Todo 생성 (Enhanced)
  */
 export const postApiTodos = (
-    postApiTodosBody: PostApiTodosBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PostApiTodos201>> => {
-    
-    
-    return axios.default.post(
-      `/api/todos`,
-      postApiTodosBody,options
-    );
-  }
+    postApiTodosBody: PostApiTodosBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostApiTodos201>(
+      {url: `/api/todos`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postApiTodosBody, signal
+    },
+      options);
+    }
+  
 
 
-
-export const getPostApiTodosMutationOptions = <TError = AxiosError<PostApiTodos400>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext>, axios?: AxiosRequestConfig}
+export const getPostApiTodosMutationOptions = <TError = PostApiTodos400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext> => {
 
 const mutationKey = ['postApiTodos'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -438,7 +443,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiTodos>>, {data: PostApiTodosBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  postApiTodos(data,axiosOptions)
+          return  postApiTodos(data,requestOptions)
         }
 
         
@@ -448,13 +453,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type PostApiTodosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiTodos>>>
     export type PostApiTodosMutationBody = PostApiTodosBody
-    export type PostApiTodosMutationError = AxiosError<PostApiTodos400>
+    export type PostApiTodosMutationError = PostApiTodos400
 
     /**
  * @summary Todo 생성 (Enhanced)
  */
-export const usePostApiTodos = <TError = AxiosError<PostApiTodos400>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext>, axios?: AxiosRequestConfig}
+export const usePostApiTodos = <TError = PostApiTodos400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiTodos>>,
         TError,
@@ -472,28 +477,30 @@ export const usePostApiTodos = <TError = AxiosError<PostApiTodos400>,
  * @summary 대량 Todo 업데이트
  */
 export const patchApiTodosBulk = (
-    patchApiTodosBulkBody: PatchApiTodosBulkBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PatchApiTodosBulk200>> => {
-    
-    
-    return axios.default.patch(
-      `/api/todos/bulk`,
-      patchApiTodosBulkBody,options
-    );
-  }
+    patchApiTodosBulkBody: PatchApiTodosBulkBody,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<PatchApiTodosBulk200>(
+      {url: `/api/todos/bulk`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: patchApiTodosBulkBody
+    },
+      options);
+    }
+  
 
 
-
-export const getPatchApiTodosBulkMutationOptions = <TError = AxiosError<PatchApiTodosBulk400>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosBulk>>, TError,{data: PatchApiTodosBulkBody}, TContext>, axios?: AxiosRequestConfig}
+export const getPatchApiTodosBulkMutationOptions = <TError = PatchApiTodosBulk400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosBulk>>, TError,{data: PatchApiTodosBulkBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosBulk>>, TError,{data: PatchApiTodosBulkBody}, TContext> => {
 
 const mutationKey = ['patchApiTodosBulk'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -501,7 +508,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiTodosBulk>>, {data: PatchApiTodosBulkBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  patchApiTodosBulk(data,axiosOptions)
+          return  patchApiTodosBulk(data,requestOptions)
         }
 
         
@@ -511,13 +518,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type PatchApiTodosBulkMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiTodosBulk>>>
     export type PatchApiTodosBulkMutationBody = PatchApiTodosBulkBody
-    export type PatchApiTodosBulkMutationError = AxiosError<PatchApiTodosBulk400>
+    export type PatchApiTodosBulkMutationError = PatchApiTodosBulk400
 
     /**
  * @summary 대량 Todo 업데이트
  */
-export const usePatchApiTodosBulk = <TError = AxiosError<PatchApiTodosBulk400>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosBulk>>, TError,{data: PatchApiTodosBulkBody}, TContext>, axios?: AxiosRequestConfig}
+export const usePatchApiTodosBulk = <TError = PatchApiTodosBulk400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosBulk>>, TError,{data: PatchApiTodosBulkBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiTodosBulk>>,
         TError,
@@ -535,31 +542,33 @@ export const usePatchApiTodosBulk = <TError = AxiosError<PatchApiTodosBulk400>,
  * @summary 개별 Todo 조회 (Enhanced)
  */
 export const getApiTodosId = (
-    id: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<GetApiTodosId200>> => {
-    
-    
-    return axios.default.get(
-      `/api/todos/${id}`,options
-    );
-  }
-
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetApiTodosId200>(
+      {url: `/api/todos/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
 
 export const getGetApiTodosIdQueryKey = (id: string,) => {
     return [`/api/todos/${id}`] as const;
     }
 
     
-export const getGetApiTodosIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = AxiosError<GetApiTodosId404>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetApiTodosIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = GetApiTodosId404>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetApiTodosIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodosId>>> = ({ signal }) => getApiTodosId(id, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTodosId>>> = ({ signal }) => getApiTodosId(id, requestOptions, signal);
 
       
 
@@ -569,39 +578,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetApiTodosIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTodosId>>>
-export type GetApiTodosIdQueryError = AxiosError<GetApiTodosId404>
+export type GetApiTodosIdQueryError = GetApiTodosId404
 
 
-export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = AxiosError<GetApiTodosId404>>(
+export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = GetApiTodosId404>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodosId>>,
           TError,
           Awaited<ReturnType<typeof getApiTodosId>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = AxiosError<GetApiTodosId404>>(
+export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = GetApiTodosId404>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodosId>>,
           TError,
           Awaited<ReturnType<typeof getApiTodosId>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = AxiosError<GetApiTodosId404>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = GetApiTodosId404>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary 개별 Todo 조회 (Enhanced)
  */
 
-export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = AxiosError<GetApiTodosId404>>(
- id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId>>, TError = GetApiTodosId404>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodosId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -623,28 +632,30 @@ export function useGetApiTodosId<TData = Awaited<ReturnType<typeof getApiTodosId
  */
 export const putApiTodosId = (
     id: string,
-    putApiTodosIdBody: PutApiTodosIdBody, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PutApiTodosId200>> => {
-    
-    
-    return axios.default.put(
-      `/api/todos/${id}`,
-      putApiTodosIdBody,options
-    );
-  }
+    putApiTodosIdBody: PutApiTodosIdBody,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<PutApiTodosId200>(
+      {url: `/api/todos/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: putApiTodosIdBody
+    },
+      options);
+    }
+  
 
 
-
-export const getPutApiTodosIdMutationOptions = <TError = AxiosError<PutApiTodosId400 | PutApiTodosId404>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiTodosId>>, TError,{id: string;data: PutApiTodosIdBody}, TContext>, axios?: AxiosRequestConfig}
+export const getPutApiTodosIdMutationOptions = <TError = PutApiTodosId400 | PutApiTodosId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiTodosId>>, TError,{id: string;data: PutApiTodosIdBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof putApiTodosId>>, TError,{id: string;data: PutApiTodosIdBody}, TContext> => {
 
 const mutationKey = ['putApiTodosId'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -652,7 +663,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiTodosId>>, {id: string;data: PutApiTodosIdBody}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  putApiTodosId(id,data,axiosOptions)
+          return  putApiTodosId(id,data,requestOptions)
         }
 
         
@@ -662,13 +673,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type PutApiTodosIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiTodosId>>>
     export type PutApiTodosIdMutationBody = PutApiTodosIdBody
-    export type PutApiTodosIdMutationError = AxiosError<PutApiTodosId400 | PutApiTodosId404>
+    export type PutApiTodosIdMutationError = PutApiTodosId400 | PutApiTodosId404
 
     /**
  * @summary Todo 업데이트 (Enhanced)
  */
-export const usePutApiTodosId = <TError = AxiosError<PutApiTodosId400 | PutApiTodosId404>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiTodosId>>, TError,{id: string;data: PutApiTodosIdBody}, TContext>, axios?: AxiosRequestConfig}
+export const usePutApiTodosId = <TError = PutApiTodosId400 | PutApiTodosId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiTodosId>>, TError,{id: string;data: PutApiTodosIdBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof putApiTodosId>>,
         TError,
@@ -686,27 +697,28 @@ export const usePutApiTodosId = <TError = AxiosError<PutApiTodosId400 | PutApiTo
  * @summary Todo 삭제
  */
 export const deleteApiTodosId = (
-    id: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<DeleteApiTodosId200>> => {
-    
-    
-    return axios.default.delete(
-      `/api/todos/${id}`,options
-    );
-  }
+    id: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<DeleteApiTodosId200>(
+      {url: `/api/todos/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
 
 
-
-export const getDeleteApiTodosIdMutationOptions = <TError = AxiosError<DeleteApiTodosId404>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodosId>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+export const getDeleteApiTodosIdMutationOptions = <TError = DeleteApiTodosId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodosId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodosId>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['deleteApiTodosId'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -714,7 +726,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiTodosId>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  deleteApiTodosId(id,axiosOptions)
+          return  deleteApiTodosId(id,requestOptions)
         }
 
         
@@ -724,13 +736,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type DeleteApiTodosIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiTodosId>>>
     
-    export type DeleteApiTodosIdMutationError = AxiosError<DeleteApiTodosId404>
+    export type DeleteApiTodosIdMutationError = DeleteApiTodosId404
 
     /**
  * @summary Todo 삭제
  */
-export const useDeleteApiTodosId = <TError = AxiosError<DeleteApiTodosId404>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodosId>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+export const useDeleteApiTodosId = <TError = DeleteApiTodosId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiTodosId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiTodosId>>,
         TError,
@@ -748,27 +760,28 @@ export const useDeleteApiTodosId = <TError = AxiosError<DeleteApiTodosId404>,
  * @summary Todo 완료 상태 토글
  */
 export const patchApiTodosIdToggle = (
-    id: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<PatchApiTodosIdToggle200>> => {
-    
-    
-    return axios.default.patch(
-      `/api/todos/${id}/toggle`,undefined,options
-    );
-  }
+    id: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<PatchApiTodosIdToggle200>(
+      {url: `/api/todos/${id}/toggle`, method: 'PATCH'
+    },
+      options);
+    }
+  
 
 
-
-export const getPatchApiTodosIdToggleMutationOptions = <TError = AxiosError<PatchApiTodosIdToggle404>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosIdToggle>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+export const getPatchApiTodosIdToggleMutationOptions = <TError = PatchApiTodosIdToggle404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosIdToggle>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosIdToggle>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['patchApiTodosIdToggle'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
       
 
@@ -776,7 +789,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchApiTodosIdToggle>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  patchApiTodosIdToggle(id,axiosOptions)
+          return  patchApiTodosIdToggle(id,requestOptions)
         }
 
         
@@ -786,13 +799,13 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type PatchApiTodosIdToggleMutationResult = NonNullable<Awaited<ReturnType<typeof patchApiTodosIdToggle>>>
     
-    export type PatchApiTodosIdToggleMutationError = AxiosError<PatchApiTodosIdToggle404>
+    export type PatchApiTodosIdToggleMutationError = PatchApiTodosIdToggle404
 
     /**
  * @summary Todo 완료 상태 토글
  */
-export const usePatchApiTodosIdToggle = <TError = AxiosError<PatchApiTodosIdToggle404>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosIdToggle>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+export const usePatchApiTodosIdToggle = <TError = PatchApiTodosIdToggle404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosIdToggle>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof patchApiTodosIdToggle>>,
         TError,

@@ -17,7 +17,7 @@ function App() {
 
   // Queries and Mutations
   const { data: todosResponse, isLoading } = useTodos(filters)
-  const todos = todosResponse?.data?.todos || []
+  const todos = todosResponse?.todos || []
 
   const createTodoMutation = useCreateTodo({
     mutation: {

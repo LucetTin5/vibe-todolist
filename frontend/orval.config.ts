@@ -13,7 +13,7 @@ export default defineConfig({
       mock: false,
       override: {
         mutator: {
-          path: 'src/api/mutator.ts',
+          path: 'src/orval/mutator.ts',
           name: 'customInstance',
         },
         query: {

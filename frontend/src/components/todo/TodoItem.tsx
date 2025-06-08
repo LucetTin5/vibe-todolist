@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Button } from '../ui'
-import type { GetTodos200TodosItem } from '../../api/model'
+import type { GetApiTodos200TodosItem } from '../../api/model'
 
 export interface TodoItemProps {
-  todo: GetTodos200TodosItem
+  todo: GetApiTodos200TodosItem
   onToggle: (id: string) => void
-  onEdit: (todo: GetTodos200TodosItem) => void
+  onEdit: (todo: GetApiTodos200TodosItem) => void
   onDelete: (id: string) => void
   isToggling?: boolean
   isDeleting?: boolean
@@ -120,6 +120,77 @@ export function TodoItem({
             >
               {todo.description}
             </p>
+          )}
+
+          {/* Enhanced Fields */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {/* Priority Badge */}
+            <span
+              className={[
+                'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
+                todo.priority === 'urgent'
+                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  : todo.priority === 'high'
+                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                    : todo.priority === 'medium'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+              ].join(' ')}
+            >
+              {(todo.priority || 'medium').charAt(0).toUpperCase() +
+                (todo.priority || 'medium').slice(1)}
+            </span>
+
+            {/* Category Badge */}
+            <span
+              className="inline-flex items-center px-2 py-1 text-xs font-medium 
+                             bg-blue-100 text-blue-800 rounded-full 
+                             dark:bg-blue-900 dark:text-blue-200"
+            >
+              {(todo.category || 'other').charAt(0).toUpperCase() +
+                (todo.category || 'other').slice(1)}
+            </span>
+
+            {/* Due Date */}
+            {todo.dueDate && (
+              <span
+                className={[
+                  'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
+                  new Date(todo.dueDate) < new Date() && !todo.completed
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                ].join(' ')}
+              >
+                📅 {formatDate(todo.dueDate)}
+              </span>
+            )}
+
+            {/* Estimated Time */}
+            {todo.estimatedMinutes && (
+              <span
+                className="inline-flex items-center px-2 py-1 text-xs font-medium 
+                               bg-purple-100 text-purple-800 rounded-full 
+                               dark:bg-purple-900 dark:text-purple-200"
+              >
+                ⏱️ {todo.estimatedMinutes}m
+              </span>
+            )}
+          </div>
+
+          {/* Tags */}
+          {todo.tags && todo.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {todo.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-2 py-0.5 text-xs font-medium 
+                             bg-gray-100 text-gray-700 rounded-md
+                             dark:bg-gray-700 dark:text-gray-300"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
           )}
 
           {/* Timestamps */}

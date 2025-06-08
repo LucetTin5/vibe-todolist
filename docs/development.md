@@ -18,8 +18,8 @@ bun install
 bun run dev
 
 # 개별 워크스페이스 실행
-cd frontend && bun run dev  # 포트 3000
-cd backend && bun run dev   # 포트 3001
+cd frontend && bun run dev  # 포트 5173
+cd backend && bun run dev   # 포트 3300
 ```
 
 ## 📝 코딩 컨벤션

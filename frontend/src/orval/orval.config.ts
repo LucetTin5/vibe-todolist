@@ -12,6 +12,17 @@ export default defineConfig({
       client: 'react-query',
       mode: 'split',
       clean: true,
+      override: {
+        mutator: {
+          path: '../orval/mutator.ts',
+          name: 'customInstance',
+        },
+        query: {
+          useQuery: true,
+          useMutation: true,
+          signal: true,
+        },
+      },
     },
     hooks: {
       afterAllFilesWrite: 'bun run format',

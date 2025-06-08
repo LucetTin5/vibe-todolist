@@ -17,10 +17,10 @@ describe('Todo Enhanced Features Integration', () => {
     storage = InMemoryStorage.getInstance()
     // 모든 데이터 삭제로 완전 격리
     storage.clear()
-    
+
     // 새로운 서비스 인스턴스 생성
     service = new TodoService()
-    
+
     // 격리 검증 - 스토리지가 비어있는지 확인
     const allTodos = await storage.findAll()
     expect(allTodos).toHaveLength(0)

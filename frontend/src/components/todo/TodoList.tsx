@@ -2,15 +2,15 @@ import { useState } from 'react'
 import { Button } from '../ui'
 import { TodoItem } from './TodoItem'
 import { TodoForm } from './TodoForm'
-import type { GetTodos200TodosItem, PostTodosBody, GetTodosParams } from '../../api/model'
+import type { GetApiTodos200TodosItem, PostApiTodosBody, GetApiTodosParams } from '../../api/model'
 
 export interface TodoListProps {
-  todos: GetTodos200TodosItem[]
-  filters: GetTodosParams
-  onFiltersChange: (filters: GetTodosParams) => void
+  todos: GetApiTodos200TodosItem[]
+  filters: GetApiTodosParams
+  onFiltersChange: (filters: GetApiTodosParams) => void
   onToggleTodo: (id: string) => void
-  onCreateTodo: (todo: PostTodosBody) => void
-  onUpdateTodo: (todo: { id: string } & PostTodosBody) => void
+  onCreateTodo: (todo: PostApiTodosBody) => void
+  onUpdateTodo: (todo: { id: string } & PostApiTodosBody) => void
   onDeleteTodo: (id: string) => void
   isLoading?: boolean
   isCreating?: boolean
@@ -34,21 +34,21 @@ export function TodoList({
   deletingIds = [],
 }: TodoListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingTodo, setEditingTodo] = useState<GetTodos200TodosItem | null>(null)
+  const [editingTodo, setEditingTodo] = useState<GetApiTodos200TodosItem | null>(null)
 
-  const handleCreateTodo = (todoData: PostTodosBody) => {
+  const handleCreateTodo = (todoData: PostApiTodosBody) => {
     onCreateTodo(todoData)
     setIsFormOpen(false)
   }
 
-  const handleUpdateTodo = (todoData: PostTodosBody) => {
+  const handleUpdateTodo = (todoData: PostApiTodosBody) => {
     if (editingTodo) {
       onUpdateTodo({ id: editingTodo.id, ...todoData })
       setEditingTodo(null)
     }
   }
 
-  const handleEditTodo = (todo: GetTodos200TodosItem) => {
+  const handleEditTodo = (todo: GetApiTodos200TodosItem) => {
     setEditingTodo(todo)
   }
 
