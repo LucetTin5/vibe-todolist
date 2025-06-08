@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
 import { TodoService } from '../services/todo.service'
 import { InMemoryStorage } from '../utils/in-memory-storage'
 import type {
@@ -13,9 +13,21 @@ describe('Todo Enhanced Features Integration', () => {
   let service: TodoService
   let storage: InMemoryStorage
 
-  beforeEach(() => {
-    service = new TodoService()
+  beforeEach(async () => {
     storage = InMemoryStorage.getInstance()
+    // 모든 데이터 삭제로 완전 격리
+    storage.clear()
+    
+    // 새로운 서비스 인스턴스 생성
+    service = new TodoService()
+    
+    // 격리 검증 - 스토리지가 비어있는지 확인
+    const allTodos = await storage.findAll()
+    expect(allTodos).toHaveLength(0)
+  })
+
+  afterEach(async () => {
+    // 테스트 종료 후에도 정리
     storage.clear()
   })
 
@@ -138,7 +150,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'medium',
           category: 'health',
           tags: ['운동', '건강'],
-          dueDate: new Date().toISOString(), // 오늘
+          dueDate: '2025-06-08T19:00:00.000Z', // 오늘 KST 기준
           estimatedMinutes: 90,
         },
         {
@@ -147,7 +159,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'low',
           category: 'personal',
           tags: ['독서', '학습'],
-          dueDate: '2025-06-07T20:00:00.000Z',
+          dueDate: '2025-06-09T16:00:00.000Z', // 내일 (KST 범위 밖)
           estimatedMinutes: 120,
         },
         {
@@ -156,7 +168,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'medium',
           category: 'shopping',
           tags: ['장보기', '생필품'],
-          dueDate: '2025-06-08T15:00:00.000Z',
+          dueDate: '2025-06-11T10:00:00.000Z', // 3일 후
           estimatedMinutes: 60,
         },
         {
@@ -174,7 +186,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'low',
           category: 'personal',
           tags: ['친구', '모임'],
-          dueDate: '2025-06-09T18:00:00.000Z',
+          dueDate: '2025-06-12T18:00:00.000Z', // 4일 후
           estimatedMinutes: 240,
         },
       ]

@@ -253,39 +253,37 @@ export class TodoService {
       other: todos.filter((todo) => todo.category === "other").length,
     };
 
-    // 마감일 관련 통계
+    // 마감일 관련 통계 (KST 기준)
     const now = new Date();
-    const startOfToday = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
-    const endOfToday = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59
-    );
-    const endOfWeek = new Date(startOfToday);
-    endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay() + 1));
+    
+    // KST 기준으로 오늘 날짜 범위 계산
+    const startOfTodayUTC = new Date(now);
+    startOfTodayUTC.setUTCHours(-9, 0, 0, 0); // KST 00:00 = UTC 15:00 (전날)
+    
+    const endOfTodayUTC = new Date(now);
+    endOfTodayUTC.setUTCDate(endOfTodayUTC.getUTCDate() + 1); // 다음날
+    endOfTodayUTC.setUTCHours(14, 59, 59, 999); // KST 23:59 = UTC 14:59 (다음날)
+    
+    const endOfWeekUTC = new Date(startOfTodayUTC);
+    endOfWeekUTC.setUTCDate(endOfWeekUTC.getUTCDate() + 6);
+    endOfWeekUTC.setUTCHours(14, 59, 59, 999);
 
     const overdue = todos.filter((todo) => {
       if (!todo.dueDate || todo.completed) return false;
-      return new Date(todo.dueDate) < startOfToday;
+      const dueDate = new Date(todo.dueDate);
+      return dueDate < startOfTodayUTC;
     }).length;
 
     const dueToday = todos.filter((todo) => {
       if (!todo.dueDate || todo.completed) return false;
       const dueDate = new Date(todo.dueDate);
-      return dueDate >= startOfToday && dueDate <= endOfToday;
+      return dueDate >= startOfTodayUTC && dueDate <= endOfTodayUTC;
     }).length;
 
     const dueThisWeek = todos.filter((todo) => {
       if (!todo.dueDate || todo.completed) return false;
       const dueDate = new Date(todo.dueDate);
-      return dueDate >= startOfToday && dueDate <= endOfWeek;
+      return dueDate >= startOfTodayUTC && dueDate <= endOfWeekUTC;
     }).length;
 
     return {
