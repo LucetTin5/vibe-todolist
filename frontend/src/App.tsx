@@ -9,10 +9,10 @@ import {
   useDeleteTodo,
   getTodosQueryKey,
 } from './hooks/useTodos'
-import type { GetTodosParams, PostTodosBody } from './api/model'
+import type { GetApiTodosParams, PostApiTodosBody } from './api/model'
 
 function App() {
-  const [filters, setFilters] = useState<GetTodosParams>({})
+  const [filters, setFilters] = useState<GetApiTodosParams>({})
   const queryClient = useQueryClient()
 
   // Queries and Mutations
@@ -56,11 +56,11 @@ function App() {
   })
 
   // Event Handlers
-  const handleCreateTodo = (todoData: PostTodosBody) => {
+  const handleCreateTodo = (todoData: PostApiTodosBody) => {
     createTodoMutation.mutate({ data: todoData })
   }
 
-  const handleUpdateTodo = (todoData: { id: string } & PostTodosBody) => {
+  const handleUpdateTodo = (todoData: { id: string } & PostApiTodosBody) => {
     const { id, ...data } = todoData
     updateTodoMutation.mutate({ id, data })
   }

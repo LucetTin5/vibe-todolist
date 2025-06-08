@@ -1,42 +1,51 @@
-import type { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from 'axios'
 
-/**
- * API 요청 변환기 (Mutator)
- * Orval에서 생성된 API 호출을 커스터마이징할 때 사용
- */
-export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-  const source = new AbortController();
+export const AXIOS_INSTANCE = axios.create({
+  baseURL: 'http://localhost:3300',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
 
-  if (!config.url) {
-    throw new Error("URL is required for API request");
+// API 요청 인터셉터
+AXIOS_INSTANCE.interceptors.request.use(
+  (config) => {
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
+    return config
+  },
+  (error) => {
+    console.error('[API Request Error]', error)
+    return Promise.reject(error)
+  }
+)
+
+// API 응답 인터셉터
+AXIOS_INSTANCE.interceptors.response.use(
+  (response) => {
+    console.log(`[API Response] ${response.status} ${response.config.url}`)
+    return response
+  },
+  (error) => {
+    console.error('[API Response Error]', error.response?.data || error.message)
+    return Promise.reject(error)
+  }
+)
+
+export const customInstance = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
+  const source = axios.CancelToken.source()
+  const promise = AXIOS_INSTANCE({
+    ...config,
+    ...options,
+    cancelToken: source.token,
+  }).then(({ data }) => data)
+
+  // @ts-ignore
+  promise.cancel = () => {
+    source.cancel('Query was cancelled')
   }
 
-  const promise = fetch(config.url, {
-    method: config.method?.toUpperCase(),
-    headers: {
-      "Content-Type": "application/json",
-      ...(config.headers as Record<string, string>),
-    },
-    body: config.data ? JSON.stringify(config.data) : undefined,
-    signal: source.signal,
-  }).then((response) => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  });
+  return promise
+}
 
-  // abort 기능을 위한 타입 확장
-  type CancellablePromise<T> = Promise<T> & { cancel: () => void };
-  const cancellablePromise = promise as CancellablePromise<T>;
-  cancellablePromise.cancel = () => {
-    source.abort();
-  };
-
-  return cancellablePromise;
-};
-
-export default customInstance;
-
-export type ErrorType<Error> = Error;
-export type BodyType<BodyData> = BodyData;
+export default customInstance
