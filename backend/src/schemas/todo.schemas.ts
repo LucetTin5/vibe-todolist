@@ -15,6 +15,12 @@ export const CategoryEnum = z.enum(['work', 'personal', 'shopping', 'health', 'o
   example: 'work',
 })
 
+// 상태 타입 (Kanban용)
+export const StatusEnum = z.enum(['todo', 'in-progress', 'done']).openapi({
+  description: 'Todo 상태 (Kanban 뷰용)',
+  example: 'todo',
+})
+
 // 확장된 Todo 스키마
 export const TodoSchema = z.object({
   id: z.string().openapi({
@@ -38,6 +44,13 @@ export const TodoSchema = z.object({
   }),
   category: CategoryEnum.default('other').openapi({
     description: '카테고리 (기본값: other)',
+  }),
+  status: StatusEnum.default('todo').openapi({
+    description: 'Todo 상태 (Kanban 뷰용, 기본값: todo)',
+  }),
+  order: z.number().default(0).openapi({
+    example: 0,
+    description: 'Todo 정렬 순서 (Kanban 뷰용)',
   }),
   dueDate: z.string().datetime().optional().openapi({
     example: '2025-06-10T09:00:00.000Z',
@@ -80,6 +93,13 @@ export const CreateTodoSchema = z.object({
   category: CategoryEnum.optional().openapi({
     description: '카테고리 (기본값: other)',
   }),
+  status: StatusEnum.optional().openapi({
+    description: 'Todo 상태 (Kanban 뷰용)',
+  }),
+  order: z.number().optional().openapi({
+    example: 0,
+    description: 'Todo 정렬 순서 (Kanban 뷰용)',
+  }),
   dueDate: z.string().datetime().optional().openapi({
     example: '2025-06-10T09:00:00.000Z',
     description: '마감일 (ISO 8601, 선택사항)',
@@ -116,6 +136,13 @@ export const UpdateTodoSchema = z.object({
   }),
   category: CategoryEnum.optional().openapi({
     description: '카테고리',
+  }),
+  status: StatusEnum.optional().openapi({
+    description: 'Todo 상태 (Kanban 뷰용)',
+  }),
+  order: z.number().optional().openapi({
+    example: 0,
+    description: 'Todo 정렬 순서 (Kanban 뷰용)',
   }),
   dueDate: z.string().datetime().optional().openapi({
     example: '2025-06-10T09:00:00.000Z',
@@ -172,6 +199,10 @@ export const TodoQuerySchema = z.object({
     param: { name: 'category', in: 'query' },
     description: '카테고리 필터',
   }),
+  status: StatusEnum.optional().openapi({
+    param: { name: 'status', in: 'query' },
+    description: '상태 필터 (Kanban 뷰용)',
+  }),
   search: z
     .string()
     .optional()
@@ -181,7 +212,7 @@ export const TodoQuerySchema = z.object({
       description: '제목 또는 설명에서 검색할 키워드',
     }),
   sortBy: z
-    .enum(['createdAt', 'updatedAt', 'dueDate', 'priority', 'title'])
+    .enum(['createdAt', 'updatedAt', 'dueDate', 'priority', 'title', 'order'])
     .default('createdAt')
     .openapi({
       param: { name: 'sortBy', in: 'query' },
@@ -324,6 +355,48 @@ export const ErrorResponseSchema = z.object({
   }),
 })
 
+// Bulk Update 스키마 (Kanban용)
+export const BulkUpdateItemSchema = z.object({
+  id: z.string().openapi({
+    example: 'todo_1737606271352',
+    description: '업데이트할 Todo ID',
+  }),
+  status: StatusEnum.optional().openapi({
+    description: '변경할 상태',
+  }),
+  order: z.number().optional().openapi({
+    example: 1,
+    description: '변경할 정렬 순서',
+  }),
+  priority: PriorityEnum.optional().openapi({
+    description: '변경할 우선순위',
+  }),
+})
+
+export const BulkUpdateSchema = z.object({
+  data: z.array(BulkUpdateItemSchema).min(1).openapi({
+    description: '일괄 업데이트할 Todo 목록',
+  }),
+})
+
+export const BulkUpdateResponseSchema = z.object({
+  success: z.boolean().openapi({
+    example: true,
+    description: '성공 여부',
+  }),
+  updatedTodos: z.array(TodoSchema).openapi({
+    description: '업데이트된 Todo 목록',
+  }),
+  updatedCount: z.number().openapi({
+    example: 3,
+    description: '업데이트된 Todo 개수',
+  }),
+  message: z.string().openapi({
+    example: '3개의 Todo가 성공적으로 업데이트되었습니다',
+    description: '결과 메시지',
+  }),
+})
+
 // TypeScript 타입 추출
 export type Todo = z.infer<typeof TodoSchema>
 export type CreateTodoRequest = z.infer<typeof CreateTodoSchema>
@@ -335,3 +408,7 @@ export type SuccessResponse = z.infer<typeof SuccessResponseSchema>
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>
 export type Priority = z.infer<typeof PriorityEnum>
 export type Category = z.infer<typeof CategoryEnum>
+export type Status = z.infer<typeof StatusEnum>
+export type BulkUpdateItem = z.infer<typeof BulkUpdateItemSchema>
+export type BulkUpdateRequest = z.infer<typeof BulkUpdateSchema>
+export type BulkUpdateResponse = z.infer<typeof BulkUpdateResponseSchema>

@@ -26,6 +26,7 @@
  */
 import type { PutApiTodosId200Priority } from './putApiTodosId200Priority'
 import type { PutApiTodosId200Category } from './putApiTodosId200Category'
+import type { PutApiTodosId200Status } from './putApiTodosId200Status'
 
 export type PutApiTodosId200 = {
   /** Todo 고유 식별자 */
@@ -44,6 +45,10 @@ export type PutApiTodosId200 = {
   priority?: PutApiTodosId200Priority
   /** 카테고리 (기본값: other) */
   category?: PutApiTodosId200Category
+  /** Todo 상태 (Kanban 뷰용, 기본값: todo) */
+  status?: PutApiTodosId200Status
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */

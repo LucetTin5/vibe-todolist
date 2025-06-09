@@ -26,16 +26,14 @@
  */
 
 /**
- * 카테고리
+ * Todo 상태 (Kanban 뷰용, 기본값: todo)
  */
-export type PatchApiTodosBulkBodyDataCategory =
-  (typeof PatchApiTodosBulkBodyDataCategory)[keyof typeof PatchApiTodosBulkBodyDataCategory]
+export type GetApiTodos200TodosItemStatus =
+  (typeof GetApiTodos200TodosItemStatus)[keyof typeof GetApiTodos200TodosItemStatus]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiTodosBulkBodyDataCategory = {
-  work: 'work',
-  personal: 'personal',
-  shopping: 'shopping',
-  health: 'health',
-  other: 'other',
+export const GetApiTodos200TodosItemStatus = {
+  todo: 'todo',
+  'in-progress': 'in-progress',
+  done: 'done',
 } as const

@@ -26,6 +26,7 @@
  */
 import type { PostApiTodos201Priority } from './postApiTodos201Priority'
 import type { PostApiTodos201Category } from './postApiTodos201Category'
+import type { PostApiTodos201Status } from './postApiTodos201Status'
 
 export type PostApiTodos201 = {
   /** Todo 고유 식별자 */
@@ -44,6 +45,10 @@ export type PostApiTodos201 = {
   priority?: PostApiTodos201Priority
   /** 카테고리 (기본값: other) */
   category?: PostApiTodos201Category
+  /** Todo 상태 (Kanban 뷰용, 기본값: todo) */
+  status?: PostApiTodos201Status
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */

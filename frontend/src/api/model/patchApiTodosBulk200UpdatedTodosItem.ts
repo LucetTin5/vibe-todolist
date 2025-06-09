@@ -26,6 +26,7 @@
  */
 import type { PatchApiTodosBulk200UpdatedTodosItemPriority } from './patchApiTodosBulk200UpdatedTodosItemPriority'
 import type { PatchApiTodosBulk200UpdatedTodosItemCategory } from './patchApiTodosBulk200UpdatedTodosItemCategory'
+import type { PatchApiTodosBulk200UpdatedTodosItemStatus } from './patchApiTodosBulk200UpdatedTodosItemStatus'
 
 export type PatchApiTodosBulk200UpdatedTodosItem = {
   /** Todo 고유 식별자 */
@@ -44,6 +45,10 @@ export type PatchApiTodosBulk200UpdatedTodosItem = {
   priority?: PatchApiTodosBulk200UpdatedTodosItemPriority
   /** 카테고리 (기본값: other) */
   category?: PatchApiTodosBulk200UpdatedTodosItemCategory
+  /** Todo 상태 (Kanban 뷰용, 기본값: todo) */
+  status?: PatchApiTodosBulk200UpdatedTodosItemStatus
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */

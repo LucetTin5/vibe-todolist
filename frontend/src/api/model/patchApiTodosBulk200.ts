@@ -27,7 +27,12 @@
 import type { PatchApiTodosBulk200UpdatedTodosItem } from './patchApiTodosBulk200UpdatedTodosItem'
 
 export type PatchApiTodosBulk200 = {
+  /** 성공 여부 */
   success: boolean
+  /** 업데이트된 Todo 목록 */
   updatedTodos: PatchApiTodosBulk200UpdatedTodosItem[]
-  message?: string
+  /** 업데이트된 Todo 개수 */
+  updatedCount: number
+  /** 결과 메시지 */
+  message: string
 }

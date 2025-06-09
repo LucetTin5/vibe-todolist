@@ -24,12 +24,16 @@
 ```
  * OpenAPI spec version: 1.0.0
  */
-import type { PatchApiTodosBulkBodyDataItem } from './patchApiTodosBulkBodyDataItem'
 
-export type PatchApiTodosBulkBody = {
-  /**
-   * 일괄 업데이트할 Todo 목록
-   * @minItems 1
-   */
-  data: PatchApiTodosBulkBodyDataItem[]
-}
+/**
+ * 변경할 상태
+ */
+export type PatchApiTodosBulkBodyDataItemStatus =
+  (typeof PatchApiTodosBulkBodyDataItemStatus)[keyof typeof PatchApiTodosBulkBodyDataItemStatus]
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatchApiTodosBulkBodyDataItemStatus = {
+  todo: 'todo',
+  'in-progress': 'in-progress',
+  done: 'done',
+} as const

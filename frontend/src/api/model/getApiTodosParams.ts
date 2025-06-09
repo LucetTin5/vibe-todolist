@@ -27,6 +27,7 @@
 import type { GetApiTodosFilter } from './getApiTodosFilter'
 import type { GetApiTodosPriority } from './getApiTodosPriority'
 import type { GetApiTodosCategory } from './getApiTodosCategory'
+import type { GetApiTodosStatus } from './getApiTodosStatus'
 import type { GetApiTodosSortBy } from './getApiTodosSortBy'
 import type { GetApiTodosSortOrder } from './getApiTodosSortOrder'
 
@@ -36,6 +37,7 @@ export type GetApiTodosParams = {
   filter?: GetApiTodosFilter
   priority?: GetApiTodosPriority
   category?: GetApiTodosCategory
+  status?: GetApiTodosStatus
   search?: string
   sortBy?: GetApiTodosSortBy
   sortOrder?: GetApiTodosSortOrder

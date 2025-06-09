@@ -12,6 +12,8 @@ import {
   TodoStatsResponseSchema,
   SuccessResponseSchema,
   ErrorResponseSchema,
+  BulkUpdateSchema,
+  BulkUpdateResponseSchema,
 } from '../schemas/todo.schemas'
 
 // Todo 목록 조회 라우트
@@ -237,6 +239,100 @@ export const deleteAllTodosRoute = createRoute({
         },
       },
       description: '모든 Todo 삭제 성공',
+    },
+  },
+})
+
+// Todo 완료 상태 토글 라우트 (Kanban용)
+export const toggleTodoRoute = createRoute({
+  method: 'patch',
+  path: '/todos/{id}/toggle',
+  tags: ['Todos', 'Kanban'],
+  summary: 'Todo 완료 상태 토글',
+  description: 'Todo의 완료 상태를 토글합니다. (Kanban 뷰에서 사용)',
+  request: {
+    params: z.object({
+      id: z.string().openapi({
+        param: { name: 'id', in: 'path' },
+        example: 'todo_1737606271352',
+        description: 'Todo ID',
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: TodoSchema,
+        },
+      },
+      description: 'Todo 상태 토글 성공',
+    },
+    404: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: 'Todo를 찾을 수 없음',
+    },
+  },
+})
+
+// Bulk Update 라우트 (Kanban 드래그앤드롭용)
+export const bulkUpdateTodosRoute = createRoute({
+  method: 'patch',
+  path: '/todos/bulk',
+  tags: ['Todos', 'Kanban'],
+  summary: 'Todo 일괄 업데이트',
+  description: '여러 Todo를 한 번에 업데이트합니다. (Kanban 드래그앤드롭에서 사용)',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: BulkUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: BulkUpdateResponseSchema,
+        },
+      },
+      description: 'Todo 일괄 업데이트 성공',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '잘못된 요청 데이터',
+    },
+  },
+})
+
+// 태그 목록 조회 라우트
+export const getTagsRoute = createRoute({
+  method: 'get',
+  path: '/todos/tags',
+  tags: ['Todos'],
+  summary: '사용된 태그 목록 조회',
+  description: '현재 Todo들에서 사용된 모든 태그 목록을 조회합니다.',
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: z.array(z.string()).openapi({
+            description: '사용된 태그 목록',
+            example: ['프로젝트', '중요', '업무', '개인'],
+          }),
+        },
+      },
+      description: '태그 목록 조회 성공',
     },
   },
 })

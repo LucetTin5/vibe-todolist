@@ -34,4 +34,5 @@ export const GetApiTodosSortBy = {
   dueDate: 'dueDate',
   priority: 'priority',
   title: 'title',
+  order: 'order',
 } as const

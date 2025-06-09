@@ -24,12 +24,16 @@
 ```
  * OpenAPI spec version: 1.0.0
  */
-import type { PatchApiTodosBulkBodyDataItem } from './patchApiTodosBulkBodyDataItem'
+import type { PatchApiTodosBulkBodyDataItemStatus } from './patchApiTodosBulkBodyDataItemStatus'
+import type { PatchApiTodosBulkBodyDataItemPriority } from './patchApiTodosBulkBodyDataItemPriority'
 
-export type PatchApiTodosBulkBody = {
-  /**
-   * 일괄 업데이트할 Todo 목록
-   * @minItems 1
-   */
-  data: PatchApiTodosBulkBodyDataItem[]
+export type PatchApiTodosBulkBodyDataItem = {
+  /** 업데이트할 Todo ID */
+  id: string
+  /** 변경할 상태 */
+  status?: PatchApiTodosBulkBodyDataItemStatus
+  /** 변경할 정렬 순서 */
+  order?: number
+  /** 변경할 우선순위 */
+  priority?: PatchApiTodosBulkBodyDataItemPriority
 }

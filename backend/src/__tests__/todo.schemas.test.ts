@@ -7,12 +7,14 @@ import {
   TodoQuerySchema,
   PriorityEnum,
   CategoryEnum,
+  StatusEnum,
   type Todo,
   type CreateTodoRequest,
   type UpdateTodoRequest,
   type TodoQuery,
   type Priority,
   type Category,
+  type Status,
 } from '../schemas/todo.schemas'
 
 describe('Todo Schemas', () => {
@@ -61,6 +63,8 @@ describe('Todo Schemas', () => {
         completed: false,
         priority: 'high' as Priority,
         category: 'work' as Category,
+        status: 'todo' as Status,
+        order: 0,
         dueDate: '2025-06-10T09:00:00.000Z',
         tags: ['프로젝트', '중요'],
         estimatedMinutes: 120,

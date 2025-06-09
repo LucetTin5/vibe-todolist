@@ -26,15 +26,14 @@
  */
 
 /**
- * 우선순위
+ * Todo 상태 (Kanban 뷰용)
  */
-export type PatchApiTodosBulkBodyDataPriority =
-  (typeof PatchApiTodosBulkBodyDataPriority)[keyof typeof PatchApiTodosBulkBodyDataPriority]
+export type PostApiTodosBodyStatus =
+  (typeof PostApiTodosBodyStatus)[keyof typeof PostApiTodosBodyStatus]
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchApiTodosBulkBodyDataPriority = {
-  low: 'low',
-  medium: 'medium',
-  high: 'high',
-  urgent: 'urgent',
+export const PostApiTodosBodyStatus = {
+  todo: 'todo',
+  'in-progress': 'in-progress',
+  done: 'done',
 } as const

@@ -11,6 +11,9 @@ import type {
   TodoQuery,
   Priority,
   Category,
+  Status,
+  BulkUpdateItem,
+  BulkUpdateResponse,
 } from '../schemas/todo.schemas'
 
 interface PaginationOptions {
@@ -30,7 +33,8 @@ export class TodoService {
     search?: string,
     priority?: Priority,
     category?: Category,
-    sortBy: 'createdAt' | 'updatedAt' | 'dueDate' | 'priority' | 'title' = 'createdAt',
+    status?: Status,
+    sortBy: 'createdAt' | 'updatedAt' | 'dueDate' | 'priority' | 'title' | 'order' = 'createdAt',
     sortOrder: 'asc' | 'desc' = 'desc',
     dueDateFrom?: string,
     dueDateTo?: string
@@ -72,6 +76,11 @@ export class TodoService {
       todos = todos.filter((todo) => todo.category === category)
     }
 
+    // 상태 필터링 (Kanban용)
+    if (status) {
+      todos = todos.filter((todo) => todo.status === status)
+    }
+
     // 마감일 범위 필터링
     if (dueDateFrom || dueDateTo) {
       todos = todos.filter((todo) => {
@@ -109,6 +118,10 @@ export class TodoService {
           bValue = priorityOrder[b.priority]
           break
         }
+        case 'order':
+          aValue = a.order
+          bValue = b.order
+          break
         case 'dueDate':
           aValue = a.dueDate ? new Date(a.dueDate) : new Date(0)
           bValue = b.dueDate ? new Date(b.dueDate) : new Date(0)
@@ -160,6 +173,8 @@ export class TodoService {
       completed: false,
       priority: data.priority || 'medium',
       category: data.category || 'other',
+      status: data.status || 'todo',
+      order: data.order || 0,
       dueDate: data.dueDate,
       tags: data.tags || [],
       estimatedMinutes: data.estimatedMinutes,
@@ -318,6 +333,44 @@ export class TodoService {
     }
 
     return updatedTodos
+  }
+
+  /**
+   * Kanban용 고급 대량 업데이트 (각 Todo마다 다른 업데이트 적용)
+   */
+  async advancedBulkUpdate(updates: BulkUpdateItem[]): Promise<BulkUpdateResponse> {
+    const updatedTodos: Todo[] = []
+    const errors: string[] = []
+
+    for (const update of updates) {
+      try {
+        const { id, ...updateData } = update
+        const updatedTodo = await this.updateTodo(id, updateData)
+        updatedTodos.push(updatedTodo)
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        errors.push(`Todo ${update.id}: ${errorMessage}`)
+        console.warn(`Failed to update todo ${update.id}:`, error)
+      }
+    }
+
+    const updatedCount = updatedTodos.length
+    const totalRequested = updates.length
+    const failedCount = totalRequested - updatedCount
+
+    let message: string
+    if (failedCount === 0) {
+      message = `${updatedCount}개의 Todo가 성공적으로 업데이트되었습니다`
+    } else {
+      message = `${updatedCount}개의 Todo가 업데이트되었습니다 (${failedCount}개 실패)`
+    }
+
+    return {
+      success: failedCount === 0,
+      updatedTodos,
+      updatedCount,
+      message,
+    }
   }
 
   /**

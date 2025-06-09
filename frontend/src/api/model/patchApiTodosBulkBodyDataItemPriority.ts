@@ -24,12 +24,17 @@
 ```
  * OpenAPI spec version: 1.0.0
  */
-import type { PatchApiTodosBulkBodyDataItem } from './patchApiTodosBulkBodyDataItem'
 
-export type PatchApiTodosBulkBody = {
-  /**
-   * 일괄 업데이트할 Todo 목록
-   * @minItems 1
-   */
-  data: PatchApiTodosBulkBodyDataItem[]
-}
+/**
+ * 변경할 우선순위
+ */
+export type PatchApiTodosBulkBodyDataItemPriority =
+  (typeof PatchApiTodosBulkBodyDataItemPriority)[keyof typeof PatchApiTodosBulkBodyDataItemPriority]
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatchApiTodosBulkBodyDataItemPriority = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  urgent: 'urgent',
+} as const

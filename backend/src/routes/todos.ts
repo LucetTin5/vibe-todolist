@@ -13,6 +13,8 @@ import {
   TodoStatsResponseSchema,
   SuccessResponseSchema,
   ErrorResponseSchema,
+  BulkUpdateSchema,
+  BulkUpdateResponseSchema,
   type TodoQuery,
 } from '../schemas/todo.schemas'
 
@@ -278,22 +280,14 @@ const deleteAllTodosRoute = createRoute({
 const bulkUpdateRoute = createRoute({
   method: 'patch',
   path: '/api/todos/bulk',
-  tags: ['Todos'],
-  summary: '대량 Todo 업데이트',
-  description: '여러 Todo를 한 번에 업데이트합니다.',
+  tags: ['Todos', 'Kanban'],
+  summary: 'Todo 일괄 업데이트 (Kanban)',
+  description: '여러 Todo를 한 번에 업데이트합니다. Kanban 드래그앤드롭에서 사용됩니다.',
   request: {
     body: {
       content: {
         'application/json': {
-          schema: z.object({
-            ids: z.array(z.string()).openapi({
-              example: ['todo_1', 'todo_2', 'todo_3'],
-              description: '업데이트할 Todo ID 목록',
-            }),
-            data: UpdateTodoSchema.openapi({
-              description: '업데이트할 데이터',
-            }),
-          }),
+          schema: BulkUpdateSchema,
         },
       },
     },
@@ -302,14 +296,10 @@ const bulkUpdateRoute = createRoute({
     200: {
       content: {
         'application/json': {
-          schema: z.object({
-            success: z.boolean(),
-            updatedTodos: z.array(TodoSchema),
-            message: z.string().optional(),
-          }),
+          schema: BulkUpdateResponseSchema,
         },
       },
-      description: '대량 업데이트 성공',
+      description: 'Todo 일괄 업데이트 성공',
     },
     400: {
       content: {
@@ -317,7 +307,7 @@ const bulkUpdateRoute = createRoute({
           schema: ErrorResponseSchema,
         },
       },
-      description: '잘못된 요청',
+      description: '잘못된 요청 데이터',
     },
   },
 })
@@ -403,17 +393,9 @@ app.openapi(deleteAllTodosRoute, async (c) => {
 
 app.openapi(bulkUpdateRoute, async (c) => {
   try {
-    const { ids, data } = c.req.valid('json')
-    const updatedTodos = await todoService.bulkUpdate(ids, data)
-
-    return c.json(
-      {
-        success: true,
-        updatedTodos,
-        message: `${updatedTodos.length}개의 Todo가 업데이트되었습니다`,
-      },
-      200
-    )
+    const { data } = c.req.valid('json')
+    const result = await todoService.advancedBulkUpdate(data)
+    return c.json(result, 200)
   } catch (error) {
     return c.json(
       {
@@ -433,6 +415,7 @@ app.openapi(getTodosRoute, async (c) => {
       search,
       priority,
       category,
+      status,
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
@@ -447,6 +430,7 @@ app.openapi(getTodosRoute, async (c) => {
       search,
       priority,
       category,
+      status,
       sortBy,
       sortOrder,
       dueDateFrom,

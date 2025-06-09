@@ -26,6 +26,7 @@
  */
 import type { PostApiTodosBodyPriority } from './postApiTodosBodyPriority'
 import type { PostApiTodosBodyCategory } from './postApiTodosBodyCategory'
+import type { PostApiTodosBodyStatus } from './postApiTodosBodyStatus'
 
 export type PostApiTodosBody = {
   /**
@@ -40,6 +41,10 @@ export type PostApiTodosBody = {
   priority?: PostApiTodosBodyPriority
   /** 카테고리 (기본값: other) */
   category?: PostApiTodosBodyCategory
+  /** Todo 상태 (Kanban 뷰용) */
+  status?: PostApiTodosBodyStatus
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */

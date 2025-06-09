@@ -470,8 +470,11 @@ describe('Todo API Routes', () => {
       const todo3 = await todo3Response.json()
 
       const bulkUpdateData = {
-        ids: [todo1.id, todo2.id, todo3.id],
-        data: { completed: true, priority: 'high' },
+        data: [
+          { id: todo1.id, status: 'done', priority: 'high' },
+          { id: todo2.id, status: 'done', priority: 'high' },
+          { id: todo3.id, status: 'done', priority: 'high' },
+        ],
       }
 
       const response = await app.request('/api/todos/bulk', {
@@ -487,15 +490,14 @@ describe('Todo API Routes', () => {
       expect(result.updatedTodos).toHaveLength(3)
 
       for (const todo of result.updatedTodos) {
-        expect(todo.completed).toBe(true)
+        expect(todo.status).toBe('done')
         expect(todo.priority).toBe('high')
       }
     })
 
-    test('빈 ID 배열로 요청하면 빈 결과를 반환한다', async () => {
+    test('빈 배열로 요청하면 400 에러가 발생한다', async () => {
       const bulkUpdateData = {
-        ids: [],
-        data: { completed: true },
+        data: [],
       }
 
       const response = await app.request('/api/todos/bulk', {
@@ -504,11 +506,7 @@ describe('Todo API Routes', () => {
         body: JSON.stringify(bulkUpdateData),
       })
 
-      expect(response.status).toBe(200)
-
-      const result = await response.json()
-      expect(result.success).toBe(true)
-      expect(result.updatedTodos).toHaveLength(0)
+      expect(response.status).toBe(400)
     })
   })
 

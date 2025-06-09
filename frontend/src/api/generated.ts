@@ -473,8 +473,8 @@ export const usePostApiTodos = <TError = PostApiTodos400,
     }
     
 /**
- * 여러 Todo를 한 번에 업데이트합니다.
- * @summary 대량 Todo 업데이트
+ * 여러 Todo를 한 번에 업데이트합니다. Kanban 드래그앤드롭에서 사용됩니다.
+ * @summary Todo 일괄 업데이트 (Kanban)
  */
 export const patchApiTodosBulk = (
     patchApiTodosBulkBody: PatchApiTodosBulkBody,
@@ -521,7 +521,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PatchApiTodosBulkMutationError = PatchApiTodosBulk400
 
     /**
- * @summary 대량 Todo 업데이트
+ * @summary Todo 일괄 업데이트 (Kanban)
  */
 export const usePatchApiTodosBulk = <TError = PatchApiTodosBulk400,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchApiTodosBulk>>, TError,{data: PatchApiTodosBulkBody}, TContext>, request?: SecondParameter<typeof customInstance>}

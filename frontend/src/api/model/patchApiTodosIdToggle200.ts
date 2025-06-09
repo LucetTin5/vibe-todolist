@@ -26,6 +26,7 @@
  */
 import type { PatchApiTodosIdToggle200Priority } from './patchApiTodosIdToggle200Priority'
 import type { PatchApiTodosIdToggle200Category } from './patchApiTodosIdToggle200Category'
+import type { PatchApiTodosIdToggle200Status } from './patchApiTodosIdToggle200Status'
 
 export type PatchApiTodosIdToggle200 = {
   /** Todo 고유 식별자 */
@@ -44,6 +45,10 @@ export type PatchApiTodosIdToggle200 = {
   priority?: PatchApiTodosIdToggle200Priority
   /** 카테고리 (기본값: other) */
   category?: PatchApiTodosIdToggle200Category
+  /** Todo 상태 (Kanban 뷰용, 기본값: todo) */
+  status?: PatchApiTodosIdToggle200Status
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */

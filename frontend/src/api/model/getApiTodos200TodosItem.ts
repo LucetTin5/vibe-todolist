@@ -26,6 +26,7 @@
  */
 import type { GetApiTodos200TodosItemPriority } from './getApiTodos200TodosItemPriority'
 import type { GetApiTodos200TodosItemCategory } from './getApiTodos200TodosItemCategory'
+import type { GetApiTodos200TodosItemStatus } from './getApiTodos200TodosItemStatus'
 
 export type GetApiTodos200TodosItem = {
   /** Todo 고유 식별자 */
@@ -44,6 +45,10 @@ export type GetApiTodos200TodosItem = {
   priority?: GetApiTodos200TodosItemPriority
   /** 카테고리 (기본값: other) */
   category?: GetApiTodos200TodosItemCategory
+  /** Todo 상태 (Kanban 뷰용, 기본값: todo) */
+  status?: GetApiTodos200TodosItemStatus
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */

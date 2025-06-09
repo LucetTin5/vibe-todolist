@@ -26,6 +26,7 @@
  */
 import type { PutApiTodosIdBodyPriority } from './putApiTodosIdBodyPriority'
 import type { PutApiTodosIdBodyCategory } from './putApiTodosIdBodyCategory'
+import type { PutApiTodosIdBodyStatus } from './putApiTodosIdBodyStatus'
 
 export type PutApiTodosIdBody = {
   /**
@@ -42,6 +43,10 @@ export type PutApiTodosIdBody = {
   priority?: PutApiTodosIdBodyPriority
   /** 카테고리 */
   category?: PutApiTodosIdBodyCategory
+  /** Todo 상태 (Kanban 뷰용) */
+  status?: PutApiTodosIdBodyStatus
+  /** Todo 정렬 순서 (Kanban 뷰용) */
+  order?: number
   /** 마감일 (ISO 8601, 선택사항) */
   dueDate?: string
   /** 태그 목록 */
