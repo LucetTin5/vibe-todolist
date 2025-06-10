@@ -111,6 +111,7 @@ describe('Todo Enhanced Features Integration', () => {
         '프로젝트',
         undefined,
         undefined,
+        undefined,
         'dueDate',
         'asc'
       )
@@ -150,7 +151,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'medium',
           category: 'health',
           tags: ['운동', '건강'],
-          dueDate: '2025-06-08T19:00:00.000Z', // 오늘 KST 기준
+          dueDate: '2025-06-10T19:00:00.000Z', // 오늘 KST 기준
           estimatedMinutes: 90,
         },
         {
@@ -159,7 +160,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'low',
           category: 'personal',
           tags: ['독서', '학습'],
-          dueDate: '2025-06-09T16:00:00.000Z', // 내일 (KST 범위 밖)
+          dueDate: '2025-06-11T16:00:00.000Z', // 내일 (KST 범위 밖)
           estimatedMinutes: 120,
         },
         {
@@ -168,7 +169,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'medium',
           category: 'shopping',
           tags: ['장보기', '생필품'],
-          dueDate: '2025-06-11T10:00:00.000Z', // 3일 후
+          dueDate: '2025-06-13T10:00:00.000Z', // 3일 후
           estimatedMinutes: 60,
         },
         {
@@ -186,7 +187,7 @@ describe('Todo Enhanced Features Integration', () => {
           priority: 'low',
           category: 'personal',
           tags: ['친구', '모임'],
-          dueDate: '2025-06-12T18:00:00.000Z', // 4일 후
+          dueDate: '2025-06-14T18:00:00.000Z', // 4일 후
           estimatedMinutes: 240,
         },
       ]
@@ -202,6 +203,7 @@ describe('Todo Enhanced Features Integration', () => {
         undefined,
         undefined,
         'health',
+        undefined,
         'priority',
         'desc'
       )
@@ -413,6 +415,7 @@ describe('Todo Enhanced Features Integration', () => {
         '중요',
         undefined,
         undefined,
+        undefined,
         'priority',
         'desc'
       )
@@ -429,6 +432,7 @@ describe('Todo Enhanced Features Integration', () => {
         undefined,
         undefined,
         'work',
+        undefined,
         'title',
         'asc',
         '2025-06-01T00:00:00.000Z',
@@ -443,6 +447,7 @@ describe('Todo Enhanced Features Integration', () => {
       const activeSortedByDueDate = await service.getTodos(
         { page: 1, limit: 10 },
         'active',
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -525,6 +530,7 @@ describe('Todo Enhanced Features Integration', () => {
         'tag1',
         'high',
         'work',
+        undefined,
         'priority',
         'desc'
       )
@@ -617,6 +623,7 @@ describe('Todo Enhanced Features Integration', () => {
       const veryOldRange = await service.getTodos(
         { page: 1, limit: 10 },
         'all',
+        undefined,
         undefined,
         undefined,
         undefined,

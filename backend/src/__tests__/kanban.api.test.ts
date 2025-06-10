@@ -99,7 +99,7 @@ describe('Kanban API Tests', () => {
       const result = await response.json()
       expect(result.total).toBe(2)
       expect(result.todos).toHaveLength(2)
-      
+
       for (const todo of result.todos) {
         expect(todo.status).toBe('todo')
       }
@@ -112,7 +112,7 @@ describe('Kanban API Tests', () => {
       const result = await response.json()
       expect(result.total).toBe(2)
       expect(result.todos).toHaveLength(2)
-      
+
       for (const todo of result.todos) {
         expect(todo.status).toBe('in-progress')
       }
@@ -134,7 +134,7 @@ describe('Kanban API Tests', () => {
 
       const result = await response.json()
       expect(result.total).toBe(2)
-      
+
       // order 순으로 정렬되었는지 확인
       expect(result.todos[0].order).toBe(1)
       expect(result.todos[1].order).toBe(2)
@@ -337,9 +337,7 @@ describe('Kanban API Tests', () => {
 
     test('잘못된 status 값으로 bulk update하면 실패한다', async () => {
       const bulkUpdateData = {
-        data: [
-          { id: todoIds[0], status: 'invalid-status' },
-        ],
+        data: [{ id: todoIds[0], status: 'invalid-status' }],
       }
 
       const response = await app.request('/api/todos/bulk', {
@@ -472,7 +470,7 @@ describe('Kanban API Tests', () => {
       // 3. 순서 확인
       const orderedResponse = await app.request('/api/todos?status=todo&sortBy=order&sortOrder=asc')
       const orderedResult = await orderedResponse.json()
-      
+
       const titles = orderedResult.todos.map((todo: any) => todo.title)
       expect(titles).toEqual(['Task C', 'Task A', 'Task B', 'Task D'])
     })
@@ -517,10 +515,12 @@ describe('Kanban API Tests', () => {
       const todoResult = await todoResponse.json()
       expect(todoResult.total).toBe(1) // Todo Task 2만 남음
 
-      const progressResponse = await app.request('/api/todos?status=in-progress&sortBy=order&sortOrder=asc')
+      const progressResponse = await app.request(
+        '/api/todos?status=in-progress&sortBy=order&sortOrder=asc'
+      )
       const progressResult = await progressResponse.json()
       expect(progressResult.total).toBe(2) // Progress Task 1, Todo Task 1
-      
+
       const progressTitles = progressResult.todos.map((todo: any) => todo.title)
       expect(progressTitles).toEqual(['Progress Task 1', 'Todo Task 1'])
     })

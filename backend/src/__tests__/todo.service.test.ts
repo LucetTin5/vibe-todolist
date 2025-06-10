@@ -202,6 +202,7 @@ describe('TodoService', () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         'createdAt',
         'desc',
         '2025-06-01T00:00:00.000Z',
@@ -264,6 +265,7 @@ describe('TodoService', () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         'title',
         'asc'
       )
@@ -274,6 +276,7 @@ describe('TodoService', () => {
       const descResult = await service.getTodos(
         { page: 1, limit: 10 },
         'all',
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -292,6 +295,7 @@ describe('TodoService', () => {
         undefined,
         undefined,
         undefined,
+        undefined,
         'priority',
         'asc'
       )
@@ -302,6 +306,7 @@ describe('TodoService', () => {
       const descResult = await service.getTodos(
         { page: 1, limit: 10 },
         'all',
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -317,6 +322,7 @@ describe('TodoService', () => {
       const ascResult = await service.getTodos(
         { page: 1, limit: 10 },
         'all',
+        undefined,
         undefined,
         undefined,
         undefined,

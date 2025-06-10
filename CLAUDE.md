@@ -26,9 +26,8 @@ cd frontend && bun run dev   # Frontend on port 5173
 # Format code
 bun run format
 
-# Lint all workspaces
+# Lint code
 bun run lint
-bun run lint:fix
 
 # Type checking
 bun run type-check
@@ -54,6 +53,41 @@ bun run start
 ```bash
 # Generate API client from OpenAPI spec
 cd frontend && bun run orval
+```
+
+## Available Scripts
+
+### Root Package Scripts
+```bash
+bun run dev              # Start all services (frontend + backend)
+bun run build            # Build all workspaces
+bun run start            # Start production server
+bun run test             # Run tests in all workspaces
+bun run format           # Format code with Biome
+bun run lint             # Lint code with Biome
+bun run type-check       # Type check all workspaces
+bun run pre-commit       # Run type-check, lint, and test
+```
+
+### Backend Scripts
+```bash
+cd backend
+bun run dev              # Start dev server with hot reload
+bun run build            # Build for production
+bun run start            # Start production server
+bun run type-check       # TypeScript type checking
+bun run test             # Run tests
+bun run test:watch       # Run tests in watch mode
+```
+
+### Frontend Scripts
+```bash
+cd frontend
+bun run dev              # Start Vite dev server
+bun run build            # Build for production
+bun run preview          # Preview production build
+bun run type-check       # TypeScript type checking
+bun run orval            # Generate API client from OpenAPI
 ```
 
 ## Architecture

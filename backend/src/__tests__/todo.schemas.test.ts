@@ -380,10 +380,12 @@ describe('Todo Schemas', () => {
       const todo: Todo = {
         id: 'todo_1',
         title: '할일',
+        status: 'todo',
         completed: false,
         priority: 'medium',
         category: 'other',
         tags: [],
+        order: 0,
         createdAt: '2025-06-02T04:44:31.352Z',
         updatedAt: '2025-06-02T04:44:31.352Z',
       }
