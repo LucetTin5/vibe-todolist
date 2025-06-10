@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 
 interface AppHeaderProps {
   viewMode: 'list' | 'kanban'
@@ -26,6 +26,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {showViewToggle && (
           <div className="flex bg-gray-100 rounded-lg p-1 flex-shrink-0">
             <button
+              type="button"
               onClick={() => onViewModeChange('list')}
               className={`px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 sm:space-x-2 ${
                 viewMode === 'list'
@@ -34,7 +35,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               }`}
               title="목록 보기"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <title>List view</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -45,6 +47,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <span className="hidden sm:inline">목록 보기</span>
             </button>
             <button
+              type="button"
               onClick={() => onViewModeChange('kanban')}
               className={`px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 sm:space-x-2 ${
                 viewMode === 'kanban'
@@ -53,7 +56,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               }`}
               title="칸반 보드"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <title>Kanban board</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

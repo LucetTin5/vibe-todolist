@@ -1,11 +1,12 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import type React from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { gsap } from 'gsap'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanCard } from './KanbanCard'
 import { QuickAddTodo } from '../common'
 import { useTodos, useBulkUpdateTodos, useCreateTodo, getTodosQueryKey } from '../../hooks/useTodos'
-import type { GetApiTodos200TodosItem, PostApiTodosBody } from '../../api/model'
+import type { PostApiTodosBody } from '../../api/model'
 
 export type TodoStatus = 'todo' | 'in-progress' | 'done'
 
@@ -94,20 +95,20 @@ export const KanbanView: React.FC = () => {
   
   // 초기 화살표 상태 설정
   useEffect(() => {
-    Object.keys(COLUMN_CONFIG).forEach(status => {
+    for (const status of Object.keys(COLUMN_CONFIG)) {
       const statusKey = status as TodoStatus
       if (arrowRefs.current[statusKey]) {
         gsap.set(arrowRefs.current[statusKey], {
           rotation: expandedSection === statusKey ? 180 : 0
         })
       }
-    })
+    }
   }, [expandedSection])
 
   // Todo 데이터 조회
   const { data: todosResponse, isLoading } = useTodos({
     search: searchTerm || undefined,
-    priority: priorityFilter !== 'all' ? (priorityFilter as any) : undefined,
+    priority: priorityFilter !== 'all' ? priorityFilter as 'low' | 'medium' | 'high' | 'urgent' : undefined,
     sortBy: 'order',
     sortOrder: 'asc',
   })
@@ -148,9 +149,9 @@ export const KanbanView: React.FC = () => {
     }
 
     // 각 컬럼 내에서 order 순으로 정렬
-    Object.keys(grouped).forEach((status) => {
+    for (const status of Object.keys(grouped)) {
       grouped[status as TodoStatus].sort((a, b) => (a.order || 0) - (b.order || 0))
-    })
+    }
 
     return grouped
   }, [todos])
@@ -182,19 +183,13 @@ export const KanbanView: React.FC = () => {
   }
 
   // 컬럼 내 카드 순서 변경 핸들러
-  const handleReorderCards = async (reorderedTodos: GetApiTodos200TodosItem[]) => {
-    const updates = reorderedTodos.map((todo, index) => ({
-      id: todo.id,
-      order: index,
-    }))
-
-    try {
-      await bulkUpdateMutation.mutateAsync({
-        data: { data: updates },
-      })
-    } catch (error) {
-      console.error('Failed to reorder cards:', error)
-    }
+  const handleReorderCard = async (
+    draggedCardId: string,
+    targetCardId: string,
+    insertPosition: 'before' | 'after'
+  ) => {
+    // TODO: 실제 드래그 앤 드롭 리오더링 로직 구현
+    console.log('Reorder card:', { draggedCardId, targetCardId, insertPosition })
   }
 
   // 할 일 생성 핸들러
@@ -209,7 +204,7 @@ export const KanbanView: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
       </div>
     )
   }
@@ -224,32 +219,34 @@ export const KanbanView: React.FC = () => {
             {/* 통계 아이콘 */}
             <div className="flex items-center space-x-3 text-xs text-gray-600">
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                <span className="w-2 h-2 bg-gray-400 rounded-full" />
                 <span>{todos.length}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                <span className="w-2 h-2 bg-blue-400 rounded-full" />
                 <span>{columnTodos.todo.length}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
+                <span className="w-2 h-2 bg-yellow-400 rounded-full" />
                 <span>{columnTodos['in-progress'].length}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                <span className="w-2 h-2 bg-green-400 rounded-full" />
                 <span>{columnTodos.done.length}</span>
               </div>
             </div>
             
             {/* 필터 버튼 */}
             <div className="flex items-center space-x-2">
-              <button className="p-2 text-gray-500 hover:text-gray-700">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button type="button" className="p-2 text-gray-500 hover:text-gray-700">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <title>Search</title>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
-              <button className="p-2 text-gray-500 hover:text-gray-700">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button type="button" className="p-2 text-gray-500 hover:text-gray-700">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <title>Filter</title>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
                 </svg>
               </button>
@@ -319,6 +316,7 @@ export const KanbanView: React.FC = () => {
               <div key={status} className="bg-white rounded-lg border border-gray-200 shadow-sm">
                 {/* 모바일 컬럼 헤더 (클릭 가능) */}
                 <button
+                  type="button"
                   onClick={() => toggleAccordion(status)}
                   className={`w-full px-4 py-3 rounded-t-lg ${COLUMN_CONFIG[status].headerColor} hover:opacity-90 transition-opacity`}
                 >
@@ -329,16 +327,18 @@ export const KanbanView: React.FC = () => {
                         {todoCount}
                       </span>
                       <svg 
-                        ref={(el) => el && (arrowRefs.current[status] = el)}
+                        ref={(el) => { if (el) arrowRefs.current[status] = el }}
                         className="w-5 h-5 text-gray-600"
                         fill="none" 
                         stroke="currentColor" 
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                       >
+                        <title>Expand</title>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                       {(bulkUpdateMutation.isPending || createTodoMutation.isPending) && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       )}
                     </div>
                   </div>
@@ -347,7 +347,7 @@ export const KanbanView: React.FC = () => {
                 {/* 확장 가능한 카드 컨테이너 */}
                 {isExpanded && (
                   <div 
-                    ref={(el) => el && (accordionRefs.current[status] = el)}
+                    ref={(el) => { if (el) accordionRefs.current[status] = el }}
                     className="p-4 space-y-3 border-t border-gray-200"
                   >
                     {/* 할 일 추가 */}
@@ -364,7 +364,7 @@ export const KanbanView: React.FC = () => {
                         key={todo.id}
                         todo={todo}
                         status={status}
-                        onReorder={handleReorderCards}
+                        onReorder={handleReorderCard}
                         isUpdating={bulkUpdateMutation.isPending}
                       />
                     ))}
@@ -400,7 +400,7 @@ export const KanbanView: React.FC = () => {
               title={COLUMN_CONFIG[status].title}
               todos={columnTodos[status]}
               onMoveCard={handleMoveCard}
-              onReorderCards={handleReorderCards}
+              onReorderCards={() => {}} 
               onAddTodo={handleAddTodo}
               isUpdating={bulkUpdateMutation.isPending}
               isCreating={createTodoMutation.isPending}

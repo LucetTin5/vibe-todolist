@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import type React from 'react'
+import { useState } from 'react'
 import type { PostApiTodosBody } from '../../api/model'
 import type { TodoStatus } from '../kanban/KanbanView'
 
@@ -44,10 +45,12 @@ export const QuickAddTodo: React.FC<QuickAddTodoProps> = ({
   if (!isExpanded) {
     return (
       <button
+        type="button"
         onClick={() => setIsExpanded(true)}
         className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center space-x-2"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <title>Add</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -72,7 +75,6 @@ export const QuickAddTodo: React.FC<QuickAddTodoProps> = ({
         placeholder={placeholder}
         className="w-full p-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         rows={3}
-        autoFocus
         disabled={isLoading}
       />
       <div className="flex items-center justify-between mt-3">

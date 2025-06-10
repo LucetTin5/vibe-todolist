@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { KanbanCard } from './KanbanCard'
 import { QuickAddTodo } from '../common'
 import type { GetApiTodos200TodosItem, PostApiTodosBody } from '../../api/model'
@@ -80,7 +80,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
               {todos.length}
             </span>
             {(isUpdating || isCreating) && (
-              <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+              <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600" />
             )}
           </div>
         </div>

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react'
+import type React from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import type { GetApiTodos200TodosItem } from '../../api/model'
 import type { TodoStatus } from './KanbanView'
@@ -15,10 +16,8 @@ interface KanbanCardProps {
 }
 
 export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder, isUpdating }) => {
-  const [isDragging, setIsDragging] = useState(false)
   const [dragOverPosition, setDragOverPosition] = useState<'before' | 'after' | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
-  const tl = useRef<gsap.core.Timeline | null>(null)
   
   // 카드 등장 애니메이션
   useEffect(() => {
@@ -41,7 +40,6 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
   }, [])
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    setIsDragging(true)
     e.dataTransfer.setData('text/plain', todo.id)
     e.dataTransfer.setData('application/status', status)
     e.dataTransfer.effectAllowed = 'move'
@@ -60,7 +58,6 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
   }
 
   const handleDragEnd = () => {
-    setIsDragging(false)
     setDragOverPosition(null)
     
     // 드래그 종료 애니메이션
@@ -194,9 +191,9 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
           {/* 태그들 */}
           {todo.tags && todo.tags.length > 0 && (
             <div className="flex items-center space-x-1">
-              {todo.tags.slice(0, 2).map((tag, index) => (
+              {todo.tags.slice(0, 2).map((tag) => (
                 <span
-                  key={index}
+                  key={tag}
                   className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs"
                 >
                   #{tag}
@@ -212,7 +209,8 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
         {/* 마감일 */}
         {todo.dueDate && (
           <div className="flex items-center space-x-1">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <title>Calendar</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -234,7 +232,9 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
+          <title>Drag handle</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
