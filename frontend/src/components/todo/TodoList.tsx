@@ -76,17 +76,17 @@ export function TodoList({
         {[...Array(3)].map((_, i) => (
           <div
             key={`skeleton-loading-${Date.now()}-${i}`}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+            className="bg-white rounded-lg border border-gray-200 p-4"
           >
             <div className="animate-pulse">
               <div className="flex items-start gap-3">
-                <div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-5 w-5 bg-gray-200 rounded" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
                   <div className="flex gap-2">
-                    <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full" />
-                    <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                    <div className="h-6 w-16 bg-gray-200 rounded-full" />
+                    <div className="h-6 w-20 bg-gray-200 rounded-full" />
                   </div>
                 </div>
               </div>
@@ -102,10 +102,8 @@ export function TodoList({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Todos ({filteredTodos.length})
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <h2 className="text-lg font-semibold text-gray-900">Todos ({filteredTodos.length})</h2>
+          <p className="text-sm text-gray-600">
             {pendingTodos.length} pending, {completedTodos.length} completed
           </p>
         </div>
@@ -113,7 +111,7 @@ export function TodoList({
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Search */}
           <div>
@@ -123,8 +121,7 @@ export function TodoList({
               value={filters.search || ''}
               onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm 
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
@@ -154,8 +151,8 @@ export function TodoList({
               d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No todos</h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No todos</h3>
+          <p className="mt-1 text-sm text-gray-500">
             {todos.length === 0
               ? 'Get started by creating your first todo.'
               : 'No todos match your current filters.'}
@@ -190,11 +187,11 @@ export function TodoList({
             <div className="space-y-3">
               {pendingTodos.length > 0 && (
                 <div className="flex items-center gap-2 pt-6">
-                  <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
-                  <span className="text-sm text-gray-500 dark:text-gray-400 px-3">
+                  <div className="flex-1 border-t border-gray-200" />
+                  <span className="text-sm text-gray-500 px-3">
                     Completed ({completedTodos.length})
                   </span>
-                  <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+                  <div className="flex-1 border-t border-gray-200" />
                 </div>
               )}
               {completedTodos.map((todo) => (

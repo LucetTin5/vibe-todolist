@@ -153,12 +153,98 @@ body {
   }
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Standard animation classes */
 .animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn var(--animate-duration-fast) var(--ease-out);
 }
 
 .animate-slide-in {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn var(--animate-duration-normal) var(--ease-out);
+}
+
+.animate-slide-up {
+  animation: slideUp var(--animate-duration-normal) var(--ease-out);
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--animate-duration-fast) var(--ease-out);
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle var(--animate-duration-slow) var(--ease-out);
+}
+
+/* Standard transition classes */
+.transition-default {
+  transition: all var(--animate-duration-fast) var(--ease-in-out);
+}
+
+.transition-colors {
+  transition: color var(--animate-duration-fast) var(--ease-in-out), 
+              background-color var(--animate-duration-fast) var(--ease-in-out), 
+              border-color var(--animate-duration-fast) var(--ease-in-out);
+}
+
+.transition-transform {
+  transition: transform var(--animate-duration-fast) var(--ease-in-out);
+}
+
+.transition-shadow {
+  transition: box-shadow var(--animate-duration-normal) var(--ease-out);
+}
+
+/* Interactive effects */
+.hover-lift {
+  transition: transform var(--animate-duration-fast) var(--ease-out), 
+              box-shadow var(--animate-duration-fast) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.focus-ring {
+  transition: box-shadow var(--animate-duration-fast) var(--ease-out);
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.3);
 }
 
 /* Layout utilities */

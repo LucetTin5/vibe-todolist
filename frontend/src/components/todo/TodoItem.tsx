@@ -34,10 +34,8 @@ export function TodoItem({
   return (
     <div
       className={[
-        'group relative bg-white dark:bg-gray-800 rounded-lg border shadow-sm transition-shadow hover:shadow-md p-4',
-        todo.completed
-          ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
-          : 'border-gray-200 dark:border-gray-700',
+        'group relative bg-white rounded-lg border shadow-sm transition-shadow hover:shadow-md p-4',
+        todo.completed ? 'border-green-200 bg-green-50' : 'border-gray-200',
         isDeleting ? 'opacity-50' : '',
       ]
         .filter(Boolean)
@@ -55,7 +53,7 @@ export function TodoItem({
             'flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
             todo.completed
               ? 'bg-green-500 border-green-500 text-white'
-              : 'border-gray-300 dark:border-gray-600 hover:border-green-500',
+              : 'border-gray-300 hover:border-green-500',
             isToggling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           ]
             .filter(Boolean)
@@ -99,7 +97,7 @@ export function TodoItem({
           {/* Title */}
           <h3
             className={[
-              'text-sm font-medium text-gray-900 dark:text-white',
+              'text-sm font-medium text-gray-900',
               todo.completed ? 'line-through opacity-75' : '',
             ]
               .filter(Boolean)
@@ -112,7 +110,7 @@ export function TodoItem({
           {todo.description && (
             <p
               className={[
-                'mt-1 text-sm text-gray-600 dark:text-gray-400',
+                'mt-1 text-sm text-gray-600',
                 todo.completed ? 'line-through opacity-75' : '',
               ]
                 .filter(Boolean)
@@ -129,12 +127,12 @@ export function TodoItem({
               className={[
                 'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
                 todo.priority === 'urgent'
-                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                  ? 'bg-red-100 text-red-800'
                   : todo.priority === 'high'
-                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                    ? 'bg-orange-100 text-orange-800'
                     : todo.priority === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-gray-100 text-gray-800',
               ].join(' ')}
             >
               {(todo.priority || 'medium').charAt(0).toUpperCase() +
@@ -144,8 +142,7 @@ export function TodoItem({
             {/* Category Badge */}
             <span
               className="inline-flex items-center px-2 py-1 text-xs font-medium 
-                             bg-blue-100 text-blue-800 rounded-full 
-                             dark:bg-blue-900 dark:text-blue-200"
+                             bg-blue-100 text-blue-800 rounded-full"
             >
               {(todo.category || 'other').charAt(0).toUpperCase() +
                 (todo.category || 'other').slice(1)}
@@ -157,8 +154,8 @@ export function TodoItem({
                 className={[
                   'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
                   new Date(todo.dueDate) < new Date() && !todo.completed
-                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-green-100 text-green-800',
                 ].join(' ')}
               >
                 📅 {formatDate(todo.dueDate)}
@@ -169,8 +166,7 @@ export function TodoItem({
             {todo.estimatedMinutes && (
               <span
                 className="inline-flex items-center px-2 py-1 text-xs font-medium 
-                               bg-purple-100 text-purple-800 rounded-full 
-                               dark:bg-purple-900 dark:text-purple-200"
+                               bg-purple-100 text-purple-800 rounded-full"
               >
                 ⏱️ {todo.estimatedMinutes}m
               </span>
@@ -184,8 +180,7 @@ export function TodoItem({
                 <span
                   key={tag}
                   className="inline-flex items-center px-2 py-0.5 text-xs font-medium 
-                             bg-gray-100 text-gray-700 rounded-md
-                             dark:bg-gray-700 dark:text-gray-300"
+                             bg-gray-100 text-gray-700 rounded-md"
                 >
                   #{tag}
                 </span>
@@ -194,7 +189,7 @@ export function TodoItem({
           )}
 
           {/* Timestamps */}
-          <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
             <span>Created: {formatDate(todo.createdAt)}</span>
             {todo.updatedAt !== todo.createdAt && (
               <span>Updated: {formatDate(todo.updatedAt)}</span>
@@ -215,7 +210,7 @@ export function TodoItem({
             variant="ghost"
             size="sm"
             onClick={() => onEdit(todo)}
-            className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+            className="text-gray-600 hover:text-blue-600"
           >
             <svg
               className="h-4 w-4"
@@ -237,7 +232,7 @@ export function TodoItem({
             size="sm"
             onClick={() => onDelete(todo.id)}
             disabled={isDeleting}
-            className="text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+            className="text-gray-600 hover:text-red-600"
           >
             {isDeleting ? (
               <svg

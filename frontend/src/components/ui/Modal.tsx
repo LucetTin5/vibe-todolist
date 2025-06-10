@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
 import type { ReactNode } from 'react'
 
 export interface ModalProps {
@@ -10,6 +11,37 @@ export interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+  const backdropRef = useRef<HTMLDivElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+  
+  // 모달 애니메이션
+  useEffect(() => {
+    if (isOpen) {
+      // 모달 열기 애니메이션
+      if (backdropRef.current && modalRef.current) {
+        gsap.fromTo(backdropRef.current, 
+          { opacity: 0 },
+          { opacity: 1, duration: 0.2, ease: "power2.out" }
+        )
+        
+        gsap.fromTo(modalRef.current,
+          { 
+            opacity: 0,
+            scale: 0.9,
+            y: -20
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.3,
+            ease: "back.out(1.7)"
+          }
+        )
+      }
+    }
+  }, [isOpen])
+  
   // ESC 키로 모달 닫기
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -42,6 +74,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
+        ref={backdropRef}
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
         onKeyDown={(e) => {
@@ -56,9 +89,10 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
 
       {/* Modal */}
       <div
+        ref={modalRef}
         className={[
-          'relative mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl',
-          'border border-gray-200 dark:border-gray-700',
+          'relative mx-4 bg-white rounded-lg shadow-xl',
+          'border border-gray-200',
           sizeClasses[size],
         ].join(' ')}
         role="dialog"
