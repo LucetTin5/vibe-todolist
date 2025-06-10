@@ -5,6 +5,30 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
 import app from '../routes/todos'
 
+// Todo 타입 정의
+interface Todo {
+  id: string
+  title: string
+  description?: string
+  status: 'todo' | 'in-progress' | 'done'
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  category?: 'work' | 'personal' | 'shopping' | 'health' | 'other'
+  order?: number
+  tags?: string[]
+  dueDate?: string
+  completed: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// API 응답 타입
+interface TodoListResponse {
+  todos: Todo[]
+  total: number
+  page: number
+  pageSize: number
+}
+
 describe('Kanban API Tests', () => {
   // 각 테스트 전에 데이터 초기화
   beforeEach(async () => {
@@ -164,10 +188,10 @@ describe('Kanban API Tests', () => {
       const response = await app.request('/api/todos?sortBy=order&sortOrder=asc')
       expect(response.status).toBe(200)
 
-      const result = await response.json()
+      const result = await response.json() as TodoListResponse
       expect(result.todos).toHaveLength(4)
 
-      const orders = result.todos.map((todo: any) => todo.order)
+      const orders = result.todos.map((todo) => todo.order)
       expect(orders).toEqual([5, 10, 20, 30])
     })
 
@@ -175,10 +199,10 @@ describe('Kanban API Tests', () => {
       const response = await app.request('/api/todos?sortBy=order&sortOrder=desc')
       expect(response.status).toBe(200)
 
-      const result = await response.json()
+      const result = await response.json() as TodoListResponse
       expect(result.todos).toHaveLength(4)
 
-      const orders = result.todos.map((todo: any) => todo.order)
+      const orders = result.todos.map((todo) => todo.order)
       expect(orders).toEqual([30, 20, 10, 5])
     })
   })
@@ -260,8 +284,8 @@ describe('Kanban API Tests', () => {
 
       // order 순으로 정렬하여 확인
       const listResponse = await app.request('/api/todos?sortBy=order&sortOrder=asc')
-      const listResult = await listResponse.json()
-      const orders = listResult.todos.map((todo: any) => todo.order)
+      const listResult = await listResponse.json() as TodoListResponse
+      const orders = listResult.todos.map((todo) => todo.order)
       expect(orders).toEqual([50, 100, 200])
     })
 
@@ -469,9 +493,9 @@ describe('Kanban API Tests', () => {
 
       // 3. 순서 확인
       const orderedResponse = await app.request('/api/todos?status=todo&sortBy=order&sortOrder=asc')
-      const orderedResult = await orderedResponse.json()
+      const orderedResult = await orderedResponse.json() as TodoListResponse
 
-      const titles = orderedResult.todos.map((todo: any) => todo.title)
+      const titles = orderedResult.todos.map((todo) => todo.title)
       expect(titles).toEqual(['Task C', 'Task A', 'Task B', 'Task D'])
     })
 
@@ -518,10 +542,10 @@ describe('Kanban API Tests', () => {
       const progressResponse = await app.request(
         '/api/todos?status=in-progress&sortBy=order&sortOrder=asc'
       )
-      const progressResult = await progressResponse.json()
+      const progressResult = await progressResponse.json() as TodoListResponse
       expect(progressResult.total).toBe(2) // Progress Task 1, Todo Task 1
 
-      const progressTitles = progressResult.todos.map((todo: any) => todo.title)
+      const progressTitles = progressResult.todos.map((todo) => todo.title)
       expect(progressTitles).toEqual(['Progress Task 1', 'Todo Task 1'])
     })
   })
