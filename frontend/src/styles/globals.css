@@ -176,7 +176,11 @@ body {
 }
 
 @keyframes bounceGentle {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -214,9 +218,9 @@ body {
 }
 
 .transition-colors {
-  transition: color var(--animate-duration-fast) var(--ease-in-out), 
-              background-color var(--animate-duration-fast) var(--ease-in-out), 
-              border-color var(--animate-duration-fast) var(--ease-in-out);
+  transition: color var(--animate-duration-fast) var(--ease-in-out), background-color
+    var(--animate-duration-fast) var(--ease-in-out), border-color var(--animate-duration-fast)
+    var(--ease-in-out);
 }
 
 .transition-transform {
@@ -229,8 +233,8 @@ body {
 
 /* Interactive effects */
 .hover-lift {
-  transition: transform var(--animate-duration-fast) var(--ease-out), 
-              box-shadow var(--animate-duration-fast) var(--ease-out);
+  transition: transform var(--animate-duration-fast) var(--ease-out), box-shadow
+    var(--animate-duration-fast) var(--ease-out);
 }
 
 .hover-lift:hover {

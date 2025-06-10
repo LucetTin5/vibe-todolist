@@ -49,7 +49,13 @@ export const QuickAddTodo: React.FC<QuickAddTodoProps> = ({
         onClick={() => setIsExpanded(true)}
         className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center space-x-2"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
           <title>Add</title>
           <path
             strokeLinecap="round"

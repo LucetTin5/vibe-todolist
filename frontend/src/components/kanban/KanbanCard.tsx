@@ -18,22 +18,23 @@ interface KanbanCardProps {
 export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder, isUpdating }) => {
   const [dragOverPosition, setDragOverPosition] = useState<'before' | 'after' | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
-  
+
   // 카드 등장 애니메이션
   useEffect(() => {
     if (cardRef.current) {
-      gsap.fromTo(cardRef.current, 
+      gsap.fromTo(
+        cardRef.current,
         {
           opacity: 0,
           y: 20,
-          scale: 0.9
+          scale: 0.9,
         },
         {
           opacity: 1,
           y: 0,
           scale: 1,
           duration: 0.4,
-          ease: "power2.out"
+          ease: 'power2.out',
         }
       )
     }
@@ -43,32 +44,32 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
     e.dataTransfer.setData('text/plain', todo.id)
     e.dataTransfer.setData('application/status', status)
     e.dataTransfer.effectAllowed = 'move'
-    
+
     // 드래그 시작 애니메이션
     if (cardRef.current) {
       gsap.to(cardRef.current, {
         scale: 1.05,
         rotation: 3,
-        boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+        boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
         zIndex: 1000,
         duration: 0.2,
-        ease: "power2.out"
+        ease: 'power2.out',
       })
     }
   }
 
   const handleDragEnd = () => {
     setDragOverPosition(null)
-    
+
     // 드래그 종료 애니메이션
     if (cardRef.current) {
       gsap.to(cardRef.current, {
         scale: 1,
         rotation: 0,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-        zIndex: "auto",
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        zIndex: 'auto',
         duration: 0.3,
-        ease: "power2.out"
+        ease: 'power2.out',
       })
     }
   }
@@ -173,7 +174,9 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
       )}
 
       {/* 제목 */}
-      <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base">{todo.title}</h4>
+      <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base">
+        {todo.title}
+      </h4>
 
       {/* 설명 */}
       {todo.description && (
@@ -192,10 +195,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
           {todo.tags && todo.tags.length > 0 && (
             <div className="flex items-center space-x-1">
               {todo.tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs"
-                >
+                <span key={tag} className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
                   #{tag}
                 </span>
               ))}
@@ -209,7 +209,13 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
         {/* 마감일 */}
         {todo.dueDate && (
           <div className="flex items-center space-x-1">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <title>Calendar</title>
               <path
                 strokeLinecap="round"

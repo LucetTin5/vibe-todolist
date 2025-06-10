@@ -70,7 +70,9 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   }
 
   return (
-    <div className={`flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm ${className}`}>
+    <div
+      className={`flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm ${className}`}
+    >
       {/* 컬럼 헤더 */}
       <div className={`px-3 sm:px-4 py-3 border-b border-gray-200 rounded-t-lg ${headerClassName}`}>
         <div className="flex items-center justify-between">

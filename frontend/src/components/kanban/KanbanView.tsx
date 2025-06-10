@@ -33,73 +33,74 @@ export const KanbanView: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [expandedSection, setExpandedSection] = useState<TodoStatus | null>('todo') // 모바일용 아코디언
   const queryClient = useQueryClient()
-  
+
   // GSAP 애니메이션을 위한 refs
   const accordionRefs = useRef<{ [key in TodoStatus]?: HTMLDivElement }>({})
   const arrowRefs = useRef<{ [key in TodoStatus]?: SVGSVGElement }>({})
-  
+
   // 아코디언 애니메이션 함수
   const toggleAccordion = (status: TodoStatus) => {
     const isCurrentlyExpanded = expandedSection === status
     const newExpandedSection = isCurrentlyExpanded ? null : status
-    
+
     // 현재 열린 섹션이 있다면 닫기
     if (expandedSection && accordionRefs.current[expandedSection]) {
       gsap.to(accordionRefs.current[expandedSection], {
         height: 0,
         opacity: 0,
         duration: 0.3,
-        ease: "power2.inOut"
+        ease: 'power2.inOut',
       })
-      
+
       // 화살표 회전
       if (arrowRefs.current[expandedSection]) {
         gsap.to(arrowRefs.current[expandedSection], {
           rotation: 0,
           duration: 0.3,
-          ease: "power2.inOut"
+          ease: 'power2.inOut',
         })
       }
     }
-    
+
     setExpandedSection(newExpandedSection)
-    
+
     // 새로 선택된 섹션 열기
     if (newExpandedSection && !isCurrentlyExpanded) {
       // 다음 프레임에서 실행하여 DOM 업데이트 후 애니메이션
       requestAnimationFrame(() => {
         const element = accordionRefs.current[newExpandedSection]
         if (element) {
-          gsap.fromTo(element, 
+          gsap.fromTo(
+            element,
             { height: 0, opacity: 0 },
-            { 
-              height: "auto", 
-              opacity: 1, 
+            {
+              height: 'auto',
+              opacity: 1,
               duration: 0.4,
-              ease: "power2.out"
+              ease: 'power2.out',
             }
           )
         }
-        
+
         // 화살표 회전
         if (arrowRefs.current[newExpandedSection]) {
           gsap.to(arrowRefs.current[newExpandedSection], {
             rotation: 180,
             duration: 0.4,
-            ease: "power2.out"
+            ease: 'power2.out',
           })
         }
       })
     }
   }
-  
+
   // 초기 화살표 상태 설정
   useEffect(() => {
     for (const status of Object.keys(COLUMN_CONFIG)) {
       const statusKey = status as TodoStatus
       if (arrowRefs.current[statusKey]) {
         gsap.set(arrowRefs.current[statusKey], {
-          rotation: expandedSection === statusKey ? 180 : 0
+          rotation: expandedSection === statusKey ? 180 : 0,
         })
       }
     }
@@ -108,7 +109,10 @@ export const KanbanView: React.FC = () => {
   // Todo 데이터 조회
   const { data: todosResponse, isLoading } = useTodos({
     search: searchTerm || undefined,
-    priority: priorityFilter !== 'all' ? priorityFilter as 'low' | 'medium' | 'high' | 'urgent' : undefined,
+    priority:
+      priorityFilter !== 'all'
+        ? (priorityFilter as 'low' | 'medium' | 'high' | 'urgent')
+        : undefined,
     sortBy: 'order',
     sortOrder: 'asc',
   })
@@ -235,24 +239,46 @@ export const KanbanView: React.FC = () => {
                 <span>{columnTodos.done.length}</span>
               </div>
             </div>
-            
+
             {/* 필터 버튼 */}
             <div className="flex items-center space-x-2">
               <button type="button" className="p-2 text-gray-500 hover:text-gray-700">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <title>Search</title>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </button>
               <button type="button" className="p-2 text-gray-500 hover:text-gray-700">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <title>Filter</title>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"
+                  />
                 </svg>
               </button>
             </div>
           </div>
-          
+
           {/* 간단한 검색 */}
           <input
             type="search"
@@ -308,10 +334,10 @@ export const KanbanView: React.FC = () => {
       <div className="flex-1 overflow-hidden">
         {/* 모바일: 세로 스택 (최대 2개씩 보이도록) */}
         <div className="block md:hidden overflow-y-auto h-full p-4 space-y-4">
-          {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map(status => {
+          {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => {
             const isExpanded = expandedSection === status
             const todoCount = columnTodos[status].length
-            
+
             return (
               <div key={status} className="bg-white rounded-lg border border-gray-200 shadow-sm">
                 {/* 모바일 컬럼 헤더 (클릭 가능) */}
@@ -321,21 +347,30 @@ export const KanbanView: React.FC = () => {
                   className={`w-full px-4 py-3 rounded-t-lg ${COLUMN_CONFIG[status].headerColor} hover:opacity-90 transition-opacity`}
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 text-base">{COLUMN_CONFIG[status].title}</h3>
+                    <h3 className="font-semibold text-gray-900 text-base">
+                      {COLUMN_CONFIG[status].title}
+                    </h3>
                     <div className="flex items-center space-x-2">
                       <span className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center">
                         {todoCount}
                       </span>
-                      <svg 
-                        ref={(el) => { if (el) arrowRefs.current[status] = el }}
+                      <svg
+                        ref={(el) => {
+                          if (el) arrowRefs.current[status] = el
+                        }}
                         className="w-5 h-5 text-gray-600"
-                        fill="none" 
-                        stroke="currentColor" 
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                         aria-hidden="true"
                       >
                         <title>Expand</title>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                       {(bulkUpdateMutation.isPending || createTodoMutation.isPending) && (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
@@ -343,11 +378,13 @@ export const KanbanView: React.FC = () => {
                     </div>
                   </div>
                 </button>
-                
+
                 {/* 확장 가능한 카드 컨테이너 */}
                 {isExpanded && (
-                  <div 
-                    ref={(el) => { if (el) accordionRefs.current[status] = el }}
+                  <div
+                    ref={(el) => {
+                      if (el) accordionRefs.current[status] = el
+                    }}
                     className="p-4 space-y-3 border-t border-gray-200"
                   >
                     {/* 할 일 추가 */}
@@ -357,7 +394,7 @@ export const KanbanView: React.FC = () => {
                       placeholder={`${COLUMN_CONFIG[status].title}에 추가...`}
                       isLoading={createTodoMutation.isPending}
                     />
-                    
+
                     {/* 카드들 */}
                     {columnTodos[status].map((todo) => (
                       <KanbanCard
@@ -368,7 +405,7 @@ export const KanbanView: React.FC = () => {
                         isUpdating={bulkUpdateMutation.isPending}
                       />
                     ))}
-                    
+
                     {/* 빈 상태 */}
                     {todoCount === 0 && (
                       <div className="text-center text-gray-400 text-sm py-8">
@@ -379,12 +416,10 @@ export const KanbanView: React.FC = () => {
                     )}
                   </div>
                 )}
-                
+
                 {/* 축약된 미리보기 (닫혀있을 때) */}
                 {!isExpanded && todoCount > 0 && (
-                  <div className="px-4 py-2 text-xs text-gray-500">
-                    {todoCount}개의 항목
-                  </div>
+                  <div className="px-4 py-2 text-xs text-gray-500">{todoCount}개의 항목</div>
                 )}
               </div>
             )
@@ -400,7 +435,7 @@ export const KanbanView: React.FC = () => {
               title={COLUMN_CONFIG[status].title}
               todos={columnTodos[status]}
               onMoveCard={handleMoveCard}
-              onReorderCards={() => {}} 
+              onReorderCards={() => {}}
               onAddTodo={handleAddTodo}
               isUpdating={bulkUpdateMutation.isPending}
               isCreating={createTodoMutation.isPending}

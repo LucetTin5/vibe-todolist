@@ -19,7 +19,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
           <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{title}</h1>
           {viewMode === 'kanban' && (
-            <div className="hidden md:block text-sm text-gray-600">칸반 보드로 작업을 시각적으로 관리하세요</div>
+            <div className="hidden md:block text-sm text-gray-600">
+              칸반 보드로 작업을 시각적으로 관리하세요
+            </div>
           )}
         </div>
 
@@ -35,7 +37,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               }`}
               title="목록 보기"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <title>List view</title>
                 <path
                   strokeLinecap="round"
@@ -56,7 +64,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               }`}
               title="칸반 보드"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <title>Kanban board</title>
                 <path
                   strokeLinecap="round"

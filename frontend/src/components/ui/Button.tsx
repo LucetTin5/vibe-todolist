@@ -19,23 +19,23 @@ export function Button({
   ...props
 }: ButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null)
-  
+
   const handleMouseDown = () => {
     if (buttonRef.current && !disabled) {
       gsap.to(buttonRef.current, {
         scale: 0.95,
         duration: 0.1,
-        ease: "power2.out"
+        ease: 'power2.out',
       })
     }
   }
-  
+
   const handleMouseUp = () => {
     if (buttonRef.current && !disabled) {
       gsap.to(buttonRef.current, {
         scale: 1,
         duration: 0.2,
-        ease: "back.out(1.7)"
+        ease: 'back.out(1.7)',
       })
     }
   }
