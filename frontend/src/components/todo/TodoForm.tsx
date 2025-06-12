@@ -137,77 +137,71 @@ export function TodoForm({
         />
 
         {/* Priority and Category */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Select
-            label="Priority"
-            value={formData.priority || 'medium'}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                priority: e.target.value as PostApiTodosBodyPriority,
-              }))
-            }
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="urgent">Urgent</option>
-          </Select>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 min-w-0">
+            <Select
+              label="Priority"
+              value={formData.priority || 'medium'}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  priority: e.target.value as PostApiTodosBodyPriority,
+                }))
+              }
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </Select>
+          </div>
 
-          <Select
-            label="Category"
-            value={formData.category || 'other'}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                category: e.target.value as PostApiTodosBodyCategory,
-              }))
-            }
-          >
-            <option value="work">Work</option>
-            <option value="personal">Personal</option>
-            <option value="shopping">Shopping</option>
-            <option value="health">Health</option>
-            <option value="other">Other</option>
-          </Select>
+          <div className="flex-1 min-w-0">
+            <Select
+              label="Category"
+              value={formData.category || 'other'}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  category: e.target.value as PostApiTodosBodyCategory,
+                }))
+              }
+            >
+              <option value="work">Work</option>
+              <option value="personal">Personal</option>
+              <option value="shopping">Shopping</option>
+              <option value="health">Health</option>
+              <option value="other">Other</option>
+            </Select>
+          </div>
         </div>
 
         {/* Due Date and Estimated Time */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="due-date-input"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Due Date
-            </label>
-            <input
-              id="due-date-input"
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 min-w-0">
+            <Input
+              label="Due Date"
               type="datetime-local"
               value={formatDateForInput(formData.dueDate)}
               onChange={handleDateChange}
-              className={cn(
-                'w-full rounded-md border border-gray-300 dark:border-gray-600',
-                'bg-white dark:bg-gray-700 px-3 py-2 text-sm',
-                'text-gray-900 dark:text-gray-100',
-                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-              )}
             />
           </div>
 
-          <Input
-            label="Estimated Time (minutes)"
-            type="number"
-            placeholder="e.g., 30"
-            min="1"
-            value={formData.estimatedMinutes || ''}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                estimatedMinutes: e.target.value ? Number(e.target.value) : undefined,
-              }))
-            }
-          />
+          <div className="flex-1 min-w-0">
+            <Input
+              label="Estimated Time (minutes)"
+              type="number"
+              placeholder="e.g., 30"
+              min="1"
+              value={formData.estimatedMinutes || ''}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  estimatedMinutes: e.target.value ? Number(e.target.value) : undefined,
+                }))
+              }
+            />
+          </div>
         </div>
 
         {/* Tags */}
@@ -220,7 +214,7 @@ export function TodoForm({
           </label>
 
           {/* Add Tag Input */}
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 mb-3">
             <input
               id="tag-input"
               type="text"
@@ -246,6 +240,7 @@ export function TodoForm({
               size="sm"
               onClick={handleAddTag}
               disabled={!tagInput.trim()}
+              className="w-full sm:w-auto"
             >
               Add
             </Button>
@@ -279,11 +274,15 @@ export function TodoForm({
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <Button type="button" variant="ghost" onClick={onClose}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" disabled={!formData.title.trim() || isLoading}>
+          <Button 
+            type="submit" 
+            disabled={!formData.title.trim() || isLoading}
+            className="w-full sm:w-auto"
+          >
             {isLoading ? 'Saving...' : initialData ? 'Update Todo' : 'Create Todo'}
           </Button>
         </div>

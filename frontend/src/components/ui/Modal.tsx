@@ -69,8 +69,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   const sizeClasses = {
     sm: 'w-full max-w-md min-w-80',
     md: 'w-full max-w-lg min-w-96',
-    lg: 'w-full max-w-2xl min-w-[32rem]',
-    xl: 'w-full max-w-4xl min-w-[40rem]',
+    lg: 'w-full max-w-2xl sm:min-w-[32rem]',
+    xl: 'w-full max-w-4xl sm:min-w-[40rem]',
   }
 
   return (
@@ -94,7 +94,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       <div
         ref={modalRef}
         className={cn(
-          'relative mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl',
+          'relative mx-2 sm:mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl',
           'border border-gray-200 dark:border-gray-700',
           sizeClasses[size]
         )}
@@ -105,7 +105,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         {/* Header */}
         {title && (
           <div className={cn(
-            'flex items-center justify-between p-6',
+            'flex items-center justify-between p-4 sm:p-6',
             'border-b border-gray-200 dark:border-gray-700'
           )}>
             <h2 id="modal-title" className={cn(
@@ -143,7 +143,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         )}
 
         {/* Content */}
-        <div className={title ? 'p-6' : 'p-6'}>{children}</div>
+        <div className={title ? 'p-4 sm:p-6' : 'p-4 sm:p-6'}>{children}</div>
       </div>
     </div>
   )

@@ -2,14 +2,13 @@ import type React from 'react'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { gsap } from 'gsap'
-import { debounce } from 'es-toolkit'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanCard } from './KanbanCard'
-import { QuickAddTodo } from '../common'
+import { TodoForm } from '../todo/TodoForm'
 import { cn } from '../../utils/cn'
 import { useDelayedLoading } from '../../hooks/useDelayedLoading'
-import { useTodos, useBulkUpdateTodos, useCreateTodo, getTodosQueryKey } from '../../hooks/useTodos'
-import type { PostApiTodosBody } from '../../api/model'
+import { useTodos, useBulkUpdateTodos, getTodosQueryKey } from '../../hooks/useTodos'
+import type { PostApiTodosBody, GetApiTodosParams } from '../../api/model'
 
 export type TodoStatus = 'todo' | 'in-progress' | 'done'
 
@@ -31,89 +30,135 @@ const COLUMN_CONFIG = {
   },
 } as const
 
-export const KanbanView: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-  const [priorityFilter, setPriorityFilter] = useState<string>('all')
+interface KanbanViewProps {
+  filters: GetApiTodosParams
+  onFiltersChange: (filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)) => void
+  onCreateTodo: (todo: PostApiTodosBody) => void
+}
+
+export const KanbanView: React.FC<KanbanViewProps> = ({
+  filters,
+  onFiltersChange: _onFiltersChange,
+  onCreateTodo,
+}) => {
   const [expandedSection, setExpandedSection] = useState<TodoStatus | null>('todo') // 모바일용 아코디언
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState<TodoStatus>('todo')
   const queryClient = useQueryClient()
-
-  // Debounced search function
-  const debouncedSetSearchTerm = useMemo(
-    () => debounce((searchValue: string) => {
-      setDebouncedSearchTerm(searchValue)
-    }, 300),
-    []
-  )
-
-  // Update debounced search term when searchTerm changes
-  useEffect(() => {
-    debouncedSetSearchTerm(searchTerm)
-  }, [searchTerm, debouncedSetSearchTerm])
 
   // GSAP 애니메이션을 위한 refs
   const accordionRefs = useRef<{ [key in TodoStatus]?: HTMLDivElement }>({})
   const arrowRefs = useRef<{ [key in TodoStatus]?: SVGSVGElement }>({})
 
-  // 아코디언 애니메이션 함수
+  // 아코디언 애니메이션 함수 (성능 최적화)
   const toggleAccordion = (status: TodoStatus) => {
     const isCurrentlyExpanded = expandedSection === status
     const newExpandedSection = isCurrentlyExpanded ? null : status
 
-    // 애니메이션 완료 후 state 업데이트
+    // 현재 열린 섹션 닫기
     if (expandedSection && accordionRefs.current[expandedSection]) {
-      gsap.to(accordionRefs.current[expandedSection], {
-        height: 0,
-        opacity: 0,
-        duration: 0.3,
-        ease: 'power2.inOut',
+      const currentElement = accordionRefs.current[expandedSection]
+      const currentArrow = arrowRefs.current[expandedSection]
+      
+      // 현재 높이를 명시적으로 설정 (auto에서 고정값으로)
+      const currentHeight = currentElement.getBoundingClientRect().height
+      gsap.set(currentElement, { height: currentHeight, overflow: 'hidden' })
+      
+      const timeline = gsap.timeline({
         onComplete: () => {
           setExpandedSection(newExpandedSection)
           
           // 새로운 섹션 열기
           if (newExpandedSection && accordionRefs.current[newExpandedSection]) {
-            gsap.fromTo(
-              accordionRefs.current[newExpandedSection],
-              { height: 0, opacity: 0 },
-              { height: 'auto', opacity: 1, duration: 0.4, ease: 'power2.out' }
-            )
+            requestAnimationFrame(() => {
+              const newElement = accordionRefs.current[newExpandedSection]
+              const newArrow = arrowRefs.current[newExpandedSection]
+              
+              if (newElement) {
+                const targetHeight = newElement.scrollHeight
+                
+                gsap.fromTo(
+                  newElement,
+                  { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, overflow: 'hidden' },
+                  { 
+                    height: targetHeight, 
+                    paddingTop: '1rem',
+                    paddingBottom: '1rem',
+                    opacity: 1, 
+                    duration: 0.3, 
+                    ease: 'power2.out',
+                    onComplete: () => {
+                      // 애니메이션 완료 후 원래 상태로 복원
+                      gsap.set(newElement, { height: 'auto', overflow: 'visible', paddingTop: '', paddingBottom: '' })
+                    }
+                  }
+                )
+              }
+              
+              // 새 화살표 회전
+              if (newArrow) {
+                gsap.to(newArrow, {
+                  rotation: 180,
+                  duration: 0.3,
+                  ease: 'power2.out',
+                })
+              }
+            })
           }
         }
       })
-
-      // 화살표 회전
-      if (arrowRefs.current[expandedSection]) {
-        gsap.to(arrowRefs.current[expandedSection], {
+      
+      // 더 부드러운 닫기 애니메이션 (padding 포함)
+      timeline.to(currentElement, {
+        height: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        opacity: 0,
+        duration: 0.35,
+        ease: 'power2.inOut',
+      })
+      
+      // 현재 화살표 회전 (동시에)
+      if (currentArrow) {
+        timeline.to(currentArrow, {
           rotation: 0,
-          duration: 0.3,
+          duration: 0.35,
           ease: 'power2.inOut',
-        })
+        }, 0)
       }
     } else {
+      // 단순히 새 섹션 열기
       setExpandedSection(newExpandedSection)
       
-      // 새로 선택된 섹션 열기
-      if (newExpandedSection) {
+      if (newExpandedSection && accordionRefs.current[newExpandedSection]) {
+        const element = accordionRefs.current[newExpandedSection]
+        const arrow = arrowRefs.current[newExpandedSection]
+        
         requestAnimationFrame(() => {
-          const element = accordionRefs.current[newExpandedSection]
-          if (element) {
-            gsap.fromTo(
-              element,
-              { height: 0, opacity: 0 },
-              {
-                height: 'auto',
-                opacity: 1,
-                duration: 0.4,
-                ease: 'power2.out',
+          const targetHeight = element.scrollHeight
+          
+          gsap.fromTo(
+            element,
+            { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, overflow: 'hidden' },
+            { 
+              height: targetHeight, 
+              paddingTop: '1rem',
+              paddingBottom: '1rem',
+              opacity: 1, 
+              duration: 0.3, 
+              ease: 'power2.out',
+              onComplete: () => {
+                // 애니메이션 완료 후 원래 상태로 복원
+                gsap.set(element, { height: 'auto', overflow: 'visible', paddingTop: '', paddingBottom: '' })
               }
-            )
-          }
+            }
+          )
 
           // 화살표 회전
-          if (arrowRefs.current[newExpandedSection]) {
-            gsap.to(arrowRefs.current[newExpandedSection], {
+          if (arrow) {
+            gsap.to(arrow, {
               rotation: 180,
-              duration: 0.4,
+              duration: 0.3,
               ease: 'power2.out',
             })
           }
@@ -134,16 +179,13 @@ export const KanbanView: React.FC = () => {
     }
   }, [expandedSection])
 
-  // Todo 데이터 조회 - Use debounced search term
-  const { data: todosResponse, isLoading } = useTodos({
-    search: debouncedSearchTerm || undefined,
-    priority:
-      priorityFilter !== 'all'
-        ? (priorityFilter as 'low' | 'medium' | 'high' | 'urgent')
-        : undefined,
-    sortBy: 'order',
-    sortOrder: 'asc',
-  })
+  // Todo 데이터 조회 - Use shared filters with kanban-specific sorting
+  const kanbanFilters = {
+    ...filters,
+    sortBy: 'order' as const,
+    sortOrder: 'asc' as const,
+  }
+  const { data: todosResponse, isLoading } = useTodos(kanbanFilters)
 
   const todos = todosResponse?.todos || []
   
@@ -163,17 +205,6 @@ export const KanbanView: React.FC = () => {
     },
   })
 
-  const createTodoMutation = useCreateTodo({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
-      },
-      onError: (error) => {
-        console.error('Create todo failed:', error)
-        // TODO: 에러 토스트 표시
-      },
-    },
-  })
 
   // 컬럼별로 Todo 그룹화
   const columnTodos = useMemo(() => {
@@ -244,13 +275,20 @@ export const KanbanView: React.FC = () => {
     console.log('Reorder card:', { draggedCardId, targetCardId, insertPosition })
   }
 
+  // 할 일 생성 모달 열기
+  const handleOpenAddTodo = (status: TodoStatus = 'todo') => {
+    setSelectedStatus(status)
+    setIsFormOpen(true)
+  }
+
   // 할 일 생성 핸들러
-  const handleAddTodo = async (todoData: PostApiTodosBody) => {
-    try {
-      await createTodoMutation.mutateAsync({ data: todoData })
-    } catch (error) {
-      console.error('Failed to create todo:', error)
+  const handleCreateTodo = (todoData: PostApiTodosBody) => {
+    const todoWithStatus = {
+      ...todoData,
+      status: selectedStatus,
     }
+    onCreateTodo(todoWithStatus)
+    setIsFormOpen(false)
   }
 
   // 칸반 스켈레톤 컴포넌트
@@ -464,18 +502,6 @@ export const KanbanView: React.FC = () => {
             </div>
           </div>
 
-          {/* 간단한 검색 */}
-          <input
-            type="search"
-            placeholder="검색..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={cn(
-              'w-full px-3 py-2 border border-gray-300 dark:border-gray-600',
-              'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100',
-              'rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-            )}
-          />
         </div>
 
         {/* 태블릿/데스크톱: 기존 레이아웃 */}
@@ -492,40 +518,6 @@ export const KanbanView: React.FC = () => {
             </div>
           </div>
 
-          {/* 오른쪽: 검색과 필터 */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-            {/* 검색 */}
-            <div className="w-full sm:w-64">
-              <input
-                type="search"
-                placeholder="할 일 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={cn(
-                  'w-full px-3 py-2 border border-gray-300 dark:border-gray-600',
-                  'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100',
-                  'rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                )}
-              />
-            </div>
-
-            {/* 우선순위 필터 */}
-            <select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className={cn(
-                'w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600',
-                'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100',
-                'rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
-              )}
-            >
-              <option value="all">모든 우선순위</option>
-              <option value="low">낮음</option>
-              <option value="medium">보통</option>
-              <option value="high">높음</option>
-              <option value="urgent">긴급</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -588,7 +580,7 @@ export const KanbanView: React.FC = () => {
                               d="M19 9l-7 7-7-7"
                             />
                           </svg>
-                          {(bulkUpdateMutation.isPending || createTodoMutation.isPending) && (
+                          {bulkUpdateMutation.isPending && (
                             <div className={cn(
                               'animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400'
                             )} />
@@ -604,16 +596,28 @@ export const KanbanView: React.FC = () => {
                           if (el) accordionRefs.current[status] = el
                         }}
                         className={cn(
-                          'p-4 space-y-3 border-t border-gray-200 dark:border-gray-700'
+                          'p-4 space-y-3 border-t border-gray-200 dark:border-gray-700',
+                          'will-change-[height,opacity] transform-gpu'
                         )}
                       >
-                        {/* 할 일 추가 */}
-                        <QuickAddTodo
-                          onAdd={handleAddTodo}
-                          status={status}
-                          placeholder={`${COLUMN_CONFIG[status].title}에 추가...`}
-                          isLoading={createTodoMutation.isPending}
-                        />
+                        {/* 할 일 추가 (todo 컬럼에만) */}
+                        {status === 'todo' && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenAddTodo('todo')}
+                            className={cn(
+                              'w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600',
+                              'text-gray-500 dark:text-gray-400 rounded-lg text-sm',
+                              'hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 dark:hover:text-blue-400',
+                              'transition-colors duration-200 flex items-center justify-center gap-2'
+                            )}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            할 일 추가
+                          </button>
+                        )}
 
                         {/* 카드들 */}
                         {columnTodos[status].map((todo) => (
@@ -664,9 +668,9 @@ export const KanbanView: React.FC = () => {
                   todos={columnTodos[status]}
                   onMoveCard={handleMoveCard}
                   onReorderCards={() => {}}
-                  onAddTodo={handleAddTodo}
+                  onAddTodo={status === 'todo' ? () => handleOpenAddTodo('todo') : undefined}
                   isUpdating={bulkUpdateMutation.isPending}
-                  isCreating={createTodoMutation.isPending}
+                  isCreating={false}
                   className={COLUMN_CONFIG[status].color}
                   headerClassName={COLUMN_CONFIG[status].headerColor}
                 />
@@ -675,6 +679,14 @@ export const KanbanView: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Todo 생성 모달 */}
+      <TodoForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSubmit={handleCreateTodo}
+        isLoading={false}
+      />
     </div>
   )
 }

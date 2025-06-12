@@ -119,7 +119,11 @@ function App() {
           />
 
           {/* 칸반 뷰 */}
-          <KanbanView />
+          <KanbanView
+            filters={debouncedFilters}
+            onFiltersChange={handleFiltersChange}
+            onCreateTodo={handleCreateTodo}
+          />
         </div>
       ) : (
         <div className="h-screen flex flex-col">

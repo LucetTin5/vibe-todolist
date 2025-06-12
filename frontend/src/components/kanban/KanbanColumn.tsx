@@ -1,8 +1,7 @@
 import type React from 'react'
 import { KanbanCard } from './KanbanCard'
-import { QuickAddTodo } from '../common'
 import { cn } from '../../utils/cn'
-import type { GetApiTodos200TodosItem, PostApiTodosBody } from '../../api/model'
+import type { GetApiTodos200TodosItem } from '../../api/model'
 import type { TodoStatus } from './KanbanView'
 
 interface KanbanColumnProps {
@@ -16,7 +15,7 @@ interface KanbanColumnProps {
     newOrder?: number
   ) => void
   onReorderCards: (reorderedTodos: GetApiTodos200TodosItem[]) => void
-  onAddTodo: (todo: PostApiTodosBody) => void
+  onAddTodo?: () => void
   isUpdating: boolean
   isCreating: boolean
   className?: string
@@ -113,13 +112,25 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        {/* 할 일 추가 영역 */}
-        <QuickAddTodo
-          onAdd={onAddTodo}
-          status={status}
-          placeholder={`${title}에 추가할 할 일을 입력하세요...`}
-          isLoading={isCreating}
-        />
+        {/* 할 일 추가 영역 (todo 컬럼에만) */}
+        {status === 'todo' && onAddTodo && (
+          <button
+            type="button"
+            onClick={onAddTodo}
+            className={cn(
+              'w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600',
+              'text-gray-500 dark:text-gray-400 rounded-lg text-sm',
+              'hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 dark:hover:text-blue-400',
+              'transition-colors duration-200 flex items-center justify-center gap-2',
+              'mb-3'
+            )}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            할 일 추가
+          </button>
+        )}
 
         {/* 기존 카드들 */}
         {todos.map((todo) => (
