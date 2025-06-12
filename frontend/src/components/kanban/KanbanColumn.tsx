@@ -14,7 +14,11 @@ interface KanbanColumnProps {
     toStatus: TodoStatus,
     newOrder?: number
   ) => void
-  onReorderCards: (reorderedTodos: GetApiTodos200TodosItem[]) => void
+  onReorderCards: (
+    draggedCardId: string,
+    targetCardId: string,
+    insertPosition: 'before' | 'after'
+  ) => void
   onAddTodo?: () => void
   isUpdating: boolean
   isCreating: boolean
@@ -55,18 +59,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
     targetCardId: string,
     insertPosition: 'before' | 'after'
   ) => {
-    const draggedIndex = todos.findIndex((todo) => todo.id === draggedCardId)
-    const targetIndex = todos.findIndex((todo) => todo.id === targetCardId)
-
-    if (draggedIndex === -1 || targetIndex === -1) return
-
-    const newTodos = [...todos]
-    const [draggedTodo] = newTodos.splice(draggedIndex, 1)
-
-    const insertIndex = insertPosition === 'before' ? targetIndex : targetIndex + 1
-    newTodos.splice(insertIndex, 0, draggedTodo)
-
-    onReorderCards(newTodos)
+    onReorderCards(draggedCardId, targetCardId, insertPosition)
   }
 
   return (

@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { debounce } from "es-toolkit";
 import { TodoList } from "./components/todo";
 import { KanbanView } from "./components/kanban";
+import { CalendarView } from "./components/calendar";
 import { AppHeader } from "./components/common";
 import {
   useTodos,
@@ -14,7 +15,7 @@ import {
 } from "./hooks/useTodos";
 import type { GetApiTodosParams, PostApiTodosBody } from "./api/model";
 
-type ViewMode = "list" | "kanban";
+type ViewMode = "list" | "kanban" | "calendar";
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -109,32 +110,35 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {viewMode === "kanban" ? (
-        <div className="h-screen flex flex-col">
-          {/* 공통 헤더 */}
-          <AppHeader
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            title="TodoList"
-          />
+      <div className="h-screen flex flex-col">
+        {/* 공통 헤더 */}
+        <AppHeader
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          title="TodoList"
+        />
 
-          {/* 칸반 뷰 */}
+        {/* 뷰 렌더링 */}
+        {viewMode === "kanban" && (
           <KanbanView
             filters={debouncedFilters}
             onFiltersChange={handleFiltersChange}
             onCreateTodo={handleCreateTodo}
           />
-        </div>
-      ) : (
-        <div className="h-screen flex flex-col">
-          {/* 공통 헤더 */}
-          <AppHeader
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            title="TodoList"
-          />
+        )}
 
-          {/* 리스트 뷰 */}
+        {viewMode === "calendar" && (
+          <CalendarView
+            filters={debouncedFilters}
+            onFiltersChange={handleFiltersChange}
+            onCreateTodo={handleCreateTodo}
+            onUpdateTodo={handleUpdateTodo}
+            onToggleTodo={handleToggleTodo}
+            onDeleteTodo={handleDeleteTodo}
+          />
+        )}
+
+        {viewMode === "list" && (
           <div className="flex-1 overflow-hidden">
             <div className="container mx-auto max-w-4xl px-4 py-6 h-full">
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col">
@@ -176,8 +180,8 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

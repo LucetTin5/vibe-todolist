@@ -667,7 +667,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                   title={COLUMN_CONFIG[status].title}
                   todos={columnTodos[status]}
                   onMoveCard={handleMoveCard}
-                  onReorderCards={() => {}}
+                  onReorderCards={handleReorderCard}
                   onAddTodo={status === 'todo' ? () => handleOpenAddTodo('todo') : undefined}
                   isUpdating={bulkUpdateMutation.isPending}
                   isCreating={false}

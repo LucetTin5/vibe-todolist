@@ -16,10 +16,12 @@
     "@tanstack/react-query-devtools": "^5.80.2",
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "es-toolkit": "^1.39.3",
     "gsap": "^3.13.0",
     "orval": "^7.9.0",
     "react": "^19.1.0",
+    "react-day-picker": "^9.7.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.8"
   },

@@ -14,6 +14,8 @@ export interface TodoFormProps {
   onSubmit: (todo: PostApiTodosBody) => void
   initialData?: GetApiTodos200TodosItem
   isLoading?: boolean
+  defaultValues?: Partial<PostApiTodosBody>
+  onDelete?: (id: string) => void
 }
 
 export function TodoForm({
@@ -22,15 +24,17 @@ export function TodoForm({
   onSubmit,
   initialData,
   isLoading = false,
+  defaultValues,
+  onDelete,
 }: TodoFormProps) {
   const [formData, setFormData] = useState<PostApiTodosBody>({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    priority: initialData?.priority || 'medium',
-    category: initialData?.category || 'other',
-    tags: initialData?.tags || [],
-    dueDate: initialData?.dueDate || undefined,
-    estimatedMinutes: initialData?.estimatedMinutes || undefined,
+    title: initialData?.title || defaultValues?.title || '',
+    description: initialData?.description || defaultValues?.description || '',
+    priority: initialData?.priority || defaultValues?.priority || 'medium',
+    category: initialData?.category || defaultValues?.category || 'other',
+    tags: initialData?.tags || defaultValues?.tags || [],
+    dueDate: initialData?.dueDate || defaultValues?.dueDate || undefined,
+    estimatedMinutes: initialData?.estimatedMinutes || defaultValues?.estimatedMinutes || undefined,
   })
 
   const [tagInput, setTagInput] = useState('')
@@ -49,19 +53,19 @@ export function TodoForm({
       })
       setTagInput('')
     } else if (isOpen && !initialData) {
-      // 새로 생성하는 경우에만 초기화
+      // 새로 생성하는 경우 - defaultValues 적용
       setFormData({
-        title: '',
-        description: '',
-        priority: 'medium',
-        category: 'other',
-        tags: [],
-        dueDate: undefined,
-        estimatedMinutes: undefined,
+        title: defaultValues?.title || '',
+        description: defaultValues?.description || '',
+        priority: defaultValues?.priority || 'medium',
+        category: defaultValues?.category || 'other',
+        tags: defaultValues?.tags || [],
+        dueDate: defaultValues?.dueDate || undefined,
+        estimatedMinutes: defaultValues?.estimatedMinutes || undefined,
       })
       setTagInput('')
     }
-  }, [isOpen, initialData])
+  }, [isOpen, initialData, defaultValues])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -274,17 +278,38 @@ export function TodoForm({
         </div>
 
         {/* Form Actions */}
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            disabled={!formData.title.trim() || isLoading}
-            className="w-full sm:w-auto"
-          >
-            {isLoading ? 'Saving...' : initialData ? 'Update Todo' : 'Create Todo'}
-          </Button>
+        <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex gap-2">
+            {/* 삭제 버튼 (수정 모드에서만 표시) */}
+            {initialData && onDelete && (
+              <Button 
+                type="button" 
+                variant="danger" 
+                onClick={() => {
+                  if (window.confirm('이 할 일을 삭제하시겠습니까?')) {
+                    onDelete(initialData.id)
+                    onClose()
+                  }
+                }}
+                className="w-full sm:w-auto"
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={!formData.title.trim() || isLoading}
+              className="w-full sm:w-auto"
+            >
+              {isLoading ? 'Saving...' : initialData ? 'Update Todo' : 'Create Todo'}
+            </Button>
+          </div>
         </div>
       </form>
     </Modal>
