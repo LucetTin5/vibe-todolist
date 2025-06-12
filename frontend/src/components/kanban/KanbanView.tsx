@@ -2,9 +2,12 @@ import type React from 'react'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { gsap } from 'gsap'
+import { debounce } from 'es-toolkit'
 import { KanbanColumn } from './KanbanColumn'
 import { KanbanCard } from './KanbanCard'
 import { QuickAddTodo } from '../common'
+import { cn } from '../../utils/cn'
+import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { useTodos, useBulkUpdateTodos, useCreateTodo, getTodosQueryKey } from '../../hooks/useTodos'
 import type { PostApiTodosBody } from '../../api/model'
 
@@ -13,26 +16,40 @@ export type TodoStatus = 'todo' | 'in-progress' | 'done'
 const COLUMN_CONFIG = {
   todo: {
     title: '할 일',
-    color: 'bg-gray-50',
-    headerColor: 'bg-gray-100',
+    color: 'bg-gray-50 dark:bg-gray-800',
+    headerColor: 'bg-gray-100 dark:bg-gray-700',
   },
   'in-progress': {
     title: '진행 중',
-    color: 'bg-blue-50',
-    headerColor: 'bg-blue-100',
+    color: 'bg-blue-50 dark:bg-blue-900/20',
+    headerColor: 'bg-blue-100 dark:bg-blue-800/30',
   },
   done: {
     title: '완료',
-    color: 'bg-green-50',
-    headerColor: 'bg-green-100',
+    color: 'bg-green-50 dark:bg-green-900/20',
+    headerColor: 'bg-green-100 dark:bg-green-800/30',
   },
 } as const
 
 export const KanbanView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [expandedSection, setExpandedSection] = useState<TodoStatus | null>('todo') // 모바일용 아코디언
   const queryClient = useQueryClient()
+
+  // Debounced search function
+  const debouncedSetSearchTerm = useMemo(
+    () => debounce((searchValue: string) => {
+      setDebouncedSearchTerm(searchValue)
+    }, 300),
+    []
+  )
+
+  // Update debounced search term when searchTerm changes
+  useEffect(() => {
+    debouncedSetSearchTerm(searchTerm)
+  }, [searchTerm, debouncedSetSearchTerm])
 
   // GSAP 애니메이션을 위한 refs
   const accordionRefs = useRef<{ [key in TodoStatus]?: HTMLDivElement }>({})
@@ -43,13 +60,25 @@ export const KanbanView: React.FC = () => {
     const isCurrentlyExpanded = expandedSection === status
     const newExpandedSection = isCurrentlyExpanded ? null : status
 
-    // 현재 열린 섹션이 있다면 닫기
+    // 애니메이션 완료 후 state 업데이트
     if (expandedSection && accordionRefs.current[expandedSection]) {
       gsap.to(accordionRefs.current[expandedSection], {
         height: 0,
         opacity: 0,
         duration: 0.3,
         ease: 'power2.inOut',
+        onComplete: () => {
+          setExpandedSection(newExpandedSection)
+          
+          // 새로운 섹션 열기
+          if (newExpandedSection && accordionRefs.current[newExpandedSection]) {
+            gsap.fromTo(
+              accordionRefs.current[newExpandedSection],
+              { height: 0, opacity: 0 },
+              { height: 'auto', opacity: 1, duration: 0.4, ease: 'power2.out' }
+            )
+          }
+        }
       })
 
       // 화살표 회전
@@ -60,37 +89,36 @@ export const KanbanView: React.FC = () => {
           ease: 'power2.inOut',
         })
       }
-    }
+    } else {
+      setExpandedSection(newExpandedSection)
+      
+      // 새로 선택된 섹션 열기
+      if (newExpandedSection) {
+        requestAnimationFrame(() => {
+          const element = accordionRefs.current[newExpandedSection]
+          if (element) {
+            gsap.fromTo(
+              element,
+              { height: 0, opacity: 0 },
+              {
+                height: 'auto',
+                opacity: 1,
+                duration: 0.4,
+                ease: 'power2.out',
+              }
+            )
+          }
 
-    setExpandedSection(newExpandedSection)
-
-    // 새로 선택된 섹션 열기
-    if (newExpandedSection && !isCurrentlyExpanded) {
-      // 다음 프레임에서 실행하여 DOM 업데이트 후 애니메이션
-      requestAnimationFrame(() => {
-        const element = accordionRefs.current[newExpandedSection]
-        if (element) {
-          gsap.fromTo(
-            element,
-            { height: 0, opacity: 0 },
-            {
-              height: 'auto',
-              opacity: 1,
+          // 화살표 회전
+          if (arrowRefs.current[newExpandedSection]) {
+            gsap.to(arrowRefs.current[newExpandedSection], {
+              rotation: 180,
               duration: 0.4,
               ease: 'power2.out',
-            }
-          )
-        }
-
-        // 화살표 회전
-        if (arrowRefs.current[newExpandedSection]) {
-          gsap.to(arrowRefs.current[newExpandedSection], {
-            rotation: 180,
-            duration: 0.4,
-            ease: 'power2.out',
-          })
-        }
-      })
+            })
+          }
+        })
+      }
     }
   }
 
@@ -106,9 +134,9 @@ export const KanbanView: React.FC = () => {
     }
   }, [expandedSection])
 
-  // Todo 데이터 조회
+  // Todo 데이터 조회 - Use debounced search term
   const { data: todosResponse, isLoading } = useTodos({
-    search: searchTerm || undefined,
+    search: debouncedSearchTerm || undefined,
     priority:
       priorityFilter !== 'all'
         ? (priorityFilter as 'low' | 'medium' | 'high' | 'urgent')
@@ -118,6 +146,9 @@ export const KanbanView: React.FC = () => {
   })
 
   const todos = todosResponse?.todos || []
+  
+  // 빠른 응답에서 스켈레톤 깜빡임 방지
+  const showSkeleton = useDelayedLoading(isLoading, 200)
 
   // Mutations
   const bulkUpdateMutation = useBulkUpdateTodos({
@@ -169,7 +200,21 @@ export const KanbanView: React.FC = () => {
   ) => {
     if (fromStatus === toStatus && newOrder === undefined) return
 
+    // Optimistic update
+    const previousData = queryClient.getQueryData(getTodosQueryKey())
+    
     try {
+      // 즉시 UI 업데이트
+      queryClient.setQueryData(getTodosQueryKey(), (old: unknown) => {
+        const oldData = old as { todos?: Array<{ id: string; status: string; order?: number }> }
+        const updatedTodos = oldData?.todos?.map((todo) => 
+          todo.id === cardId 
+            ? { ...todo, status: toStatus, order: newOrder }
+            : todo
+        ) || []
+        return { ...oldData, todos: updatedTodos }
+      })
+      
       await bulkUpdateMutation.mutateAsync({
         data: {
           data: [
@@ -182,7 +227,10 @@ export const KanbanView: React.FC = () => {
         },
       })
     } catch (error) {
+      // Rollback on error
+      queryClient.setQueryData(getTodosQueryKey(), previousData)
       console.error('Failed to move card:', error)
+      // TODO: 사용자에게 에러 알림
     }
   }
 
@@ -205,23 +253,156 @@ export const KanbanView: React.FC = () => {
     }
   }
 
-  if (isLoading) {
+  // 칸반 스켈레톤 컴포넌트
+  const KanbanSkeleton = () => {
+    const columnKeys = ['kanban-todo', 'kanban-progress', 'kanban-done']
+    const cardSkeletonKeys = [
+      ['todo-card-1', 'todo-card-2'],
+      ['progress-card-1', 'progress-card-2', 'progress-card-3'],
+      ['done-card-1', 'done-card-2', 'done-card-3', 'done-card-4']
+    ]
+    
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className={cn(
+        'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto'
+      )}>
+        {/* 3개의 컬럼 스켈레톤 */}
+        {columnKeys.map((columnKey, columnIndex) => (
+        <div
+          key={columnKey}
+          className={cn(
+            'flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg',
+            'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
+          )}
+        >
+          {/* 컬럼 헤더 스켈레톤 */}
+          <div className={cn(
+            'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
+            columnIndex === 0 && 'bg-gray-100 dark:bg-gray-700',
+            columnIndex === 1 && 'bg-blue-100 dark:bg-blue-800/30', 
+            columnIndex === 2 && 'bg-green-100 dark:bg-green-800/30'
+          )}>
+            <div className="flex items-center justify-between">
+              <div className={cn(
+                'h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded animate-pulse'
+              )} />
+              <div className={cn(
+                'h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse'
+              )} />
+            </div>
+          </div>
+
+          {/* 카드 스켈레톤들 */}
+          <div className={cn(
+            'flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96'
+          )}>
+            {/* QuickAdd 스켈레톤 */}
+            <div className={cn(
+              'w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg animate-pulse'
+            )}>
+              <div className={cn(
+                'h-4 w-24 bg-gray-200 dark:bg-gray-600 rounded mx-auto'
+              )} />
+            </div>
+
+            {/* 카드 스켈레톤들 */}
+            {cardSkeletonKeys[columnIndex]?.map((cardKey, cardIndex) => (
+              <div
+                key={cardKey}
+                className={cn(
+                  'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
+                  'p-3 sm:p-4 shadow-sm animate-pulse'
+                )}
+              >
+                {/* 우선순위 배지 */}
+                <div className="flex justify-end mb-2">
+                  <div className={cn(
+                    'h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded-full'
+                  )} />
+                </div>
+
+                {/* 제목 */}
+                <div className={cn(
+                  'h-4 bg-gray-200 dark:bg-gray-600 rounded mb-2',
+                  cardIndex % 2 === 0 ? 'w-3/4' : 'w-2/3'
+                )} />
+
+                {/* 설명 (가끔 없음) */}
+                {cardIndex % 3 !== 0 && (
+                  <div className={cn(
+                    'h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-3'
+                  )} />
+                )}
+
+                {/* 메타 정보 */}
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <div className={cn(
+                      'h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded'
+                    )} />
+                    <div className={cn(
+                      'h-4 w-8 bg-gray-200 dark:bg-gray-600 rounded'
+                    )} />
+                  </div>
+                  <div className={cn(
+                    'h-4 w-10 bg-gray-200 dark:bg-gray-600 rounded'
+                  )} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    )
+  }
+
+  // 모바일 스켈레톤
+  const MobileKanbanSkeleton = () => {
+    const mobileKeys = ['mobile-todo', 'mobile-progress', 'mobile-done']
+    
+    return (
+      <div className="block md:hidden overflow-y-auto h-full p-4 space-y-4">
+        {mobileKeys.map((key, i) => (
+          <div key={key} className={cn(
+          'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'
+        )}>
+          <div className={cn(
+            'w-full px-4 py-3 rounded-t-lg animate-pulse',
+            i === 0 && 'bg-gray-100 dark:bg-gray-700',
+            i === 1 && 'bg-blue-100 dark:bg-blue-800/30',
+            i === 2 && 'bg-green-100 dark:bg-green-800/30'
+          )}>
+            <div className="flex items-center justify-between">
+              <div className={cn(
+                'h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded'
+              )} />
+              <div className={cn(
+                'h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full'
+              )} />
+            </div>
+          </div>
+        </div>
+        ))}
       </div>
     )
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className={cn(
+      'h-full flex flex-col bg-gray-50 dark:bg-gray-900'
+    )}>
       {/* 툴바 */}
-      <div className="bg-white border-b border-gray-200 p-3 md:p-4">
+      <div className={cn(
+        'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 md:p-4'
+      )}>
         {/* 모바일: 아이콘 중심 레이아웃 */}
         <div className="block sm:hidden">
           <div className="flex items-center justify-between mb-3">
             {/* 통계 아이콘 */}
-            <div className="flex items-center space-x-3 text-xs text-gray-600">
+            <div className={cn(
+              'flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400'
+            )}>
               <div className="flex items-center space-x-1">
                 <span className="w-2 h-2 bg-gray-400 rounded-full" />
                 <span>{todos.length}</span>
@@ -242,7 +423,9 @@ export const KanbanView: React.FC = () => {
 
             {/* 필터 버튼 */}
             <div className="flex items-center space-x-2">
-              <button type="button" className="p-2 text-gray-500 hover:text-gray-700">
+              <button type="button" className={cn(
+                'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              )}>
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -259,7 +442,9 @@ export const KanbanView: React.FC = () => {
                   />
                 </svg>
               </button>
-              <button type="button" className="p-2 text-gray-500 hover:text-gray-700">
+              <button type="button" className={cn(
+                'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              )}>
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -285,7 +470,11 @@ export const KanbanView: React.FC = () => {
             placeholder="검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={cn(
+              'w-full px-3 py-2 border border-gray-300 dark:border-gray-600',
+              'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100',
+              'rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+            )}
           />
         </div>
 
@@ -293,7 +482,9 @@ export const KanbanView: React.FC = () => {
         <div className="hidden sm:flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
           {/* 왼쪽: 통계 */}
           <div className="flex items-center space-x-6">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600">
+            <div className={cn(
+              'flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400'
+            )}>
               <span className="font-medium">전체: {todos.length}</span>
               <span>할 일: {columnTodos.todo.length}</span>
               <span>진행 중: {columnTodos['in-progress'].length}</span>
@@ -310,7 +501,11 @@ export const KanbanView: React.FC = () => {
                 placeholder="할 일 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={cn(
+                  'w-full px-3 py-2 border border-gray-300 dark:border-gray-600',
+                  'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100',
+                  'rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                )}
               />
             </div>
 
@@ -318,7 +513,11 @@ export const KanbanView: React.FC = () => {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-full sm:w-auto px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={cn(
+                'w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600',
+                'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100',
+                'rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+              )}
             >
               <option value="all">모든 우선순위</option>
               <option value="low">낮음</option>
@@ -332,118 +531,149 @@ export const KanbanView: React.FC = () => {
 
       {/* 칸반 보드 */}
       <div className="flex-1 overflow-hidden">
-        {/* 모바일: 세로 스택 (최대 2개씩 보이도록) */}
-        <div className="block md:hidden overflow-y-auto h-full p-4 space-y-4">
-          {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => {
-            const isExpanded = expandedSection === status
-            const todoCount = columnTodos[status].length
+        {showSkeleton ? (
+          <>
+            <MobileKanbanSkeleton />
+            <KanbanSkeleton />
+          </>
+        ) : (
+          <>
+            {/* 모바일: 세로 스택 (최대 2개씩 보이도록) */}
+            <div className="block md:hidden overflow-y-auto h-full p-4 space-y-4">
+              {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => {
+                const isExpanded = expandedSection === status
+                const todoCount = columnTodos[status].length
 
-            return (
-              <div key={status} className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                {/* 모바일 컬럼 헤더 (클릭 가능) */}
-                <button
-                  type="button"
-                  onClick={() => toggleAccordion(status)}
-                  className={`w-full px-4 py-3 rounded-t-lg ${COLUMN_CONFIG[status].headerColor} hover:opacity-90 transition-opacity`}
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 text-base">
-                      {COLUMN_CONFIG[status].title}
-                    </h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center">
-                        {todoCount}
-                      </span>
-                      <svg
-                        ref={(el) => {
-                          if (el) arrowRefs.current[status] = el
-                        }}
-                        className="w-5 h-5 text-gray-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <title>Expand</title>
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                      {(bulkUpdateMutation.isPending || createTodoMutation.isPending) && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                return (
+                  <div key={status} className={cn(
+                    'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'
+                  )}>
+                    {/* 모바일 컬럼 헤더 (클릭 가능) */}
+                    <button
+                      type="button"
+                      onClick={() => toggleAccordion(status)}
+                      className={cn(
+                        'w-full px-4 py-3 rounded-t-lg hover:opacity-90 transition-opacity',
+                        COLUMN_CONFIG[status].headerColor
                       )}
-                    </div>
-                  </div>
-                </button>
+                    >
+                      <div className="flex items-center justify-between">
+                        <h3 className={cn(
+                          'font-semibold text-gray-900 dark:text-gray-100 text-base'
+                        )}>
+                          {COLUMN_CONFIG[status].title}
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <span className={cn(
+                            'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300',
+                            'text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center'
+                          )}>
+                            {todoCount}
+                          </span>
+                          <svg
+                            ref={(el) => {
+                              if (el) arrowRefs.current[status] = el
+                            }}
+                            className="w-5 h-5 text-gray-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <title>Expand</title>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                          {(bulkUpdateMutation.isPending || createTodoMutation.isPending) && (
+                            <div className={cn(
+                              'animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400'
+                            )} />
+                          )}
+                        </div>
+                      </div>
+                    </button>
 
-                {/* 확장 가능한 카드 컨테이너 */}
-                {isExpanded && (
-                  <div
-                    ref={(el) => {
-                      if (el) accordionRefs.current[status] = el
-                    }}
-                    className="p-4 space-y-3 border-t border-gray-200"
-                  >
-                    {/* 할 일 추가 */}
-                    <QuickAddTodo
-                      onAdd={handleAddTodo}
-                      status={status}
-                      placeholder={`${COLUMN_CONFIG[status].title}에 추가...`}
-                      isLoading={createTodoMutation.isPending}
-                    />
+                    {/* 확장 가능한 카드 컨테이너 */}
+                    {isExpanded && (
+                      <div
+                        ref={(el) => {
+                          if (el) accordionRefs.current[status] = el
+                        }}
+                        className={cn(
+                          'p-4 space-y-3 border-t border-gray-200 dark:border-gray-700'
+                        )}
+                      >
+                        {/* 할 일 추가 */}
+                        <QuickAddTodo
+                          onAdd={handleAddTodo}
+                          status={status}
+                          placeholder={`${COLUMN_CONFIG[status].title}에 추가...`}
+                          isLoading={createTodoMutation.isPending}
+                        />
 
-                    {/* 카드들 */}
-                    {columnTodos[status].map((todo) => (
-                      <KanbanCard
-                        key={todo.id}
-                        todo={todo}
-                        status={status}
-                        onReorder={handleReorderCard}
-                        isUpdating={bulkUpdateMutation.isPending}
-                      />
-                    ))}
+                        {/* 카드들 */}
+                        {columnTodos[status].map((todo) => (
+                          <KanbanCard
+                            key={todo.id}
+                            todo={todo}
+                            status={status}
+                            onReorder={handleReorderCard}
+                            isUpdating={bulkUpdateMutation.isPending}
+                          />
+                        ))}
 
-                    {/* 빈 상태 */}
-                    {todoCount === 0 && (
-                      <div className="text-center text-gray-400 text-sm py-8">
-                        {status === 'todo' && '아직 할 일이 없습니다'}
-                        {status === 'in-progress' && '진행 중인 작업이 없습니다'}
-                        {status === 'done' && '완료된 작업이 없습니다'}
+                        {/* 빈 상태 */}
+                        {todoCount === 0 && (
+                          <div className={cn(
+                            'text-center text-gray-400 dark:text-gray-500 text-sm py-8'
+                          )}>
+                            {status === 'todo' && '아직 할 일이 없습니다'}
+                            {status === 'in-progress' && '진행 중인 작업이 없습니다'}
+                            {status === 'done' && '완료된 작업이 없습니다'}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 축약된 미리보기 (닫혀있을 때) */}
+                    {!isExpanded && todoCount > 0 && (
+                      <div className={cn(
+                        'px-4 py-2 text-xs text-gray-500 dark:text-gray-400'
+                      )}>
+                        {todoCount}개의 항목
                       </div>
                     )}
                   </div>
-                )}
+                )
+              })}
+            </div>
 
-                {/* 축약된 미리보기 (닫혀있을 때) */}
-                {!isExpanded && todoCount > 0 && (
-                  <div className="px-4 py-2 text-xs text-gray-500">{todoCount}개의 항목</div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* 태블릿/데스크톱: 가로 레이아웃 */}
-        <div className="hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto scroll-smooth">
-          {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => (
-            <KanbanColumn
-              key={status}
-              status={status}
-              title={COLUMN_CONFIG[status].title}
-              todos={columnTodos[status]}
-              onMoveCard={handleMoveCard}
-              onReorderCards={() => {}}
-              onAddTodo={handleAddTodo}
-              isUpdating={bulkUpdateMutation.isPending}
-              isCreating={createTodoMutation.isPending}
-              className={COLUMN_CONFIG[status].color}
-              headerClassName={COLUMN_CONFIG[status].headerColor}
-            />
-          ))}
-        </div>
+            {/* 태블릿/데스크톱: 가로 레이아웃 */}
+            <div className={cn(
+              'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto scroll-smooth'
+            )}>
+              {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  title={COLUMN_CONFIG[status].title}
+                  todos={columnTodos[status]}
+                  onMoveCard={handleMoveCard}
+                  onReorderCards={() => {}}
+                  onAddTodo={handleAddTodo}
+                  isUpdating={bulkUpdateMutation.isPending}
+                  isCreating={createTodoMutation.isPending}
+                  className={COLUMN_CONFIG[status].color}
+                  headerClassName={COLUMN_CONFIG[status].headerColor}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
