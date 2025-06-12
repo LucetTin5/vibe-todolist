@@ -111,6 +111,14 @@ bun run orval            # Generate API client from OpenAPI
   - `frontend/src/orval/mutator.ts` - Custom axios instance for API calls
 - **Hooks**: `frontend/src/hooks/useTodos.ts` - React Query hooks for API calls
 - **Components**: `frontend/src/components/` - Reusable UI components
+  - `common/` - Shared components (AppHeader, QuickAddTodo, ThemeToggle)
+  - `todo/` - Todo-specific components (TodoForm, TodoList)
+  - `kanban/` - Kanban view components (KanbanCard, KanbanColumn, KanbanView)
+  - `ui/` - Base UI components (Modal)
+- **Context**: `frontend/src/contexts/` - React Context providers
+  - `ThemeContext.tsx` - Theme management (light/dark/system)
+- **Utils**: `frontend/src/utils/` - Utility functions
+  - `cn.ts` - Tailwind CSS class name utility (clsx wrapper)
 - **Proxy Setup**: Vite config proxies `/api/*` to `localhost:3300/*`
 
 ### Key Integration Points
@@ -172,7 +180,9 @@ bun run orval            # Generate API client from OpenAPI
 
 - Uses Biome for linting/formatting (not ESLint/Prettier)
 - Backend runs on port 3300 (not 3001 as mentioned in README)
-- TailwindCSS v4 is configured but CSS-first setup is pending
+- TailwindCSS v4 is configured and active with dark mode support
+- GSAP animation system implemented for enhanced UI interactions
 - In-memory storage only - no persistent database yet
 - Uses Bun as runtime and package manager throughout
 - OpenAPI code generation with Orval is critical for type-safe API integration
+- Theme system supports light/dark/system modes with localStorage persistence

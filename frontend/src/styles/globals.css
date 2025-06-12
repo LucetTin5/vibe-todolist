@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 /* TailwindCSS v4 Theme Configuration */
+/* Enable class-based dark mode */
+@variant dark (.dark &);
 @theme {
   /* Custom colors */
   --color-primary: #3b82f6;

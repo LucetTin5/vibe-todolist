@@ -1,4 +1,6 @@
 import type React from 'react'
+import { ThemeToggle } from './ThemeToggle'
+import { cn } from '../../utils/cn'
 
 interface AppHeaderProps {
   viewMode: 'list' | 'kanban'
@@ -14,27 +16,36 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showViewToggle = true,
 }) => {
   return (
-    <header className="bg-white border-b border-gray-200 px-3 sm:px-4 py-3 sm:py-4">
+    <header className={cn(
+      'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700',
+      'px-3 sm:px-4 py-3 sm:py-4'
+    )}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{title}</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{title}</h1>
           {viewMode === 'kanban' && (
-            <div className="hidden md:block text-sm text-gray-600">
+            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
               칸반 보드로 작업을 시각적으로 관리하세요
             </div>
           )}
         </div>
 
-        {showViewToggle && (
-          <div className="flex bg-gray-100 rounded-lg p-1 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          {showViewToggle && (
+            <div className={cn(
+              'flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 flex-shrink-0'
+            )}>
             <button
               type="button"
               onClick={() => onViewModeChange('list')}
-              className={`px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 sm:space-x-2 ${
+              className={cn(
+                'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                'flex items-center space-x-1 sm:space-x-2',
                 viewMode === 'list'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+              )}
               title="목록 보기"
             >
               <svg
@@ -57,11 +68,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <button
               type="button"
               onClick={() => onViewModeChange('kanban')}
-              className={`px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 sm:space-x-2 ${
+              className={cn(
+                'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                'flex items-center space-x-1 sm:space-x-2',
                 viewMode === 'kanban'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+              )}
               title="칸반 보드"
             >
               <svg
@@ -81,8 +94,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </svg>
               <span className="hidden sm:inline">칸반 보드</span>
             </button>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   )

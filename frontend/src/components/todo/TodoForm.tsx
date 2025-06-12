@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Button, Input, Textarea, Modal, Select } from '../ui'
+import { cn } from '../../utils/cn'
 import type {
   PostApiTodosBody,
   GetApiTodos200TodosItem,
@@ -36,15 +37,27 @@ export function TodoForm({
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && initialData) {
       setFormData({
-        title: initialData?.title || '',
-        description: initialData?.description || '',
-        priority: initialData?.priority || 'medium',
-        category: initialData?.category || 'other',
-        tags: initialData?.tags || [],
-        dueDate: initialData?.dueDate || undefined,
-        estimatedMinutes: initialData?.estimatedMinutes || undefined,
+        title: initialData.title || '',
+        description: initialData.description || '',
+        priority: initialData.priority || 'medium',
+        category: initialData.category || 'other',
+        tags: initialData.tags || [],
+        dueDate: initialData.dueDate || undefined,
+        estimatedMinutes: initialData.estimatedMinutes || undefined,
+      })
+      setTagInput('')
+    } else if (isOpen && !initialData) {
+      // 새로 생성하는 경우에만 초기화
+      setFormData({
+        title: '',
+        description: '',
+        priority: 'medium',
+        category: 'other',
+        tags: [],
+        dueDate: undefined,
+        estimatedMinutes: undefined,
       })
       setTagInput('')
     }
@@ -173,9 +186,12 @@ export function TodoForm({
               type="datetime-local"
               value={formatDateForInput(formData.dueDate)}
               onChange={handleDateChange}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm 
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              className={cn(
+                'w-full rounded-md border border-gray-300 dark:border-gray-600',
+                'bg-white dark:bg-gray-700 px-3 py-2 text-sm',
+                'text-gray-900 dark:text-gray-100',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              )}
             />
           </div>
 
@@ -217,9 +233,12 @@ export function TodoForm({
                   handleAddTag()
                 }
               }}
-              className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm 
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+              className={cn(
+                'flex-1 rounded-md border border-gray-300 dark:border-gray-600',
+                'bg-white dark:bg-gray-700 px-3 py-2 text-sm',
+                'text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+              )}
             />
             <Button
               type="button"
@@ -238,14 +257,18 @@ export function TodoForm({
               {formData.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium 
-                             bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900 dark:text-blue-200"
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full',
+                    'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                  )}
                 >
                   {tag}
                   <button
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
-                    className="hover:text-blue-600 dark:hover:text-blue-400"
+                    className={cn(
+                      'hover:text-blue-600 dark:hover:text-blue-400 transition-colors'
+                    )}
                   >
                     ×
                   </button>

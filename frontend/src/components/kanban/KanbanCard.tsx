@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
+import { cn } from '../../utils/cn'
 import type { GetApiTodos200TodosItem } from '../../api/model'
 import type { TodoStatus } from './KanbanView'
 
@@ -21,8 +22,10 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
 
   // 카드 등장 애니메이션
   useEffect(() => {
+    let animation: gsap.core.Tween | null = null
+    
     if (cardRef.current) {
-      gsap.fromTo(
+      animation = gsap.fromTo(
         cardRef.current,
         {
           opacity: 0,
@@ -37,6 +40,10 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
           ease: 'power2.out',
         }
       )
+    }
+    
+    return () => {
+      animation?.kill()
     }
   }, [])
 
@@ -155,12 +162,13 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`
-        relative bg-white rounded-lg border border-gray-200 p-3 sm:p-4 cursor-move shadow-sm hover:shadow-md transition-all duration-200
-        ${isUpdating ? 'cursor-not-allowed opacity-75' : ''}
-        ${dragOverPosition === 'before' ? 'border-t-2 border-t-blue-500' : ''}
-        ${dragOverPosition === 'after' ? 'border-b-2 border-b-blue-500' : ''}
-      `}
+      className={cn(
+        'relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
+        'p-3 sm:p-4 cursor-move shadow-sm hover:shadow-md transition-all duration-200',
+        isUpdating && 'cursor-not-allowed opacity-75',
+        dragOverPosition === 'before' && 'border-t-2 border-t-blue-500',
+        dragOverPosition === 'after' && 'border-b-2 border-b-blue-500'
+      )}
     >
       {/* 우선순위 배지 */}
       {todo.priority && (
@@ -174,33 +182,51 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
       )}
 
       {/* 제목 */}
-      <h4 className="font-medium text-gray-900 mb-2 line-clamp-2 text-sm sm:text-base">
+      <h4 className={cn(
+        'font-medium text-gray-900 dark:text-gray-100 mb-2 line-clamp-2 text-sm sm:text-base'
+      )}>
         {todo.title}
       </h4>
 
       {/* 설명 */}
       {todo.description && (
-        <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{todo.description}</p>
+        <p className={cn(
+          'text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2'
+        )}>
+          {todo.description}
+        </p>
       )}
 
       {/* 메타 정보 */}
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className={cn(
+        'flex items-center justify-between text-xs text-gray-500 dark:text-gray-400'
+      )}>
         <div className="flex items-center space-x-2">
           {/* 카테고리 */}
           {todo.category && (
-            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded">{todo.category}</span>
+            <span className={cn(
+              'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded'
+            )}>
+              {todo.category}
+            </span>
           )}
 
           {/* 태그들 */}
           {todo.tags && todo.tags.length > 0 && (
             <div className="flex items-center space-x-1">
               {todo.tags.slice(0, 2).map((tag) => (
-                <span key={tag} className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
+                <span key={tag} className={cn(
+                  'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded text-xs'
+                )}>
                   #{tag}
                 </span>
               ))}
               {todo.tags.length > 2 && (
-                <span className="text-gray-400">+{todo.tags.length - 2}</span>
+                <span className={cn(
+                  'text-gray-400 dark:text-gray-500'
+                )}>
+                  +{todo.tags.length - 2}
+                </span>
               )}
             </div>
           )}
@@ -224,7 +250,9 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span className={`${new Date(todo.dueDate) < new Date() ? 'text-red-500' : ''}`}>
+            <span className={cn(
+              new Date(todo.dueDate) < new Date() && 'text-red-500 dark:text-red-400'
+            )}>
               {formatDate(todo.dueDate)}
             </span>
           </div>
@@ -232,9 +260,13 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
       </div>
 
       {/* 드래그 인디케이터 */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className={cn(
+        'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity'
+      )}>
         <svg
-          className="w-4 h-4 text-gray-400"
+          className={cn(
+            'w-4 h-4 text-gray-400 dark:text-gray-500'
+          )}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

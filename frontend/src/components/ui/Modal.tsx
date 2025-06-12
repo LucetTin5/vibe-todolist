@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import type { ReactNode } from 'react'
+import { cn } from '../../utils/cn'
 
 export interface ModalProps {
   isOpen: boolean
@@ -92,25 +93,34 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       {/* Modal */}
       <div
         ref={modalRef}
-        className={[
-          'relative mx-4 bg-white rounded-lg shadow-xl',
-          'border border-gray-200',
-          sizeClasses[size],
-        ].join(' ')}
+        className={cn(
+          'relative mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl',
+          'border border-gray-200 dark:border-gray-700',
+          sizeClasses[size]
+        )}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className={cn(
+            'flex items-center justify-between p-6',
+            'border-b border-gray-200 dark:border-gray-700'
+          )}>
+            <h2 id="modal-title" className={cn(
+              'text-lg font-semibold text-gray-900 dark:text-white'
+            )}>
               {title}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className={cn(
+                'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
+                'transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500',
+                'rounded-md p-1'
+              )}
               aria-label="Close modal"
             >
               <svg
