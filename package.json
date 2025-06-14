@@ -14,10 +14,17 @@
     "lint:fix-unsafe": "biome lint --write --unsafe .",
     "check": "biome check .",
     "type-check": "bun run --filter='*' type-check",
-    "pre-commit": "bun run type-check && bun run lint && bun run test"
+    "pre-commit": "bun run type-check && bun run lint && bun run test",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
     "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md}": ["biome format --write"],
+    "*.{js,jsx,ts,tsx}": ["biome lint --write"]
   }
 }

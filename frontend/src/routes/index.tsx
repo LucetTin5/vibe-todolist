@@ -9,13 +9,28 @@ export const AppRoutes = () => {
     <Routes>
       {/* 기본 경로는 dashboard로 리다이렉트 */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      
+
       {/* 각 뷰별 라우트 */}
       <Route path="/dashboard" element={<DashboardView />} />
       <Route path="/todos" element={<TodosPage />} />
-      <Route path="/kanban" element={<KanbanView />} />
-      <Route path="/calendar" element={<CalendarView />} />
-      
+      <Route
+        path="/kanban"
+        element={<KanbanView filters={{}} onFiltersChange={() => {}} onCreateTodo={() => {}} />}
+      />
+      <Route
+        path="/calendar"
+        element={
+          <CalendarView
+            filters={{}}
+            onFiltersChange={() => {}}
+            onCreateTodo={() => {}}
+            onUpdateTodo={() => {}}
+            onToggleTodo={() => {}}
+            onDeleteTodo={() => {}}
+          />
+        }
+      />
+
       {/* 404 페이지 - dashboard로 리다이렉트 */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
