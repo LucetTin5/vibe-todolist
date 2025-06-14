@@ -153,7 +153,7 @@ export function TodoList({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -202,89 +202,91 @@ export function TodoList({
         </div>
       </div>
 
-      {/* Todo List */}
-      {showSkeleton ? (
-        <TodoSkeleton />
-      ) : filteredTodos.length === 0 ? (
-        <div className="text-center py-12">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-          <h3 className={cn(
-            'mt-2 text-sm font-medium text-gray-900 dark:text-white'
-          )}>
-            No todos
-          </h3>
-          <p className={cn(
-            'mt-1 text-sm text-gray-500 dark:text-gray-400'
-          )}>
-            {todos.length === 0
-              ? 'Get started by creating your first todo.'
-              : 'No todos match your current filters.'}
-          </p>
-          {todos.length === 0 && (
-            <div className="mt-6">
-              <Button onClick={() => setIsFormOpen(true)}>Create Todo</Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {/* Pending Todos */}
-          {pendingTodos.length > 0 && (
-            <div className="space-y-3">
-              {pendingTodos.map((todo) => (
-                <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  onToggle={onToggleTodo}
-                  onEdit={handleEditTodo}
-                  onDelete={onDeleteTodo}
-                  isToggling={togglingIds.includes(todo.id)}
-                  isDeleting={deletingIds.includes(todo.id)}
-                />
-              ))}
-            </div>
-          )}
+      {/* Todo List - 스크롤 가능한 컨테이너 */}
+      <div className="flex-1 overflow-y-auto">
+        {showSkeleton ? (
+          <TodoSkeleton />
+        ) : filteredTodos.length === 0 ? (
+          <div className="text-center py-12">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            <h3 className={cn(
+              'mt-2 text-sm font-medium text-gray-900 dark:text-white'
+            )}>
+              No todos
+            </h3>
+            <p className={cn(
+              'mt-1 text-sm text-gray-500 dark:text-gray-400'
+            )}>
+              {todos.length === 0
+                ? 'Get started by creating your first todo.'
+                : 'No todos match your current filters.'}
+            </p>
+            {todos.length === 0 && (
+              <div className="mt-6">
+                <Button onClick={() => setIsFormOpen(true)}>Create Todo</Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3 pb-4">
+            {/* Pending Todos */}
+            {pendingTodos.length > 0 && (
+              <div className="space-y-3">
+                {pendingTodos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onToggle={onToggleTodo}
+                    onEdit={handleEditTodo}
+                    onDelete={onDeleteTodo}
+                    isToggling={togglingIds.includes(todo.id)}
+                    isDeleting={deletingIds.includes(todo.id)}
+                  />
+                ))}
+              </div>
+            )}
 
-          {/* Completed Todos */}
-          {completedTodos.length > 0 && (
-            <div className="space-y-3">
-              {pendingTodos.length > 0 && (
-                <div className="flex items-center gap-2 pt-6">
-                  <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
-                  <span className="text-sm text-gray-500 dark:text-gray-400 px-3">
-                    Completed ({completedTodos.length})
-                  </span>
-                  <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
-                </div>
-              )}
-              {completedTodos.map((todo) => (
-                <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  onToggle={onToggleTodo}
-                  onEdit={handleEditTodo}
-                  onDelete={onDeleteTodo}
-                  isToggling={togglingIds.includes(todo.id)}
-                  isDeleting={deletingIds.includes(todo.id)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+            {/* Completed Todos */}
+            {completedTodos.length > 0 && (
+              <div className="space-y-3">
+                {pendingTodos.length > 0 && (
+                  <div className="flex items-center gap-2 pt-6">
+                    <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 px-3">
+                      Completed ({completedTodos.length})
+                    </span>
+                    <div className="flex-1 border-t border-gray-200 dark:border-gray-700" />
+                  </div>
+                )}
+                {completedTodos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onToggle={onToggleTodo}
+                    onEdit={handleEditTodo}
+                    onDelete={onDeleteTodo}
+                    isToggling={togglingIds.includes(todo.id)}
+                    isDeleting={deletingIds.includes(todo.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Todo Form Modal */}
       <TodoForm

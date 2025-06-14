@@ -1,20 +1,25 @@
 import type React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ThemeToggle } from './ThemeToggle'
 import { cn } from '../../utils/cn'
 
 interface AppHeaderProps {
-  viewMode: 'list' | 'kanban' | 'calendar'
-  onViewModeChange: (mode: 'list' | 'kanban' | 'calendar') => void
+  currentView: 'dashboard' | 'todos' | 'kanban' | 'calendar'
   title?: string
   showViewToggle?: boolean
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
-  viewMode,
-  onViewModeChange,
+  currentView,
   title = 'TodoList',
   showViewToggle = true,
 }) => {
+  const navigate = useNavigate()
+
+  const handleNavigate = (path: string) => {
+    navigate(path)
+  }
+
   return (
     <header className={cn(
       'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700',
@@ -23,14 +28,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
           <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{title}</h1>
-          {viewMode === 'kanban' && (
+          {currentView === 'dashboard' && (
+            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+              전체 현황을 한눈에 확인하세요
+            </div>
+          )}
+          {currentView === 'kanban' && (
             <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
               칸반 보드로 작업을 시각적으로 관리하세요
             </div>
           )}
-          {viewMode === 'calendar' && (
+          {currentView === 'calendar' && (
             <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
               캘린더로 일정을 한눈에 확인하세요
+            </div>
+          )}
+          {currentView === 'todos' && (
+            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+              할 일을 목록으로 관리하세요
             </div>
           )}
         </div>
@@ -43,11 +58,40 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             )}>
             <button
               type="button"
-              onClick={() => onViewModeChange('list')}
+              onClick={() => handleNavigate('/dashboard')}
               className={cn(
                 'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
                 'flex items-center space-x-1 sm:space-x-2',
-                viewMode === 'list'
+                currentView === 'dashboard'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+              )}
+              title="대시보드"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <title>Dashboard</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+              <span className="hidden sm:inline">대시보드</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNavigate('/todos')}
+              className={cn(
+                'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                'flex items-center space-x-1 sm:space-x-2',
+                currentView === 'todos'
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
               )}
@@ -68,15 +112,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   d="M4 6h16M4 10h16M4 14h16M4 18h16"
                 />
               </svg>
-              <span className="hidden sm:inline">목록 보기</span>
+              <span className="hidden sm:inline">목록</span>
             </button>
             <button
               type="button"
-              onClick={() => onViewModeChange('kanban')}
+              onClick={() => handleNavigate('/kanban')}
               className={cn(
                 'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
                 'flex items-center space-x-1 sm:space-x-2',
-                viewMode === 'kanban'
+                currentView === 'kanban'
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
               )}
@@ -101,11 +145,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => onViewModeChange('calendar')}
+              onClick={() => handleNavigate('/calendar')}
               className={cn(
                 'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
                 'flex items-center space-x-1 sm:space-x-2',
-                viewMode === 'calendar'
+                currentView === 'calendar'
                   ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
               )}
