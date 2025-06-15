@@ -43,21 +43,13 @@ const getTodosRoute = createRoute({
       },
       description: 'Todo 목록 조회 성공',
     },
-    401: {
+    500: {
       content: {
         'application/json': {
           schema: ErrorResponseSchema,
         },
       },
-      description: '인증 실패',
-    },
-    400: {
-      content: {
-        'application/json': {
-          schema: ErrorResponseSchema,
-        },
-      },
-      description: '잘못된 요청',
+      description: '서버 오류',
     },
   },
 })
@@ -87,21 +79,13 @@ const createTodoRoute = createRoute({
       },
       description: 'Todo 생성 성공',
     },
-    401: {
+    500: {
       content: {
         'application/json': {
           schema: ErrorResponseSchema,
         },
       },
-      description: '인증 실패',
-    },
-    400: {
-      content: {
-        'application/json': {
-          schema: ErrorResponseSchema,
-        },
-      },
-      description: '잘못된 요청',
+      description: '서버 오류',
     },
   },
 })
@@ -302,13 +286,13 @@ const getStatsRoute = createRoute({
       },
       description: 'Todo 통계 조회 성공',
     },
-    401: {
+    500: {
       content: {
         'application/json': {
           schema: ErrorResponseSchema,
         },
       },
-      description: '인증 실패',
+      description: '서버 오류',
     },
   },
 })
@@ -322,15 +306,19 @@ app.openapi(getTodosRoute, async (c) => {
     const result = await todoService.getTodos(
       userId,
       { page: query.page || 1, limit: query.limit || 10 },
-      query.filter,
-      query.search,
-      query.priority,
-      query.category,
-      query.status,
-      query.sortBy,
-      query.sortOrder,
-      query.dueDateFrom,
-      query.dueDateTo
+      {
+        filter: query.filter,
+        search: query.search,
+        priority: query.priority,
+        category: query.category,
+        status: query.status,
+        dueDateFrom: query.dueDateFrom ? new Date(query.dueDateFrom) : undefined,
+        dueDateTo: query.dueDateTo ? new Date(query.dueDateTo) : undefined,
+      },
+      {
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+      }
     )
 
     return c.json(result)
@@ -338,8 +326,9 @@ app.openapi(getTodosRoute, async (c) => {
     console.error('getTodos error:', error)
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )
@@ -357,8 +346,9 @@ app.openapi(createTodoRoute, async (c) => {
     console.error('createTodo error:', error)
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )
@@ -371,16 +361,20 @@ app.openapi(getTodoRoute, async (c) => {
     const { id } = c.req.valid('param')
 
     const todo = await todoService.getTodoById(userId, id)
+    if (!todo) {
+      return c.json({ success: false, error: 'Not Found', details: 'Todo를 찾을 수 없습니다' }, 404)
+    }
     return c.json(todo)
   } catch (error) {
     console.error('getTodo error:', error)
     if (error instanceof Error && error.message.includes('찾을 수 없습니다')) {
-      return c.json({ error: 'Not Found', message: error.message }, 404)
+      return c.json({ success: false, error: 'Not Found', details: error.message }, 404)
     }
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )
@@ -394,16 +388,20 @@ app.openapi(updateTodoRoute, async (c) => {
     const data = c.req.valid('json')
 
     const todo = await todoService.updateTodo(userId, id, data)
+    if (!todo) {
+      return c.json({ success: false, error: 'Not Found', details: 'Todo를 찾을 수 없습니다' }, 404)
+    }
     return c.json(todo)
   } catch (error) {
     console.error('updateTodo error:', error)
     if (error instanceof Error && error.message.includes('찾을 수 없습니다')) {
-      return c.json({ error: 'Not Found', message: error.message }, 404)
+      return c.json({ success: false, error: 'Not Found', details: error.message }, 404)
     }
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )
@@ -416,16 +414,17 @@ app.openapi(deleteTodoRoute, async (c) => {
     const { id } = c.req.valid('param')
 
     await todoService.deleteTodo(userId, id)
-    return c.json({ message: 'Todo deleted successfully' })
+    return c.json({ success: true, message: 'Todo deleted successfully' })
   } catch (error) {
     console.error('deleteTodo error:', error)
     if (error instanceof Error && error.message.includes('찾을 수 없습니다')) {
-      return c.json({ error: 'Not Found', message: error.message }, 404)
+      return c.json({ success: false, error: 'Not Found', details: error.message }, 404)
     }
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )
@@ -438,16 +437,20 @@ app.openapi(toggleTodoRoute, async (c) => {
     const { id } = c.req.valid('param')
 
     const todo = await todoService.toggleTodo(userId, id)
+    if (!todo) {
+      return c.json({ success: false, error: 'Not Found', details: 'Todo를 찾을 수 없습니다' }, 404)
+    }
     return c.json(todo)
   } catch (error) {
     console.error('toggleTodo error:', error)
     if (error instanceof Error && error.message.includes('찾을 수 없습니다')) {
-      return c.json({ error: 'Not Found', message: error.message }, 404)
+      return c.json({ success: false, error: 'Not Found', details: error.message }, 404)
     }
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )
@@ -464,8 +467,9 @@ app.openapi(getStatsRoute, async (c) => {
     console.error('getStats error:', error)
     return c.json(
       {
+        success: false,
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       500
     )

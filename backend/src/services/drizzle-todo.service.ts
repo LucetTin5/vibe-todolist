@@ -68,7 +68,7 @@ export class DrizzleTodoService {
       description: data.description || null,
       priority: data.priority || 'medium',
       category: data.category || 'other',
-      status: data.completed ? 'completed' : 'pending',
+      status: 'completed' in data && data.completed ? 'completed' : 'pending',
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     }
   }
@@ -124,9 +124,20 @@ export class DrizzleTodoService {
     }
 
     // 정렬 기준
-    const orderBy = sortOrder === 'asc' 
-      ? asc(todos[sortBy as keyof typeof todos]) 
-      : desc(todos[sortBy as keyof typeof todos])
+    let orderBy
+    if (sortBy === 'createdAt') {
+      orderBy = sortOrder === 'asc' ? asc(todos.createdAt) : desc(todos.createdAt)
+    } else if (sortBy === 'updatedAt') {
+      orderBy = sortOrder === 'asc' ? asc(todos.updatedAt) : desc(todos.updatedAt)
+    } else if (sortBy === 'dueDate') {
+      orderBy = sortOrder === 'asc' ? asc(todos.dueDate) : desc(todos.dueDate)
+    } else if (sortBy === 'priority') {
+      orderBy = sortOrder === 'asc' ? asc(todos.priority) : desc(todos.priority)
+    } else if (sortBy === 'title') {
+      orderBy = sortOrder === 'asc' ? asc(todos.title) : desc(todos.title)
+    } else {
+      orderBy = sortOrder === 'asc' ? asc(todos.createdAt) : desc(todos.createdAt)
+    }
 
     // 전체 개수 조회
     const [totalResult] = await db
@@ -199,7 +210,7 @@ export class DrizzleTodoService {
     if (data.description !== undefined) updateData.description = data.description || null
     if (data.priority !== undefined) updateData.priority = data.priority
     if (data.category !== undefined) updateData.category = data.category
-    if (data.completed !== undefined) updateData.status = data.completed ? 'completed' : 'pending'
+    if ('completed' in data && data.completed !== undefined) updateData.status = data.completed ? 'completed' : 'pending'
     if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null
 
     const [updatedTodo] = await db

@@ -55,7 +55,7 @@ export class SupabaseTodoService {
       description: data.description || null,
       priority: data.priority || 'medium',
       category: data.category || 'other',
-      status: data.completed ? 'completed' : 'pending',
+      status: 'completed' in data && data.completed ? 'completed' : 'pending',
       due_date: data.dueDate || null,
     }
   }
@@ -70,7 +70,7 @@ export class SupabaseTodoService {
     if (data.description !== undefined) update.description = data.description || null
     if (data.priority !== undefined) update.priority = data.priority
     if (data.category !== undefined) update.category = data.category
-    if (data.completed !== undefined) update.status = data.completed ? 'completed' : 'pending'
+    if ('completed' in data && data.completed !== undefined) update.status = data.completed ? 'completed' : 'pending'
     if (data.dueDate !== undefined) update.due_date = data.dueDate || null
 
     return update
