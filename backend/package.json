@@ -8,17 +8,26 @@
     "start": "bun run dist/index.js",
     "type-check": "tsc --noEmit",
     "test": "bun test",
-    "test:watch": "bun test --watch"
+    "test:watch": "bun test --watch",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.5.1",
     "@hono/zod-openapi": "^0.19.8",
     "@hono/zod-validator": "^0.7.0",
+    "@supabase/supabase-js": "^2.50.0",
+    "drizzle-orm": "^0.44.2",
     "hono": "^4.7.11",
+    "postgres": "^3.4.7",
     "zod": "^3.25.46"
   },
   "devDependencies": {
     "@types/bun": "^1.2.15",
+    "@types/pg": "^8.15.4",
+    "drizzle-kit": "^0.31.1",
     "typescript": "^5.8.3"
   }
 }
