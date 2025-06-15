@@ -5,7 +5,7 @@ import { createSupabaseClient } from '../lib/supabase'
 // 인증 정보를 컨텍스트에 추가하기 위한 타입 확장
 declare module 'hono' {
   interface ContextVariableMap {
-    user: any // User 타입으로 나중에 교체
+    user: unknown // User 타입으로 나중에 교체
     userId: string
   }
 }
@@ -18,31 +18,43 @@ export const authMiddleware = createMiddleware(async (c: Context, next) => {
   const authHeader = c.req.header('Authorization')
 
   if (!authHeader?.startsWith('Bearer ')) {
-    return c.json({ 
-      error: 'Unauthorized',
-      message: 'Missing or invalid authorization header' 
-    }, 401)
+    return c.json(
+      {
+        error: 'Unauthorized',
+        message: 'Missing or invalid authorization header',
+      },
+      401
+    )
   }
 
   const token = authHeader.substring(7)
 
   try {
     const supabase = createSupabaseClient(token)
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser()
 
     if (error) {
       console.error('Auth verification error:', error)
-      return c.json({ 
-        error: 'Unauthorized',
-        message: 'Invalid token' 
-      }, 401)
+      return c.json(
+        {
+          error: 'Unauthorized',
+          message: 'Invalid token',
+        },
+        401
+      )
     }
 
     if (!user) {
-      return c.json({ 
-        error: 'Unauthorized',
-        message: 'User not found' 
-      }, 401)
+      return c.json(
+        {
+          error: 'Unauthorized',
+          message: 'User not found',
+        },
+        401
+      )
     }
 
     // 사용자 정보를 컨텍스트에 저장
@@ -52,10 +64,13 @@ export const authMiddleware = createMiddleware(async (c: Context, next) => {
     await next()
   } catch (error) {
     console.error('Authentication middleware error:', error)
-    return c.json({ 
-      error: 'Internal Server Error',
-      message: 'Authentication failed' 
-    }, 500)
+    return c.json(
+      {
+        error: 'Internal Server Error',
+        message: 'Authentication failed',
+      },
+      500
+    )
   }
 })
 
@@ -71,7 +86,9 @@ export const optionalAuthMiddleware = createMiddleware(async (c: Context, next) 
 
     try {
       const supabase = createSupabaseClient(token)
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
       if (user) {
         c.set('user', user)

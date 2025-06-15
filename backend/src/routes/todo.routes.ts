@@ -11,10 +11,10 @@ import {
   TodoListResponseSchema,
   TodoStatsResponseSchema,
   SuccessResponseSchema,
-  ErrorResponseSchema,
   BulkUpdateSchema,
   BulkUpdateResponseSchema,
 } from '../schemas/todo.schemas'
+import { ErrorResponseSchema } from '../types/api.types'
 
 // Todo 목록 조회 라우트
 export const getTodosRoute = createRoute({

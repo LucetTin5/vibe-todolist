@@ -12,11 +12,11 @@ import {
   TodoListResponseSchema,
   TodoStatsResponseSchema,
   SuccessResponseSchema,
-  ErrorResponseSchema,
   BulkUpdateSchema,
   BulkUpdateResponseSchema,
   type TodoQuery,
 } from '../schemas/todo.schemas'
+import { ErrorResponseSchema } from '../types/api.types'
 
 const app = new OpenAPIHono()
 const todoService = new TodoService()
@@ -342,8 +342,9 @@ app.onError((err, c) => {
   if (err.message.includes('페이지') || err.message.includes('크기')) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: err.message,
+        message: err.message,
       },
       400
     )
@@ -352,8 +353,9 @@ app.onError((err, c) => {
   if (err.message.includes('JSON') || err.message.includes('parse')) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: '잘못된 JSON 형식입니다',
+        message: '잘못된 JSON 형식입니다',
       },
       400
     )
@@ -361,8 +363,9 @@ app.onError((err, c) => {
 
   return c.json(
     {
-      success: false,
+      success: false as const,
       error: 'Internal Server Error',
+      message: 'Internal Server Error',
     },
     500
   )
@@ -384,7 +387,7 @@ app.openapi(deleteAllTodosRoute, async (c) => {
 
   return c.json(
     {
-      success: true,
+      success: true as const,
       message: '모든 Todo가 성공적으로 삭제되었습니다',
     },
     200
@@ -399,8 +402,9 @@ app.openapi(bulkUpdateRoute, async (c) => {
   } catch (error) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       400
     )
@@ -441,8 +445,9 @@ app.openapi(getTodosRoute, async (c) => {
   } catch (error) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       400
     )
@@ -457,8 +462,9 @@ app.openapi(createTodoRoute, async (c) => {
   } catch (error) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       400
     )
@@ -473,8 +479,9 @@ app.openapi(getTodoRoute, async (c) => {
   } catch (error) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       404
     )
@@ -491,8 +498,9 @@ app.openapi(updateTodoRoute, async (c) => {
     if (error instanceof Error && error.message.includes('찾을 수 없습니다')) {
       return c.json(
         {
-          success: false,
+          success: false as const,
           error: (error as Error).message,
+          message: (error as Error).message,
         },
         404
       )
@@ -500,8 +508,9 @@ app.openapi(updateTodoRoute, async (c) => {
 
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       400
     )
@@ -515,7 +524,7 @@ app.openapi(deleteTodoRoute, async (c) => {
 
     return c.json(
       {
-        success: true,
+        success: true as const,
         message: 'Todo가 성공적으로 삭제되었습니다',
       },
       200
@@ -523,8 +532,9 @@ app.openapi(deleteTodoRoute, async (c) => {
   } catch (error) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       404
     )
@@ -539,8 +549,9 @@ app.openapi(toggleTodoRoute, async (c) => {
   } catch (error) {
     return c.json(
       {
-        success: false,
+        success: false as const,
         error: (error as Error).message,
+        message: (error as Error).message,
       },
       404
     )

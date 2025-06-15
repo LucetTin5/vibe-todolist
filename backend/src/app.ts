@@ -106,34 +106,37 @@ app.get('/health', (c) => {
 app.get('/supabase/status', async (c) => {
   try {
     const { supabaseAdmin } = await import('./lib/supabase')
-    
-    // 간단한 쿼리로 연결 테스트  
-    const { data, error } = await supabaseAdmin
-      .from('profiles')
-      .select('count')
-      .limit(1)
-    
+
+    // 간단한 쿼리로 연결 테스트
+    const { data, error } = await supabaseAdmin.from('profiles').select('count').limit(1)
+
     if (error) {
-      return c.json({
-        status: 'error',
-        message: 'Supabase 연결 실패',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      }, 500)
+      return c.json(
+        {
+          status: 'error',
+          message: 'Supabase 연결 실패',
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        },
+        500
+      )
     }
-    
+
     return c.json({
       status: 'connected',
       message: 'Supabase 연결 성공',
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    return c.json({
-      status: 'error',
-      message: 'Supabase 클라이언트 초기화 실패',
-      error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date().toISOString(),
-    }, 500)
+    return c.json(
+      {
+        status: 'error',
+        message: 'Supabase 클라이언트 초기화 실패',
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
+      },
+      500
+    )
   }
 })
 
@@ -141,10 +144,12 @@ app.get('/supabase/status', async (c) => {
 app.get('/drizzle/status', async (c) => {
   try {
     const { db } = await import('./db/connection')
-    
+
     // 간단한 쿼리로 연결 테스트
-    const result = await db.execute(`SELECT 'Drizzle ORM 연결 성공' as message, current_timestamp as timestamp`)
-    
+    const result = await db.execute(
+      `SELECT 'Drizzle ORM 연결 성공' as message, current_timestamp as timestamp`
+    )
+
     return c.json({
       status: 'connected',
       message: 'Drizzle ORM 연결 성공',
@@ -152,30 +157,29 @@ app.get('/drizzle/status', async (c) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    return c.json({
-      status: 'error',
-      message: 'Drizzle ORM 연결 실패',
-      error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date().toISOString(),
-    }, 500)
+    return c.json(
+      {
+        status: 'error',
+        message: 'Drizzle ORM 연결 실패',
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
+      },
+      500
+    )
   }
 })
-
-// 라우트 등록
-app.route('/', todoRoutes)
-app.route('/', todoAuthRoutes)
 
 // Drizzle Todo 서비스 테스트 엔드포인트
 app.get('/test/drizzle-todos', async (c) => {
   try {
     const { DrizzleTodoService } = await import('./services/drizzle-todo.service')
     const todoService = new DrizzleTodoService()
-    
+
     // 테스트 사용자 ID
     const testUserId = '550e8400-e29b-41d4-a716-446655440000'
-    
+
     const result = await todoService.getTodos(testUserId)
-    
+
     return c.json({
       status: 'success',
       message: 'Drizzle Todo 서비스 테스트 성공',
@@ -183,11 +187,18 @@ app.get('/test/drizzle-todos', async (c) => {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    return c.json({
-      status: 'error',
-      message: 'Drizzle Todo 서비스 테스트 실패',
-      error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date().toISOString(),
-    }, 500)
+    return c.json(
+      {
+        status: 'error',
+        message: 'Drizzle Todo 서비스 테스트 실패',
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
+      },
+      500
+    )
   }
 })
+
+// 라우트 등록 (테스트/헬스체크 엔드포인트 이후에 등록)
+app.route('/', todoRoutes)
+app.route('/', todoAuthRoutes)

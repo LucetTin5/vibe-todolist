@@ -2,6 +2,12 @@
  * OpenAPI 호환 Todo 스키마 - Enhanced 기능 포함
  */
 import { z } from '@hono/zod-openapi'
+import {
+  createSuccessResponseSchema,
+  createTodoListResponseSchema,
+  type ErrorResponseSchema,
+  SimpleSuccessResponseSchema,
+} from '../types/api.types'
 
 // 우선순위 타입
 export const PriorityEnum = z.enum(['low', 'medium', 'high', 'urgent']).openapi({
@@ -247,32 +253,8 @@ export const TodoQuerySchema = z.object({
     }),
 })
 
-// Todo 목록 응답 스키마
-export const TodoListResponseSchema = z.object({
-  todos: z.array(TodoSchema).openapi({
-    description: 'Todo 목록',
-  }),
-  total: z.number().openapi({
-    example: 25,
-    description: '전체 Todo 개수',
-  }),
-  currentPage: z.number().openapi({
-    example: 1,
-    description: '현재 페이지 번호',
-  }),
-  totalPages: z.number().openapi({
-    example: 3,
-    description: '전체 페이지 수',
-  }),
-  hasNext: z.boolean().openapi({
-    example: true,
-    description: '다음 페이지 존재 여부',
-  }),
-  hasPrev: z.boolean().openapi({
-    example: false,
-    description: '이전 페이지 존재 여부',
-  }),
-})
+// Todo 목록 응답 스키마 (Generic 타입 사용)
+export const TodoListResponseSchema = createTodoListResponseSchema(TodoSchema)
 
 // 확장된 Todo 통계 응답 스키마
 export const TodoStatsResponseSchema = z.object({
@@ -327,33 +309,9 @@ export const TodoStatsResponseSchema = z.object({
   }),
 })
 
-// 기본 응답 스키마
-export const SuccessResponseSchema = z.object({
-  success: z.boolean().openapi({
-    example: true,
-    description: '성공 여부',
-  }),
-  message: z.string().optional().openapi({
-    example: '작업이 성공적으로 완료되었습니다',
-    description: '응답 메시지',
-  }),
-})
-
-// 에러 응답 스키마
-export const ErrorResponseSchema = z.object({
-  success: z.boolean().openapi({
-    example: false,
-    description: '성공 여부',
-  }),
-  error: z.string().openapi({
-    example: '요청된 Todo를 찾을 수 없습니다',
-    description: '에러 메시지',
-  }),
-  details: z.string().optional().openapi({
-    example: 'Todo ID: invalid_id',
-    description: '상세 에러 정보',
-  }),
-})
+// 기존 스키마들을 Generic 타입으로 대체
+export const SuccessResponseSchema = SimpleSuccessResponseSchema
+// ErrorResponseSchema는 이미 import됨
 
 // Bulk Update 스키마 (Kanban용)
 export const BulkUpdateItemSchema = z.object({

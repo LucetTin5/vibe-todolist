@@ -1,7 +1,7 @@
 /**
  * Drizzle ORM Todo Service - 사용자별 Todo 관리
  */
-import { eq, and, desc, asc, like, gte, lte, count, sql } from 'drizzle-orm'
+import { eq, and, desc, asc, like, gte, lte, count, sql, type SQL } from 'drizzle-orm'
 import { db } from '../db/connection'
 import { todos, profiles } from '../db/schema'
 import type { Todo as DrizzleTodo, NewTodo as DrizzleNewTodo } from '../db/schema'
@@ -48,7 +48,8 @@ export class DrizzleTodoService {
       completed: row.status === 'completed',
       priority: row.priority,
       category: row.category,
-      status: row.status === 'completed' ? 'done' : row.status === 'pending' ? 'todo' : 'in-progress',
+      status:
+        row.status === 'completed' ? 'done' : row.status === 'pending' ? 'todo' : 'in-progress',
       order: 0, // 기본값
       dueDate: row.dueDate?.toISOString(),
       tags: [], // 나중에 구현
@@ -124,7 +125,7 @@ export class DrizzleTodoService {
     }
 
     // 정렬 기준
-    let orderBy
+    let orderBy: SQL
     if (sortBy === 'createdAt') {
       orderBy = sortOrder === 'asc' ? asc(todos.createdAt) : desc(todos.createdAt)
     } else if (sortBy === 'updatedAt') {
@@ -157,8 +158,8 @@ export class DrizzleTodoService {
       .limit(limit)
       .offset(offset)
 
-    const todoList = rows.map(row => this.mapRowToTodo(row))
-    
+    const todoList = rows.map((row) => this.mapRowToTodo(row))
+
     const totalPages = Math.ceil(total / limit)
     const hasNext = page < totalPages
     const hasPrev = page > 1
@@ -191,11 +192,8 @@ export class DrizzleTodoService {
    */
   async createTodo(userId: string, data: CreateTodoRequest): Promise<Todo> {
     const insertData = this.mapCreateRequestToInsert(userId, data)
-    
-    const [newTodo] = await db
-      .insert(todos)
-      .values(insertData)
-      .returning()
+
+    const [newTodo] = await db.insert(todos).values(insertData).returning()
 
     return this.mapRowToTodo(newTodo)
   }
@@ -210,8 +208,10 @@ export class DrizzleTodoService {
     if (data.description !== undefined) updateData.description = data.description || null
     if (data.priority !== undefined) updateData.priority = data.priority
     if (data.category !== undefined) updateData.category = data.category
-    if ('completed' in data && data.completed !== undefined) updateData.status = data.completed ? 'completed' : 'pending'
-    if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null
+    if ('completed' in data && data.completed !== undefined)
+      updateData.status = data.completed ? 'completed' : 'pending'
+    if (data.dueDate !== undefined)
+      updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null
 
     const [updatedTodo] = await db
       .update(todos)
@@ -249,7 +249,7 @@ export class DrizzleTodoService {
 
     // 상태 토글
     const newStatus = currentTodo.status === 'completed' ? 'pending' : 'completed'
-    
+
     const [updatedTodo] = await db
       .update(todos)
       .set({ status: newStatus })
@@ -281,9 +281,9 @@ export class DrizzleTodoService {
 
     // 우선순위별 통계
     const priorityStats = await db
-      .select({ 
+      .select({
         priority: todos.priority,
-        count: count()
+        count: count(),
       })
       .from(todos)
       .where(eq(todos.userId, userId))
@@ -296,15 +296,15 @@ export class DrizzleTodoService {
       urgent: 0,
     }
 
-    priorityStats.forEach(stat => {
+    for (const stat of priorityStats) {
       byPriority[stat.priority] = stat.count
-    })
+    }
 
     // 카테고리별 통계
     const categoryStats = await db
       .select({
         category: todos.category,
-        count: count()
+        count: count(),
       })
       .from(todos)
       .where(eq(todos.userId, userId))
@@ -318,9 +318,9 @@ export class DrizzleTodoService {
       other: 0,
     }
 
-    categoryStats.forEach(stat => {
+    for (const stat of categoryStats) {
       byCategory[stat.category] = stat.count
-    })
+    }
 
     // 마감일 관련 통계 (간단 버전)
     const now = new Date()
@@ -330,30 +330,32 @@ export class DrizzleTodoService {
     const [overdueResult] = await db
       .select({ count: count() })
       .from(todos)
-      .where(and(
-        eq(todos.userId, userId),
-        eq(todos.status, 'pending'),
-        sql`${todos.dueDate} < ${today}`
-      ))
+      .where(
+        and(eq(todos.userId, userId), eq(todos.status, 'pending'), sql`${todos.dueDate} < ${today}`)
+      )
 
     const [dueTodayResult] = await db
       .select({ count: count() })
       .from(todos)
-      .where(and(
-        eq(todos.userId, userId),
-        eq(todos.status, 'pending'),
-        sql`DATE(${todos.dueDate}) = DATE(${today})`
-      ))
+      .where(
+        and(
+          eq(todos.userId, userId),
+          eq(todos.status, 'pending'),
+          sql`DATE(${todos.dueDate}) = DATE(${today})`
+        )
+      )
 
     const [dueThisWeekResult] = await db
       .select({ count: count() })
       .from(todos)
-      .where(and(
-        eq(todos.userId, userId),
-        eq(todos.status, 'pending'),
-        gte(todos.dueDate, today),
-        lte(todos.dueDate, weekFromNow)
-      ))
+      .where(
+        and(
+          eq(todos.userId, userId),
+          eq(todos.status, 'pending'),
+          gte(todos.dueDate, today),
+          lte(todos.dueDate, weekFromNow)
+        )
+      )
 
     return {
       total,
