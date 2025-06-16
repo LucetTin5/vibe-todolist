@@ -18,7 +18,9 @@ export const profiles = pgTable('profiles', {
 // Todos 테이블
 export const todos = pgTable('todos', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => profiles.id, { onDelete: 'cascade' }),
   title: text('title').notNull(),
   description: text('description'),
   priority: priorityEnum('priority').default('medium').notNull(),
@@ -32,5 +34,5 @@ export const todos = pgTable('todos', {
 // 타입 추출
 export type Profile = typeof profiles.$inferSelect
 export type NewProfile = typeof profiles.$inferInsert
-export type Todo = typeof todos.$inferSelect  
+export type Todo = typeof todos.$inferSelect
 export type NewTodo = typeof todos.$inferInsert

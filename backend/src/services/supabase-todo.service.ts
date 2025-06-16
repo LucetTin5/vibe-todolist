@@ -65,12 +65,13 @@ export class SupabaseTodoService {
    */
   private mapTodoToUpdate(data: UpdateTodoRequest): TodoUpdate {
     const update: TodoUpdate = {}
-    
+
     if (data.title !== undefined) update.title = data.title
     if (data.description !== undefined) update.description = data.description || null
     if (data.priority !== undefined) update.priority = data.priority
     if (data.category !== undefined) update.category = data.category
-    if ('completed' in data && data.completed !== undefined) update.status = data.completed ? 'completed' : 'pending'
+    if ('completed' in data && data.completed !== undefined)
+      update.status = data.completed ? 'completed' : 'pending'
     if (data.dueDate !== undefined) update.due_date = data.dueDate || null
 
     return update
@@ -99,10 +100,7 @@ export class SupabaseTodoService {
       throw new Error('페이지 크기는 1-100 사이여야 합니다')
     }
 
-    let query = supabaseAdmin
-      .from('todos')
-      .select('*', { count: 'exact' })
-      .eq('user_id', userId)
+    let query = supabaseAdmin.from('todos').select('*', { count: 'exact' }).eq('user_id', userId)
 
     // 상태 필터링
     if (filter === 'active') {
@@ -135,10 +133,14 @@ export class SupabaseTodoService {
     }
 
     // 정렬
-    const orderColumn = sortBy === 'createdAt' ? 'created_at' : 
-                       sortBy === 'updatedAt' ? 'updated_at' :
-                       sortBy === 'dueDate' ? 'due_date' : 
-                       sortBy
+    const orderColumn =
+      sortBy === 'createdAt'
+        ? 'created_at'
+        : sortBy === 'updatedAt'
+          ? 'updated_at'
+          : sortBy === 'dueDate'
+            ? 'due_date'
+            : sortBy
 
     query = query.order(orderColumn, { ascending: sortOrder === 'asc' })
 
@@ -153,7 +155,7 @@ export class SupabaseTodoService {
       throw new Error('Todo 목록 조회에 실패했습니다')
     }
 
-    const todos = (data || []).map(row => this.mapRowToTodo(row))
+    const todos = (data || []).map((row) => this.mapRowToTodo(row))
     const total = count || 0
     const totalPages = Math.ceil(total / pagination.limit)
     const currentPage = pagination.page
@@ -200,7 +202,8 @@ export class SupabaseTodoService {
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') { // No rows returned
+      if (error.code === 'PGRST116') {
+        // No rows returned
         throw new Error('Todo를 찾을 수 없습니다')
       }
       console.error('Database error:', error)
@@ -225,7 +228,8 @@ export class SupabaseTodoService {
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') { // No rows returned
+      if (error.code === 'PGRST116') {
+        // No rows returned
         throw new Error('Todo를 찾을 수 없습니다')
       }
       console.error('Database error:', error)
@@ -239,11 +243,7 @@ export class SupabaseTodoService {
    * Todo 삭제
    */
   async deleteTodo(userId: string, id: string): Promise<void> {
-    const { error } = await supabaseAdmin
-      .from('todos')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId)
+    const { error } = await supabaseAdmin.from('todos').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       console.error('Database error:', error)
@@ -257,10 +257,10 @@ export class SupabaseTodoService {
   async toggleTodo(userId: string, id: string): Promise<Todo> {
     // 먼저 현재 상태를 조회
     const currentTodo = await this.getTodoById(userId, id)
-    
+
     // 상태 토글
-    return this.updateTodo(userId, id, { 
-      completed: !currentTodo.completed 
+    return this.updateTodo(userId, id, {
+      completed: !currentTodo.completed,
     })
   }
 
@@ -278,28 +278,28 @@ export class SupabaseTodoService {
       throw new Error('통계 조회에 실패했습니다')
     }
 
-    const mappedTodos = todos.map(row => this.mapRowToTodo(row))
+    const mappedTodos = todos.map((row) => this.mapRowToTodo(row))
 
     const total = mappedTodos.length
-    const completed = mappedTodos.filter(todo => todo.completed).length
+    const completed = mappedTodos.filter((todo) => todo.completed).length
     const active = total - completed
     const completionRate = total > 0 ? (completed / total) * 100 : 0
 
     // 우선순위별 통계
     const byPriority = {
-      low: mappedTodos.filter(todo => todo.priority === 'low').length,
-      medium: mappedTodos.filter(todo => todo.priority === 'medium').length,
-      high: mappedTodos.filter(todo => todo.priority === 'high').length,
-      urgent: mappedTodos.filter(todo => todo.priority === 'urgent').length,
+      low: mappedTodos.filter((todo) => todo.priority === 'low').length,
+      medium: mappedTodos.filter((todo) => todo.priority === 'medium').length,
+      high: mappedTodos.filter((todo) => todo.priority === 'high').length,
+      urgent: mappedTodos.filter((todo) => todo.priority === 'urgent').length,
     }
 
     // 카테고리별 통계
     const byCategory = {
-      work: mappedTodos.filter(todo => todo.category === 'work').length,
-      personal: mappedTodos.filter(todo => todo.category === 'personal').length,
-      shopping: mappedTodos.filter(todo => todo.category === 'shopping').length,
-      health: mappedTodos.filter(todo => todo.category === 'health').length,
-      other: mappedTodos.filter(todo => todo.category === 'other').length,
+      work: mappedTodos.filter((todo) => todo.category === 'work').length,
+      personal: mappedTodos.filter((todo) => todo.category === 'personal').length,
+      shopping: mappedTodos.filter((todo) => todo.category === 'shopping').length,
+      health: mappedTodos.filter((todo) => todo.category === 'health').length,
+      other: mappedTodos.filter((todo) => todo.category === 'other').length,
     }
 
     // 마감일 관련 통계
@@ -315,19 +315,19 @@ export class SupabaseTodoService {
     endOfWeekUTC.setUTCDate(endOfWeekUTC.getUTCDate() + 6)
     endOfWeekUTC.setUTCHours(14, 59, 59, 999)
 
-    const overdue = mappedTodos.filter(todo => {
+    const overdue = mappedTodos.filter((todo) => {
       if (!todo.dueDate || todo.completed) return false
       const dueDate = new Date(todo.dueDate)
       return dueDate < startOfTodayUTC
     }).length
 
-    const dueToday = mappedTodos.filter(todo => {
+    const dueToday = mappedTodos.filter((todo) => {
       if (!todo.dueDate || todo.completed) return false
       const dueDate = new Date(todo.dueDate)
       return dueDate >= startOfTodayUTC && dueDate <= endOfTodayUTC
     }).length
 
-    const dueThisWeek = mappedTodos.filter(todo => {
+    const dueThisWeek = mappedTodos.filter((todo) => {
       if (!todo.dueDate || todo.completed) return false
       const dueDate = new Date(todo.dueDate)
       return dueDate >= startOfTodayUTC && dueDate <= endOfWeekUTC
@@ -350,10 +350,7 @@ export class SupabaseTodoService {
    * 사용자의 모든 Todo 삭제
    */
   async clearTodos(userId: string): Promise<void> {
-    const { error } = await supabaseAdmin
-      .from('todos')
-      .delete()
-      .eq('user_id', userId)
+    const { error } = await supabaseAdmin.from('todos').delete().eq('user_id', userId)
 
     if (error) {
       console.error('Database error:', error)
