@@ -7,16 +7,17 @@ interface OverdueCardProps {
   dueThisWeek: number
 }
 
-export const OverdueCard: React.FC<OverdueCardProps> = ({
-  overdue,
-  dueToday,
-  dueThisWeek,
-}) => {
+export const OverdueCard: React.FC<OverdueCardProps> = ({ overdue, dueToday, dueThisWeek }) => {
   const hasUrgentItems = overdue > 0 || dueToday > 0
-  
+
   const icon = (
     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
     </svg>
   )
 
@@ -24,9 +25,9 @@ export const OverdueCard: React.FC<OverdueCardProps> = ({
     <StatsCard
       title="마감 관리"
       value={hasUrgentItems ? overdue + dueToday : dueThisWeek}
-      subtitle={hasUrgentItems ? "긴급 처리 필요" : "이번 주 마감"}
+      subtitle={hasUrgentItems ? '긴급 처리 필요' : '이번 주 마감'}
       icon={icon}
-      color={hasUrgentItems ? "red" : "yellow"}
+      color={hasUrgentItems ? 'red' : 'yellow'}
     >
       <div className="space-y-2 text-sm">
         {overdue > 0 && (

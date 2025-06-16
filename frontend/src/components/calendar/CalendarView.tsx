@@ -11,7 +11,9 @@ import type { PostApiTodosBody, GetApiTodosParams } from '../../api/model'
 
 interface CalendarViewProps {
   filters: GetApiTodosParams
-  onFiltersChange: (filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)) => void
+  onFiltersChange: (
+    filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)
+  ) => void
   onCreateTodo: (todo: PostApiTodosBody) => void
   onUpdateTodo: (todo: { id: string } & PostApiTodosBody) => void
   onToggleTodo: (id: string) => void
@@ -34,7 +36,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   // Todo 데이터 조회
   const { data: todosResponse, isLoading } = useTodos(filters)
   const todos = todosResponse?.todos || []
-  
+
   // 스켈레톤 깜빡임 방지
   const showSkeleton = useDelayedLoading(isLoading, 200)
 
@@ -48,7 +50,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   // 날짜별 todo 그룹화
   const todosByDate = useMemo(() => {
     const grouped: Record<string, typeof todos> = {}
-    
+
     todos.forEach((todo) => {
       if (todo.dueDate) {
         const dateKey = format(new Date(todo.dueDate), 'yyyy-MM-dd')
@@ -58,7 +60,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         grouped[dateKey].push(todo)
       }
     })
-    
+
     return grouped
   }, [todos])
 
@@ -102,12 +104,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       }
       onCreateTodo(todoWithDate)
     }
-    
+
     setIsFormOpen(false)
     setSelectedFormDate(null)
     setEditingTodo(null)
   }
-
 
   // 상태별 색상 매핑
   const getStatusColor = (status: string) => {
@@ -137,34 +138,44 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}
+              onClick={() =>
+                setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))
+              }
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Button>
-            
+
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 min-w-[120px] text-center">
               {format(selectedDate, 'yyyy년 M월', { locale: ko })}
             </h2>
-            
+
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}
+              onClick={() =>
+                setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))
+              }
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </Button>
           </div>
 
           {/* 오늘 버튼 */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSelectedDate(new Date())}
-          >
+          <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
             오늘
           </Button>
         </div>
@@ -208,15 +219,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   <span
                     className={cn(
                       'text-sm font-medium',
-                      isCurrentDay && 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs',
+                      isCurrentDay &&
+                        'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs',
                       !isCurrentDay && dayOfWeek === 0 && 'text-red-500 dark:text-red-400', // 일요일
                       !isCurrentDay && dayOfWeek === 6 && 'text-blue-500 dark:text-blue-400', // 토요일
-                      !isCurrentDay && dayOfWeek !== 0 && dayOfWeek !== 6 && 'text-gray-900 dark:text-gray-100'
+                      !isCurrentDay &&
+                        dayOfWeek !== 0 &&
+                        dayOfWeek !== 6 &&
+                        'text-gray-900 dark:text-gray-100'
                     )}
                   >
                     {format(date, 'd')}
                   </span>
-                  
+
                   {dayTodos.length > 0 && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       {dayTodos.length}
@@ -245,49 +260,62 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                           className={cn(
                             'w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center',
                             'hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors',
-                            todo.completed 
-                              ? 'bg-green-500 border-green-500 text-white' 
+                            todo.completed
+                              ? 'bg-green-500 border-green-500 text-white'
                               : 'border-gray-300 dark:border-gray-500'
                           )}
                         >
                           {todo.completed && (
                             <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
                             </svg>
                           )}
                         </button>
-                        
+
                         {/* 우선순위 표시 */}
                         {todo.priority && (
-                          <span className={cn(
-                            'w-2 h-2 rounded-full flex-shrink-0',
-                            todo.priority === 'high' && 'bg-red-400',
-                            todo.priority === 'medium' && 'bg-yellow-400',
-                            todo.priority === 'low' && 'bg-green-400'
-                          )} />
+                          <span
+                            className={cn(
+                              'w-2 h-2 rounded-full flex-shrink-0',
+                              todo.priority === 'high' && 'bg-red-400',
+                              todo.priority === 'medium' && 'bg-yellow-400',
+                              todo.priority === 'low' && 'bg-green-400'
+                            )}
+                          />
                         )}
-                        
+
                         {/* 제목 */}
-                        <span className={cn(
-                          'truncate flex-1',
-                          todo.completed && 'line-through opacity-60'
-                        )}>
+                        <span
+                          className={cn(
+                            'truncate flex-1',
+                            todo.completed && 'line-through opacity-60'
+                          )}
+                        >
                           {todo.title}
                         </span>
-                        
+
                         {/* 수정 아이콘 (호버시 표시) */}
-                        <svg 
-                          className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" 
-                          fill="none" 
-                          stroke="currentColor" 
+                        <svg
+                          className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
                         </svg>
                       </div>
                     </div>
                   ))}
-                  
+
                   {dayTodos.length > 3 && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
                       +{dayTodos.length - 3}개 더
@@ -359,10 +387,7 @@ const CalendarSkeleton = () => {
               <div className="w-6 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse mb-2" />
               <div className="space-y-1">
                 {Array.from({ length: Math.floor(Math.random() * 3) }).map((_, j) => (
-                  <div
-                    key={j}
-                    className="h-3 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"
-                  />
+                  <div key={j} className="h-3 bg-gray-200 dark:bg-gray-600 rounded animate-pulse" />
                 ))}
               </div>
             </div>

@@ -33,7 +33,7 @@ const PopoverContext = React.createContext<{
 function Popover({ children, open: controlledOpen, onOpenChange }: PopoverProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const triggerRef = useRef<HTMLElement>(null)
-  
+
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = (newOpen: boolean) => {
     if (controlledOpen === undefined) {
@@ -82,7 +82,12 @@ function PopoverTrigger({ children, asChild }: PopoverTriggerProps) {
   )
 }
 
-function PopoverContent({ children, className, align = 'center', side = 'bottom' }: PopoverContentProps) {
+function PopoverContent({
+  children,
+  className,
+  align = 'center',
+  side = 'bottom',
+}: PopoverContentProps) {
   const { open } = React.useContext(PopoverContext)
 
   if (!open) return null

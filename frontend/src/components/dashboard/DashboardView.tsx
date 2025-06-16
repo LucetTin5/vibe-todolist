@@ -1,5 +1,14 @@
 import { useTodoStats } from '../../hooks/useTodos'
-import { TotalStatsCard, CompletionRateCard, OverdueCard, PriorityChartCard, CategoryChartCard, WeeklyProgressCard, QuickActionsCard, FloatingActionButton } from './widgets'
+import {
+  TotalStatsCard,
+  CompletionRateCard,
+  OverdueCard,
+  PriorityChartCard,
+  CategoryChartCard,
+  WeeklyProgressCard,
+  QuickActionsCard,
+  FloatingActionButton,
+} from './widgets'
 import { cn } from '../../utils/cn'
 
 export const DashboardView = () => {
@@ -29,9 +38,7 @@ export const DashboardView = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               📊 대시보드
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              전체 현황을 한눈에 확인하세요
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">전체 현황을 한눈에 확인하세요</p>
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             마지막 업데이트: {new Date().toLocaleTimeString('ko-KR')}
@@ -40,17 +47,17 @@ export const DashboardView = () => {
 
         {/* 핵심 통계 카드 */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-          <TotalStatsCard 
+          <TotalStatsCard
             total={stats?.total || 0}
             completed={stats?.completed || 0}
             active={stats?.active || 0}
           />
-          <CompletionRateCard 
+          <CompletionRateCard
             completionRate={stats?.completionRate || 0}
             completed={stats?.completed || 0}
             total={stats?.total || 0}
           />
-          <OverdueCard 
+          <OverdueCard
             overdue={stats?.overdue || 0}
             dueToday={stats?.dueToday || 0}
             dueThisWeek={stats?.dueThisWeek || 0}
@@ -70,20 +77,40 @@ export const DashboardView = () => {
               </div>
               <div className="text-purple-600 dark:text-purple-400 flex-shrink-0 ml-2">
                 <div className="w-6 h-6 sm:w-8 sm:h-8">
-                  <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <svg
+                    className="w-full h-full"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
                   </svg>
                 </div>
               </div>
             </div>
           </div>
-          
+
           {/* 이번 주 목표 카드 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 lg:p-6 col-span-2 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <span className="hidden sm:inline">이번 주 목표</span>
                 <span className="sm:hidden">목표</span>
@@ -93,12 +120,14 @@ export const DashboardView = () => {
               <div>
                 <div className="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
                   <span>완료율</span>
-                  <span>{Math.round((stats?.completionRate || 0))}% / 80%</span>
+                  <span>{Math.round(stats?.completionRate || 0)}% / 80%</span>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min((stats?.completionRate || 0) / 80 * 100, 100)}%` }}
+                    style={{
+                      width: `${Math.min(((stats?.completionRate || 0) / 80) * 100, 100)}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -112,45 +141,53 @@ export const DashboardView = () => {
         {/* 차트 섹션 */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              📈 상세 분석
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">📈 상세 분석</h2>
             <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
               실시간 데이터 기반
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {/* 우선순위 차트 */}
             <div className="md:col-span-1">
               <PriorityChartCard />
             </div>
-            
+
             {/* 카테고리 차트 */}
             <div className="md:col-span-1">
               <CategoryChartCard />
             </div>
-            
+
             {/* 주간 진행률 - 모바일에서는 전체 너비, 중간 크기에서는 2열 차지 */}
             <div className="md:col-span-2 xl:col-span-1">
               <WeeklyProgressCard />
             </div>
           </div>
-          
+
           {/* 추가 정보 섹션 (데스크톱에서만 표시) */}
           <div className="mt-6 sm:mt-8 hidden lg:block">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">
                 <QuickActionsCard />
               </div>
-              
+
               {/* 추가 정보 카드들 */}
               <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* 최근 활동 요약 */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     최근 활동
                   </h4>
@@ -170,17 +207,27 @@ export const DashboardView = () => {
                     <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
                       <span>평균 완료율</span>
                       <span className="font-medium text-purple-600 dark:text-purple-400">
-                        {Math.round((stats?.completionRate || 0))}%
+                        {Math.round(stats?.completionRate || 0)}%
                       </span>
                     </div>
                   </div>
                 </div>
-                
+
                 {/* 트렌드 분석 */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                   <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                      />
                     </svg>
                     트렌드 분석
                   </h4>
@@ -193,15 +240,11 @@ export const DashboardView = () => {
                     </div>
                     <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
                       <span>활동량</span>
-                      <span className="font-medium text-blue-600 dark:text-blue-400">
-                        높음
-                      </span>
+                      <span className="font-medium text-blue-600 dark:text-blue-400">높음</span>
                     </div>
                     <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
                       <span>주간 개선도</span>
-                      <span className="font-medium text-purple-600 dark:text-purple-400">
-                        우수
-                      </span>
+                      <span className="font-medium text-purple-600 dark:text-purple-400">우수</span>
                     </div>
                   </div>
                 </div>
@@ -210,13 +253,12 @@ export const DashboardView = () => {
           </div>
         </div>
       </div>
-      
+
       {/* 플로팅 액션 버튼 (모바일에서만 표시) */}
       <FloatingActionButton />
     </div>
   )
 }
-
 
 // 스켈레톤 로딩 컴포넌트
 const DashboardSkeleton = () => {
@@ -235,10 +277,13 @@ const DashboardSkeleton = () => {
         {/* 카드 스켈레톤 */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className={cn(
-              "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 sm:p-4 lg:p-6",
-              i === 4 && "col-span-2 sm:col-span-2 lg:col-span-1"
-            )}>
+            <div
+              key={i}
+              className={cn(
+                'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 sm:p-4 lg:p-6',
+                i === 4 && 'col-span-2 sm:col-span-2 lg:col-span-1'
+              )}
+            >
               <div className="animate-pulse">
                 <div className="h-3 sm:h-4 w-16 sm:w-20 bg-gray-200 dark:bg-gray-700 rounded mb-2 sm:mb-3" />
                 <div className="h-6 sm:h-8 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded mb-1 sm:mb-2" />
@@ -259,7 +304,7 @@ const DashboardSkeleton = () => {
             <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse hidden sm:block" />
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             <div className="lg:col-span-1">
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -269,7 +314,7 @@ const DashboardSkeleton = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="lg:col-span-1">
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div className="animate-pulse">
@@ -278,7 +323,7 @@ const DashboardSkeleton = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="lg:col-span-2 xl:col-span-1">
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div className="animate-pulse">
@@ -288,7 +333,7 @@ const DashboardSkeleton = () => {
               </div>
             </div>
           </div>
-          
+
           {/* 빠른 액션 스켈레톤 */}
           <div className="mt-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -304,10 +349,13 @@ const DashboardSkeleton = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6"
+                  >
                     <div className="animate-pulse">
                       <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
                       <div className="space-y-2">

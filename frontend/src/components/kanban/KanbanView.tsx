@@ -32,7 +32,9 @@ const COLUMN_CONFIG = {
 
 interface KanbanViewProps {
   filters: GetApiTodosParams
-  onFiltersChange: (filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)) => void
+  onFiltersChange: (
+    filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)
+  ) => void
   onCreateTodo: (todo: PostApiTodosBody) => void
 }
 
@@ -59,42 +61,47 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     if (expandedSection && accordionRefs.current[expandedSection]) {
       const currentElement = accordionRefs.current[expandedSection]
       const currentArrow = arrowRefs.current[expandedSection]
-      
+
       // 현재 높이를 명시적으로 설정 (auto에서 고정값으로)
       const currentHeight = currentElement.getBoundingClientRect().height
       gsap.set(currentElement, { height: currentHeight, overflow: 'hidden' })
-      
+
       const timeline = gsap.timeline({
         onComplete: () => {
           setExpandedSection(newExpandedSection)
-          
+
           // 새로운 섹션 열기
           if (newExpandedSection && accordionRefs.current[newExpandedSection]) {
             requestAnimationFrame(() => {
               const newElement = accordionRefs.current[newExpandedSection]
               const newArrow = arrowRefs.current[newExpandedSection]
-              
+
               if (newElement) {
                 const targetHeight = newElement.scrollHeight
-                
+
                 gsap.fromTo(
                   newElement,
                   { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, overflow: 'hidden' },
-                  { 
-                    height: targetHeight, 
+                  {
+                    height: targetHeight,
                     paddingTop: '1rem',
                     paddingBottom: '1rem',
-                    opacity: 1, 
-                    duration: 0.3, 
+                    opacity: 1,
+                    duration: 0.3,
                     ease: 'power2.out',
                     onComplete: () => {
                       // 애니메이션 완료 후 원래 상태로 복원
-                      gsap.set(newElement, { height: 'auto', overflow: 'visible', paddingTop: '', paddingBottom: '' })
-                    }
+                      gsap.set(newElement, {
+                        height: 'auto',
+                        overflow: 'visible',
+                        paddingTop: '',
+                        paddingBottom: '',
+                      })
+                    },
                   }
                 )
               }
-              
+
               // 새 화살표 회전
               if (newArrow) {
                 gsap.to(newArrow, {
@@ -105,9 +112,9 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               }
             })
           }
-        }
+        },
       })
-      
+
       // 더 부드러운 닫기 애니메이션 (padding 포함)
       timeline.to(currentElement, {
         height: 0,
@@ -117,40 +124,49 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
         duration: 0.35,
         ease: 'power2.inOut',
       })
-      
+
       // 현재 화살표 회전 (동시에)
       if (currentArrow) {
-        timeline.to(currentArrow, {
-          rotation: 0,
-          duration: 0.35,
-          ease: 'power2.inOut',
-        }, 0)
+        timeline.to(
+          currentArrow,
+          {
+            rotation: 0,
+            duration: 0.35,
+            ease: 'power2.inOut',
+          },
+          0
+        )
       }
     } else {
       // 단순히 새 섹션 열기
       setExpandedSection(newExpandedSection)
-      
+
       if (newExpandedSection && accordionRefs.current[newExpandedSection]) {
         const element = accordionRefs.current[newExpandedSection]
         const arrow = arrowRefs.current[newExpandedSection]
-        
+
         requestAnimationFrame(() => {
           const targetHeight = element.scrollHeight
-          
+
           gsap.fromTo(
             element,
             { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, overflow: 'hidden' },
-            { 
-              height: targetHeight, 
+            {
+              height: targetHeight,
               paddingTop: '1rem',
               paddingBottom: '1rem',
-              opacity: 1, 
-              duration: 0.3, 
+              opacity: 1,
+              duration: 0.3,
               ease: 'power2.out',
               onComplete: () => {
                 // 애니메이션 완료 후 원래 상태로 복원
-                gsap.set(element, { height: 'auto', overflow: 'visible', paddingTop: '', paddingBottom: '' })
-              }
+                gsap.set(element, {
+                  height: 'auto',
+                  overflow: 'visible',
+                  paddingTop: '',
+                  paddingBottom: '',
+                })
+              },
             }
           )
 
@@ -188,7 +204,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   const { data: todosResponse, isLoading } = useTodos(kanbanFilters)
 
   const todos = todosResponse?.todos || []
-  
+
   // 빠른 응답에서 스켈레톤 깜빡임 방지
   const showSkeleton = useDelayedLoading(isLoading, 200)
 
@@ -204,7 +220,6 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
       },
     },
   })
-
 
   // 컬럼별로 Todo 그룹화
   const columnTodos = useMemo(() => {
@@ -233,19 +248,18 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
     // Optimistic update
     const previousData = queryClient.getQueryData(getTodosQueryKey())
-    
+
     try {
       // 즉시 UI 업데이트
       queryClient.setQueryData(getTodosQueryKey(), (old: unknown) => {
         const oldData = old as { todos?: Array<{ id: string; status: string; order?: number }> }
-        const updatedTodos = oldData?.todos?.map((todo) => 
-          todo.id === cardId 
-            ? { ...todo, status: toStatus, order: newOrder }
-            : todo
-        ) || []
+        const updatedTodos =
+          oldData?.todos?.map((todo) =>
+            todo.id === cardId ? { ...todo, status: toStatus, order: newOrder } : todo
+          ) || []
         return { ...oldData, todos: updatedTodos }
       })
-      
+
       await bulkUpdateMutation.mutateAsync({
         data: {
           data: [
@@ -297,150 +311,143 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     const cardSkeletonKeys = [
       ['todo-card-1', 'todo-card-2'],
       ['progress-card-1', 'progress-card-2', 'progress-card-3'],
-      ['done-card-1', 'done-card-2', 'done-card-3', 'done-card-4']
+      ['done-card-1', 'done-card-2', 'done-card-3', 'done-card-4'],
     ]
-    
+
     return (
-      <div className={cn(
-        'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto'
-      )}>
+      <div className={cn('hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto')}>
         {/* 3개의 컬럼 스켈레톤 */}
         {columnKeys.map((columnKey, columnIndex) => (
-        <div
-          key={columnKey}
-          className={cn(
-            'flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg',
-            'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
-          )}
-        >
-          {/* 컬럼 헤더 스켈레톤 */}
-          <div className={cn(
-            'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
-            columnIndex === 0 && 'bg-gray-100 dark:bg-gray-700',
-            columnIndex === 1 && 'bg-blue-100 dark:bg-blue-800/30', 
-            columnIndex === 2 && 'bg-green-100 dark:bg-green-800/30'
-          )}>
-            <div className="flex items-center justify-between">
-              <div className={cn(
-                'h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded animate-pulse'
-              )} />
-              <div className={cn(
-                'h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse'
-              )} />
-            </div>
-          </div>
-
-          {/* 카드 스켈레톤들 */}
-          <div className={cn(
-            'flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96'
-          )}>
-            {/* QuickAdd 스켈레톤 */}
-            <div className={cn(
-              'w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg animate-pulse'
-            )}>
-              <div className={cn(
-                'h-4 w-24 bg-gray-200 dark:bg-gray-600 rounded mx-auto'
-              )} />
+          <div
+            key={columnKey}
+            className={cn(
+              'flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg',
+              'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
+            )}
+          >
+            {/* 컬럼 헤더 스켈레톤 */}
+            <div
+              className={cn(
+                'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
+                columnIndex === 0 && 'bg-gray-100 dark:bg-gray-700',
+                columnIndex === 1 && 'bg-blue-100 dark:bg-blue-800/30',
+                columnIndex === 2 && 'bg-green-100 dark:bg-green-800/30'
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <div
+                  className={cn('h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded animate-pulse')}
+                />
+                <div
+                  className={cn('h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse')}
+                />
+              </div>
             </div>
 
             {/* 카드 스켈레톤들 */}
-            {cardSkeletonKeys[columnIndex]?.map((cardKey, cardIndex) => (
+            <div
+              className={cn('flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96')}
+            >
+              {/* QuickAdd 스켈레톤 */}
               <div
-                key={cardKey}
                 className={cn(
-                  'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
-                  'p-3 sm:p-4 shadow-sm animate-pulse'
+                  'w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg animate-pulse'
                 )}
               >
-                {/* 우선순위 배지 */}
-                <div className="flex justify-end mb-2">
-                  <div className={cn(
-                    'h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded-full'
-                  )} />
-                </div>
-
-                {/* 제목 */}
-                <div className={cn(
-                  'h-4 bg-gray-200 dark:bg-gray-600 rounded mb-2',
-                  cardIndex % 2 === 0 ? 'w-3/4' : 'w-2/3'
-                )} />
-
-                {/* 설명 (가끔 없음) */}
-                {cardIndex % 3 !== 0 && (
-                  <div className={cn(
-                    'h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-3'
-                  )} />
-                )}
-
-                {/* 메타 정보 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <div className={cn(
-                      'h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded'
-                    )} />
-                    <div className={cn(
-                      'h-4 w-8 bg-gray-200 dark:bg-gray-600 rounded'
-                    )} />
-                  </div>
-                  <div className={cn(
-                    'h-4 w-10 bg-gray-200 dark:bg-gray-600 rounded'
-                  )} />
-                </div>
+                <div className={cn('h-4 w-24 bg-gray-200 dark:bg-gray-600 rounded mx-auto')} />
               </div>
-            ))}
+
+              {/* 카드 스켈레톤들 */}
+              {cardSkeletonKeys[columnIndex]?.map((cardKey, cardIndex) => (
+                <div
+                  key={cardKey}
+                  className={cn(
+                    'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
+                    'p-3 sm:p-4 shadow-sm animate-pulse'
+                  )}
+                >
+                  {/* 우선순위 배지 */}
+                  <div className="flex justify-end mb-2">
+                    <div className={cn('h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded-full')} />
+                  </div>
+
+                  {/* 제목 */}
+                  <div
+                    className={cn(
+                      'h-4 bg-gray-200 dark:bg-gray-600 rounded mb-2',
+                      cardIndex % 2 === 0 ? 'w-3/4' : 'w-2/3'
+                    )}
+                  />
+
+                  {/* 설명 (가끔 없음) */}
+                  {cardIndex % 3 !== 0 && (
+                    <div className={cn('h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-3')} />
+                  )}
+
+                  {/* 메타 정보 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <div className={cn('h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded')} />
+                      <div className={cn('h-4 w-8 bg-gray-200 dark:bg-gray-600 rounded')} />
+                    </div>
+                    <div className={cn('h-4 w-10 bg-gray-200 dark:bg-gray-600 rounded')} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
     )
   }
 
   // 모바일 스켈레톤
   const MobileKanbanSkeleton = () => {
     const mobileKeys = ['mobile-todo', 'mobile-progress', 'mobile-done']
-    
+
     return (
       <div className="block md:hidden overflow-y-auto h-full p-4 space-y-4">
         {mobileKeys.map((key, i) => (
-          <div key={key} className={cn(
-          'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'
-        )}>
-          <div className={cn(
-            'w-full px-4 py-3 rounded-t-lg animate-pulse',
-            i === 0 && 'bg-gray-100 dark:bg-gray-700',
-            i === 1 && 'bg-blue-100 dark:bg-blue-800/30',
-            i === 2 && 'bg-green-100 dark:bg-green-800/30'
-          )}>
-            <div className="flex items-center justify-between">
-              <div className={cn(
-                'h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded'
-              )} />
-              <div className={cn(
-                'h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full'
-              )} />
+          <div
+            key={key}
+            className={cn(
+              'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'
+            )}
+          >
+            <div
+              className={cn(
+                'w-full px-4 py-3 rounded-t-lg animate-pulse',
+                i === 0 && 'bg-gray-100 dark:bg-gray-700',
+                i === 1 && 'bg-blue-100 dark:bg-blue-800/30',
+                i === 2 && 'bg-green-100 dark:bg-green-800/30'
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <div className={cn('h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded')} />
+                <div className={cn('h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full')} />
+              </div>
             </div>
           </div>
-        </div>
         ))}
       </div>
     )
   }
 
   return (
-    <div className={cn(
-      'h-full flex flex-col bg-gray-50 dark:bg-gray-900'
-    )}>
+    <div className={cn('h-full flex flex-col bg-gray-50 dark:bg-gray-900')}>
       {/* 툴바 */}
-      <div className={cn(
-        'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 md:p-4'
-      )}>
+      <div
+        className={cn(
+          'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 md:p-4'
+        )}
+      >
         {/* 모바일: 아이콘 중심 레이아웃 */}
         <div className="block sm:hidden">
           <div className="flex items-center justify-between mb-3">
             {/* 통계 아이콘 */}
-            <div className={cn(
-              'flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400'
-            )}>
+            <div
+              className={cn('flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400')}
+            >
               <div className="flex items-center space-x-1">
                 <span className="w-2 h-2 bg-gray-400 rounded-full" />
                 <span>{todos.length}</span>
@@ -461,9 +468,12 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
             {/* 필터 버튼 */}
             <div className="flex items-center space-x-2">
-              <button type="button" className={cn(
-                'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              )}>
+              <button
+                type="button"
+                className={cn(
+                  'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                )}
+              >
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -480,9 +490,12 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                   />
                 </svg>
               </button>
-              <button type="button" className={cn(
-                'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              )}>
+              <button
+                type="button"
+                className={cn(
+                  'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                )}
+              >
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -501,23 +514,23 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
               </button>
             </div>
           </div>
-
         </div>
 
         {/* 태블릿/데스크톱: 기존 레이아웃 */}
         <div className="hidden sm:flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
           {/* 왼쪽: 통계 */}
           <div className="flex items-center space-x-6">
-            <div className={cn(
-              'flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400'
-            )}>
+            <div
+              className={cn(
+                'flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400'
+              )}
+            >
               <span className="font-medium">전체: {todos.length}</span>
               <span>할 일: {columnTodos.todo.length}</span>
               <span>진행 중: {columnTodos['in-progress'].length}</span>
               <span>완료: {columnTodos.done.length}</span>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -537,9 +550,12 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 const todoCount = columnTodos[status].length
 
                 return (
-                  <div key={status} className={cn(
-                    'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'
-                  )}>
+                  <div
+                    key={status}
+                    className={cn(
+                      'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm'
+                    )}
+                  >
                     {/* 모바일 컬럼 헤더 (클릭 가능) */}
                     <button
                       type="button"
@@ -550,16 +566,18 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                       )}
                     >
                       <div className="flex items-center justify-between">
-                        <h3 className={cn(
-                          'font-semibold text-gray-900 dark:text-gray-100 text-base'
-                        )}>
+                        <h3
+                          className={cn('font-semibold text-gray-900 dark:text-gray-100 text-base')}
+                        >
                           {COLUMN_CONFIG[status].title}
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <span className={cn(
-                            'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300',
-                            'text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center'
-                          )}>
+                          <span
+                            className={cn(
+                              'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300',
+                              'text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center'
+                            )}
+                          >
                             {todoCount}
                           </span>
                           <svg
@@ -581,9 +599,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             />
                           </svg>
                           {bulkUpdateMutation.isPending && (
-                            <div className={cn(
-                              'animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400'
-                            )} />
+                            <div
+                              className={cn(
+                                'animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 dark:border-blue-400'
+                              )}
+                            />
                           )}
                         </div>
                       </div>
@@ -612,8 +632,18 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               'transition-colors duration-200 flex items-center justify-center gap-2'
                             )}
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                              />
                             </svg>
                             할 일 추가
                           </button>
@@ -632,9 +662,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
                         {/* 빈 상태 */}
                         {todoCount === 0 && (
-                          <div className={cn(
-                            'text-center text-gray-400 dark:text-gray-500 text-sm py-8'
-                          )}>
+                          <div
+                            className={cn(
+                              'text-center text-gray-400 dark:text-gray-500 text-sm py-8'
+                            )}
+                          >
                             {status === 'todo' && '아직 할 일이 없습니다'}
                             {status === 'in-progress' && '진행 중인 작업이 없습니다'}
                             {status === 'done' && '완료된 작업이 없습니다'}
@@ -645,9 +677,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
                     {/* 축약된 미리보기 (닫혀있을 때) */}
                     {!isExpanded && todoCount > 0 && (
-                      <div className={cn(
-                        'px-4 py-2 text-xs text-gray-500 dark:text-gray-400'
-                      )}>
+                      <div className={cn('px-4 py-2 text-xs text-gray-500 dark:text-gray-400')}>
                         {todoCount}개의 항목
                       </div>
                     )}
@@ -657,9 +687,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
             </div>
 
             {/* 태블릿/데스크톱: 가로 레이아웃 */}
-            <div className={cn(
-              'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto scroll-smooth'
-            )}>
+            <div
+              className={cn(
+                'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto scroll-smooth'
+              )}
+            >
               {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => (
                 <KanbanColumn
                   key={status}

@@ -24,7 +24,13 @@ export const FloatingActionButton: React.FC = () => {
       id: 'add-todo',
       title: '할 일 추가',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={2.5}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
       ),
@@ -32,41 +38,67 @@ export const FloatingActionButton: React.FC = () => {
       action: () => {
         navigate('/todos')
         setIsOpen(false)
-      }
+      },
     },
     {
       id: 'kanban-view',
       title: '칸반 보드',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={2.5}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2"
+          />
         </svg>
       ),
       color: 'bg-purple-500 hover:bg-purple-600',
       action: () => {
         navigate('/kanban')
         setIsOpen(false)
-      }
+      },
     },
     {
       id: 'calendar-view',
       title: '캘린더',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={2.5}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       ),
       color: 'bg-green-500 hover:bg-green-600',
       action: () => {
         navigate('/calendar')
         setIsOpen(false)
-      }
+      },
     },
     {
       id: 'todo-list',
       title: '목록 보기',
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={2.5}
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
       ),
@@ -74,15 +106,15 @@ export const FloatingActionButton: React.FC = () => {
       action: () => {
         navigate('/todos')
         setIsOpen(false)
-      }
-    }
+      },
+    },
   ]
 
   return (
     <>
       {/* 오버레이 (메뉴가 열렸을 때) */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 z-40 md:hidden"
           onClick={() => setIsOpen(false)}
         />
@@ -97,9 +129,9 @@ export const FloatingActionButton: React.FC = () => {
               <div
                 key={action.id}
                 className="animate-slide-up"
-                style={{ 
+                style={{
                   animationDelay: `${index * 75}ms`,
-                  animationFillMode: 'both'
+                  animationFillMode: 'both',
                 }}
               >
                 <Tooltip text={action.title}>
@@ -132,7 +164,13 @@ export const FloatingActionButton: React.FC = () => {
             isOpen && 'rotate-45 bg-red-500 hover:bg-red-600'
           )}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2.5}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         </button>

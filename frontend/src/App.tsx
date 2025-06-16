@@ -19,10 +19,7 @@ function App() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="h-screen flex flex-col">
         {/* 공통 헤더 */}
-        <AppHeader
-          currentView={currentView}
-          title="TodoList"
-        />
+        <AppHeader currentView={currentView} title="TodoList" />
 
         {/* 라우터 기반 뷰 렌더링 */}
         <div className="flex-1 overflow-hidden">

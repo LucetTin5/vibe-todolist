@@ -11,7 +11,7 @@
 - 통계 조회
 
 ## 인증
-현재 버전에서는 인증이 필요하지 않습니다.
+Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더에 'Bearer {token}' 형식으로 전달하세요.
 
 ## 에러 처리
 모든 에러 응답은 다음 형식을 따릅니다:
@@ -29,9 +29,9 @@ import type { GetApiTodos200TodosItem } from './getApiTodos200TodosItem'
 export type GetApiTodos200 = {
   /** Todo 목록 */
   todos: GetApiTodos200TodosItem[]
-  /** 전체 Todo 개수 */
+  /** 전체 항목 수 */
   total: number
-  /** 현재 페이지 번호 */
+  /** 현재 페이지 */
   currentPage: number
   /** 전체 페이지 수 */
   totalPages: number

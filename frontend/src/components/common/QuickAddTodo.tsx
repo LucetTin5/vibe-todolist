@@ -97,9 +97,7 @@ export const QuickAddTodo: React.FC<QuickAddTodoProps> = ({
         disabled={isLoading}
       />
       <div className="flex items-center justify-between mt-3">
-        <div className={cn(
-          'text-xs text-gray-500 dark:text-gray-400'
-        )}>
+        <div className={cn('text-xs text-gray-500 dark:text-gray-400')}>
           Enter로 저장, Esc로 취소
         </div>
         <div className="flex items-center space-x-2">

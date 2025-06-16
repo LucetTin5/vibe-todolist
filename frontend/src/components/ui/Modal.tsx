@@ -104,13 +104,16 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       >
         {/* Header */}
         {title && (
-          <div className={cn(
-            'flex items-center justify-between p-4 sm:p-6',
-            'border-b border-gray-200 dark:border-gray-700'
-          )}>
-            <h2 id="modal-title" className={cn(
-              'text-lg font-semibold text-gray-900 dark:text-white'
-            )}>
+          <div
+            className={cn(
+              'flex items-center justify-between p-4 sm:p-6',
+              'border-b border-gray-200 dark:border-gray-700'
+            )}
+          >
+            <h2
+              id="modal-title"
+              className={cn('text-lg font-semibold text-gray-900 dark:text-white')}
+            >
               {title}
             </h2>
             <button

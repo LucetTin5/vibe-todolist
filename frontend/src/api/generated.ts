@@ -11,7 +11,7 @@
 - 통계 조회
 
 ## 인증
-현재 버전에서는 인증이 필요하지 않습니다.
+Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더에 'Bearer {token}' 형식으로 전달하세요.
 
 ## 에러 처리
 모든 에러 응답은 다음 형식을 따릅니다:
@@ -47,6 +47,10 @@ import type {
   DeleteApiTodos200,
   DeleteApiTodosId200,
   DeleteApiTodosId404,
+  DeleteAuthTodosId200,
+  DeleteAuthTodosId401,
+  DeleteAuthTodosId404,
+  DeleteAuthTodosId500,
   GetApiTodos200,
   GetApiTodos400,
   GetApiTodosId200,
@@ -54,18 +58,40 @@ import type {
   GetApiTodosParams,
   GetApiTodosStats200,
   GetApiTodosTags200,
+  GetAuthTodos200,
+  GetAuthTodos500,
+  GetAuthTodosId200,
+  GetAuthTodosId401,
+  GetAuthTodosId404,
+  GetAuthTodosId500,
+  GetAuthTodosParams,
+  GetAuthTodosStats200,
+  GetAuthTodosStats500,
   PatchApiTodosBulk200,
   PatchApiTodosBulk400,
   PatchApiTodosBulkBody,
   PatchApiTodosIdToggle200,
   PatchApiTodosIdToggle404,
+  PatchAuthTodosIdToggle200,
+  PatchAuthTodosIdToggle401,
+  PatchAuthTodosIdToggle404,
+  PatchAuthTodosIdToggle500,
   PostApiTodos201,
   PostApiTodos400,
   PostApiTodosBody,
+  PostAuthTodos201,
+  PostAuthTodos401,
+  PostAuthTodos500,
+  PostAuthTodosBody,
   PutApiTodosId200,
   PutApiTodosId400,
   PutApiTodosId404,
-  PutApiTodosIdBody
+  PutApiTodosIdBody,
+  PutAuthTodosId200,
+  PutAuthTodosId401,
+  PutAuthTodosId404,
+  PutAuthTodosId500,
+  PutAuthTodosIdBody
 } from './model';
 
 import { customInstance } from '../orval/mutator';
@@ -818,3 +844,529 @@ export const usePatchApiTodosIdToggle = <TError = PatchApiTodosIdToggle404,
       return useMutation(mutationOptions , queryClient);
     }
     
+/**
+ * 인증된 사용자의 Todo 목록을 조회합니다.
+ * @summary 사용자별 Todo 목록 조회
+ */
+export const getAuthTodos = (
+    params?: GetAuthTodosParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetAuthTodos200>(
+      {url: `/auth/todos`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+export const getGetAuthTodosQueryKey = (params?: GetAuthTodosParams,) => {
+    return [`/auth/todos`, ...(params ? [params]: [])] as const;
+    }
+
+    
+export const getGetAuthTodosQueryOptions = <TData = Awaited<ReturnType<typeof getAuthTodos>>, TError = GetAuthTodos500>(params?: GetAuthTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthTodosQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthTodos>>> = ({ signal }) => getAuthTodos(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthTodos>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAuthTodosQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthTodos>>>
+export type GetAuthTodosQueryError = GetAuthTodos500
+
+
+export function useGetAuthTodos<TData = Awaited<ReturnType<typeof getAuthTodos>>, TError = GetAuthTodos500>(
+ params: undefined |  GetAuthTodosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodos>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthTodos>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthTodos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthTodos<TData = Awaited<ReturnType<typeof getAuthTodos>>, TError = GetAuthTodos500>(
+ params?: GetAuthTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodos>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthTodos>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthTodos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthTodos<TData = Awaited<ReturnType<typeof getAuthTodos>>, TError = GetAuthTodos500>(
+ params?: GetAuthTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 사용자별 Todo 목록 조회
+ */
+
+export function useGetAuthTodos<TData = Awaited<ReturnType<typeof getAuthTodos>>, TError = GetAuthTodos500>(
+ params?: GetAuthTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAuthTodosQueryOptions(params,options)
+
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * 새로운 Todo를 생성합니다.
+ * @summary Todo 생성
+ */
+export const postAuthTodos = (
+    postAuthTodosBody: PostAuthTodosBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostAuthTodos201>(
+      {url: `/auth/todos`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postAuthTodosBody, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostAuthTodosMutationOptions = <TError = PostAuthTodos401 | PostAuthTodos500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthTodos>>, TError,{data: PostAuthTodosBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAuthTodos>>, TError,{data: PostAuthTodosBody}, TContext> => {
+
+const mutationKey = ['postAuthTodos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthTodos>>, {data: PostAuthTodosBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postAuthTodos(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAuthTodosMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthTodos>>>
+    export type PostAuthTodosMutationBody = PostAuthTodosBody
+    export type PostAuthTodosMutationError = PostAuthTodos401 | PostAuthTodos500
+
+    /**
+ * @summary Todo 생성
+ */
+export const usePostAuthTodos = <TError = PostAuthTodos401 | PostAuthTodos500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAuthTodos>>, TError,{data: PostAuthTodosBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAuthTodos>>,
+        TError,
+        {data: PostAuthTodosBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPostAuthTodosMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * ID로 특정 Todo를 조회합니다.
+ * @summary 개별 Todo 조회
+ */
+export const getAuthTodosId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetAuthTodosId200>(
+      {url: `/auth/todos/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+export const getGetAuthTodosIdQueryKey = (id: string,) => {
+    return [`/auth/todos/${id}`] as const;
+    }
+
+    
+export const getGetAuthTodosIdQueryOptions = <TData = Awaited<ReturnType<typeof getAuthTodosId>>, TError = GetAuthTodosId401 | GetAuthTodosId404 | GetAuthTodosId500>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthTodosIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthTodosId>>> = ({ signal }) => getAuthTodosId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAuthTodosIdQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthTodosId>>>
+export type GetAuthTodosIdQueryError = GetAuthTodosId401 | GetAuthTodosId404 | GetAuthTodosId500
+
+
+export function useGetAuthTodosId<TData = Awaited<ReturnType<typeof getAuthTodosId>>, TError = GetAuthTodosId401 | GetAuthTodosId404 | GetAuthTodosId500>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthTodosId>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthTodosId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthTodosId<TData = Awaited<ReturnType<typeof getAuthTodosId>>, TError = GetAuthTodosId401 | GetAuthTodosId404 | GetAuthTodosId500>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthTodosId>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthTodosId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthTodosId<TData = Awaited<ReturnType<typeof getAuthTodosId>>, TError = GetAuthTodosId401 | GetAuthTodosId404 | GetAuthTodosId500>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 개별 Todo 조회
+ */
+
+export function useGetAuthTodosId<TData = Awaited<ReturnType<typeof getAuthTodosId>>, TError = GetAuthTodosId401 | GetAuthTodosId404 | GetAuthTodosId500>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAuthTodosIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * Todo의 정보를 업데이트합니다.
+ * @summary Todo 업데이트
+ */
+export const putAuthTodosId = (
+    id: string,
+    putAuthTodosIdBody: PutAuthTodosIdBody,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<PutAuthTodosId200>(
+      {url: `/auth/todos/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: putAuthTodosIdBody
+    },
+      options);
+    }
+  
+
+
+export const getPutAuthTodosIdMutationOptions = <TError = PutAuthTodosId401 | PutAuthTodosId404 | PutAuthTodosId500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAuthTodosId>>, TError,{id: string;data: PutAuthTodosIdBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putAuthTodosId>>, TError,{id: string;data: PutAuthTodosIdBody}, TContext> => {
+
+const mutationKey = ['putAuthTodosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putAuthTodosId>>, {id: string;data: PutAuthTodosIdBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putAuthTodosId(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutAuthTodosIdMutationResult = NonNullable<Awaited<ReturnType<typeof putAuthTodosId>>>
+    export type PutAuthTodosIdMutationBody = PutAuthTodosIdBody
+    export type PutAuthTodosIdMutationError = PutAuthTodosId401 | PutAuthTodosId404 | PutAuthTodosId500
+
+    /**
+ * @summary Todo 업데이트
+ */
+export const usePutAuthTodosId = <TError = PutAuthTodosId401 | PutAuthTodosId404 | PutAuthTodosId500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAuthTodosId>>, TError,{id: string;data: PutAuthTodosIdBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putAuthTodosId>>,
+        TError,
+        {id: string;data: PutAuthTodosIdBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPutAuthTodosIdMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * Todo를 삭제합니다.
+ * @summary Todo 삭제
+ */
+export const deleteAuthTodosId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<DeleteAuthTodosId200>(
+      {url: `/auth/todos/${id}`, method: 'DELETE'
+    },
+      options);
+    }
+  
+
+
+export const getDeleteAuthTodosIdMutationOptions = <TError = DeleteAuthTodosId401 | DeleteAuthTodosId404 | DeleteAuthTodosId500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAuthTodosId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAuthTodosId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteAuthTodosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAuthTodosId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteAuthTodosId(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAuthTodosIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAuthTodosId>>>
+    
+    export type DeleteAuthTodosIdMutationError = DeleteAuthTodosId401 | DeleteAuthTodosId404 | DeleteAuthTodosId500
+
+    /**
+ * @summary Todo 삭제
+ */
+export const useDeleteAuthTodosId = <TError = DeleteAuthTodosId401 | DeleteAuthTodosId404 | DeleteAuthTodosId500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAuthTodosId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAuthTodosId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteAuthTodosIdMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * Todo의 완료 상태를 토글합니다.
+ * @summary Todo 완료 상태 토글
+ */
+export const patchAuthTodosIdToggle = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<PatchAuthTodosIdToggle200>(
+      {url: `/auth/todos/${id}/toggle`, method: 'PATCH'
+    },
+      options);
+    }
+  
+
+
+export const getPatchAuthTodosIdToggleMutationOptions = <TError = PatchAuthTodosIdToggle401 | PatchAuthTodosIdToggle404 | PatchAuthTodosIdToggle500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchAuthTodosIdToggle>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchAuthTodosIdToggle>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['patchAuthTodosIdToggle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchAuthTodosIdToggle>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  patchAuthTodosIdToggle(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchAuthTodosIdToggleMutationResult = NonNullable<Awaited<ReturnType<typeof patchAuthTodosIdToggle>>>
+    
+    export type PatchAuthTodosIdToggleMutationError = PatchAuthTodosIdToggle401 | PatchAuthTodosIdToggle404 | PatchAuthTodosIdToggle500
+
+    /**
+ * @summary Todo 완료 상태 토글
+ */
+export const usePatchAuthTodosIdToggle = <TError = PatchAuthTodosIdToggle401 | PatchAuthTodosIdToggle404 | PatchAuthTodosIdToggle500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchAuthTodosIdToggle>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchAuthTodosIdToggle>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPatchAuthTodosIdToggleMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * 인증된 사용자의 Todo 통계 정보를 조회합니다.
+ * @summary 사용자별 Todo 통계 조회
+ */
+export const getAuthTodosStats = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<GetAuthTodosStats200>(
+      {url: `/auth/todos/stats`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+export const getGetAuthTodosStatsQueryKey = () => {
+    return [`/auth/todos/stats`] as const;
+    }
+
+    
+export const getGetAuthTodosStatsQueryOptions = <TData = Awaited<ReturnType<typeof getAuthTodosStats>>, TError = GetAuthTodosStats500>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAuthTodosStatsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthTodosStats>>> = ({ signal }) => getAuthTodosStats(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAuthTodosStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthTodosStats>>>
+export type GetAuthTodosStatsQueryError = GetAuthTodosStats500
+
+
+export function useGetAuthTodosStats<TData = Awaited<ReturnType<typeof getAuthTodosStats>>, TError = GetAuthTodosStats500>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosStats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthTodosStats>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthTodosStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthTodosStats<TData = Awaited<ReturnType<typeof getAuthTodosStats>>, TError = GetAuthTodosStats500>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosStats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAuthTodosStats>>,
+          TError,
+          Awaited<ReturnType<typeof getAuthTodosStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAuthTodosStats<TData = Awaited<ReturnType<typeof getAuthTodosStats>>, TError = GetAuthTodosStats500>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 사용자별 Todo 통계 조회
+ */
+
+export function useGetAuthTodosStats<TData = Awaited<ReturnType<typeof getAuthTodosStats>>, TError = GetAuthTodosStats500>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthTodosStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAuthTodosStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions , queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+

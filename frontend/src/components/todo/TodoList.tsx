@@ -9,7 +9,9 @@ import type { GetApiTodos200TodosItem, PostApiTodosBody, GetApiTodosParams } fro
 export interface TodoListProps {
   todos: GetApiTodos200TodosItem[]
   filters: GetApiTodosParams
-  onFiltersChange: (filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)) => void
+  onFiltersChange: (
+    filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)
+  ) => void
   onToggleTodo: (id: string) => void
   onCreateTodo: (todo: PostApiTodosBody) => void
   onUpdateTodo: (todo: { id: string } & PostApiTodosBody) => void
@@ -37,21 +39,27 @@ export function TodoList({
 }: TodoListProps) {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingTodo, setEditingTodo] = useState<GetApiTodos200TodosItem | null>(null)
-  
+
   // 빠른 응답에서 스켈레톤 깜빡임 방지
   const showSkeleton = useDelayedLoading(isLoading, 200)
 
-  const handleCreateTodo = useCallback((todoData: PostApiTodosBody) => {
-    onCreateTodo(todoData)
-    setIsFormOpen(false)
-  }, [onCreateTodo])
+  const handleCreateTodo = useCallback(
+    (todoData: PostApiTodosBody) => {
+      onCreateTodo(todoData)
+      setIsFormOpen(false)
+    },
+    [onCreateTodo]
+  )
 
-  const handleUpdateTodo = useCallback((todoData: PostApiTodosBody) => {
-    if (editingTodo) {
-      onUpdateTodo({ id: editingTodo.id, ...todoData })
-      setEditingTodo(null)
-    }
-  }, [editingTodo, onUpdateTodo])
+  const handleUpdateTodo = useCallback(
+    (todoData: PostApiTodosBody) => {
+      if (editingTodo) {
+        onUpdateTodo({ id: editingTodo.id, ...todoData })
+        setEditingTodo(null)
+      }
+    },
+    [editingTodo, onUpdateTodo]
+  )
 
   const handleEditTodo = useCallback((todo: GetApiTodos200TodosItem) => {
     setEditingTodo(todo)
@@ -62,10 +70,13 @@ export function TodoList({
     setEditingTodo(null)
   }, [])
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = e.target.value
-    onFiltersChange((prev: GetApiTodosParams) => ({ ...prev, search: searchValue }))
-  }, [onFiltersChange])
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const searchValue = e.target.value
+      onFiltersChange((prev: GetApiTodosParams) => ({ ...prev, search: searchValue }))
+    },
+    [onFiltersChange]
+  )
 
   const handleClearFilters = useCallback(() => {
     onFiltersChange({})
@@ -86,69 +97,63 @@ export function TodoList({
 
   // 스켈레톤 컴포넌트를 별도로 정의
   const TodoSkeleton = () => {
-    const skeletonKeys = ['todo-skeleton-1', 'todo-skeleton-2', 'todo-skeleton-3', 'todo-skeleton-4', 'todo-skeleton-5']
-    
+    const skeletonKeys = [
+      'todo-skeleton-1',
+      'todo-skeleton-2',
+      'todo-skeleton-3',
+      'todo-skeleton-4',
+      'todo-skeleton-5',
+    ]
+
     return (
       <div className="space-y-3">
         {skeletonKeys.map((key, i) => (
           <div
             key={key}
-          className={cn(
-            'bg-white dark:bg-gray-800 rounded-lg',
-            'border border-gray-200 dark:border-gray-700 p-4'
-          )}
-        >
-          <div className="animate-pulse">
-            <div className="flex items-start gap-3">
-              {/* 체크박스 */}
-              <div className={cn(
-                'h-5 w-5 bg-gray-200 dark:bg-gray-600 rounded border'
-              )} />
-              
-              <div className="flex-1 space-y-3">
-                {/* 제목 */}
-                <div className={cn(
-                  'h-4 bg-gray-200 dark:bg-gray-600 rounded',
-                  i % 2 === 0 ? 'w-3/4' : 'w-2/3'
-                )} />
-                
-                {/* 설명 (가끔 없음) */}
-                {i % 3 !== 0 && (
-                  <div className={cn(
-                    'h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2'
-                  )} />
-                )}
-                
-                {/* 태그와 메타 정보 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <div className={cn(
-                      'h-6 w-16 bg-gray-200 dark:bg-gray-600 rounded-full'
-                    )} />
-                    <div className={cn(
-                      'h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full'
-                    )} />
+            className={cn(
+              'bg-white dark:bg-gray-800 rounded-lg',
+              'border border-gray-200 dark:border-gray-700 p-4'
+            )}
+          >
+            <div className="animate-pulse">
+              <div className="flex items-start gap-3">
+                {/* 체크박스 */}
+                <div className={cn('h-5 w-5 bg-gray-200 dark:bg-gray-600 rounded border')} />
+
+                <div className="flex-1 space-y-3">
+                  {/* 제목 */}
+                  <div
+                    className={cn(
+                      'h-4 bg-gray-200 dark:bg-gray-600 rounded',
+                      i % 2 === 0 ? 'w-3/4' : 'w-2/3'
+                    )}
+                  />
+
+                  {/* 설명 (가끔 없음) */}
+                  {i % 3 !== 0 && (
+                    <div className={cn('h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2')} />
+                  )}
+
+                  {/* 태그와 메타 정보 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <div className={cn('h-6 w-16 bg-gray-200 dark:bg-gray-600 rounded-full')} />
+                      <div className={cn('h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full')} />
+                    </div>
+                    <div className={cn('h-4 w-12 bg-gray-200 dark:bg-gray-600 rounded')} />
                   </div>
-                  <div className={cn(
-                    'h-4 w-12 bg-gray-200 dark:bg-gray-600 rounded'
-                  )} />
                 </div>
-              </div>
-              
-              {/* 액션 버튼들 */}
-              <div className="flex gap-1">
-                <div className={cn(
-                  'h-8 w-8 bg-gray-200 dark:bg-gray-600 rounded'
-                )} />
-                <div className={cn(
-                  'h-8 w-8 bg-gray-200 dark:bg-gray-600 rounded'
-                )} />
+
+                {/* 액션 버튼들 */}
+                <div className="flex gap-1">
+                  <div className={cn('h-8 w-8 bg-gray-200 dark:bg-gray-600 rounded')} />
+                  <div className={cn('h-8 w-8 bg-gray-200 dark:bg-gray-600 rounded')} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
     )
   }
 
@@ -157,14 +162,10 @@ export function TodoList({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className={cn(
-            'text-lg font-semibold text-gray-900 dark:text-white'
-          )}>
+          <h2 className={cn('text-lg font-semibold text-gray-900 dark:text-white')}>
             Todos ({filteredTodos.length})
           </h2>
-          <p className={cn(
-            'text-sm text-gray-600 dark:text-gray-400'
-          )}>
+          <p className={cn('text-sm text-gray-600 dark:text-gray-400')}>
             {pendingTodos.length} pending, {completedTodos.length} completed
           </p>
         </div>
@@ -172,10 +173,12 @@ export function TodoList({
       </div>
 
       {/* Filters */}
-      <div className={cn(
-        'bg-white dark:bg-gray-800 rounded-lg',
-        'border border-gray-200 dark:border-gray-700 p-4'
-      )}>
+      <div
+        className={cn(
+          'bg-white dark:bg-gray-800 rounded-lg',
+          'border border-gray-200 dark:border-gray-700 p-4'
+        )}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Search */}
           <div>
@@ -222,14 +225,10 @@ export function TodoList({
                 d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
               />
             </svg>
-            <h3 className={cn(
-              'mt-2 text-sm font-medium text-gray-900 dark:text-white'
-            )}>
+            <h3 className={cn('mt-2 text-sm font-medium text-gray-900 dark:text-white')}>
               No todos
             </h3>
-            <p className={cn(
-              'mt-1 text-sm text-gray-500 dark:text-gray-400'
-            )}>
+            <p className={cn('mt-1 text-sm text-gray-500 dark:text-gray-400')}>
               {todos.length === 0
                 ? 'Get started by creating your first todo.'
                 : 'No todos match your current filters.'}

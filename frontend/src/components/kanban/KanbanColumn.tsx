@@ -71,27 +71,35 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       )}
     >
       {/* 컬럼 헤더 */}
-      <div className={cn(
-        'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
-        headerClassName
-      )}>
+      <div
+        className={cn(
+          'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
+          headerClassName
+        )}
+      >
         <div className="flex items-center justify-between">
-          <h3 className={cn(
-            'font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate'
-          )}>
+          <h3
+            className={cn(
+              'font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate'
+            )}
+          >
             {title}
           </h3>
           <div className="flex items-center space-x-2 flex-shrink-0">
-            <span className={cn(
-              'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300',
-              'text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center'
-            )}>
+            <span
+              className={cn(
+                'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300',
+                'text-xs font-medium px-2 py-1 rounded-full min-w-[24px] text-center'
+              )}
+            >
               {todos.length}
             </span>
             {(isUpdating || isCreating) && (
-              <div className={cn(
-                'animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600 dark:border-blue-400'
-              )} />
+              <div
+                className={cn(
+                  'animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600 dark:border-blue-400'
+                )}
+              />
             )}
           </div>
         </div>
@@ -99,9 +107,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
       {/* 카드 드롭 영역 */}
       <div
-        className={cn(
-          'flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96'
-        )}
+        className={cn('flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96')}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
@@ -119,7 +125,12 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             )}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             할 일 추가
           </button>
@@ -138,9 +149,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
         {/* 빈 상태 메시지 (할 일이 없을 때만) */}
         {todos.length === 0 && (
-          <div className={cn(
-            'text-center text-gray-400 dark:text-gray-500 text-sm py-8'
-          )}>
+          <div className={cn('text-center text-gray-400 dark:text-gray-500 text-sm py-8')}>
             {status === 'todo' && '아직 할 일이 없습니다'}
             {status === 'in-progress' && '진행 중인 작업이 없습니다'}
             {status === 'done' && '완료된 작업이 없습니다'}

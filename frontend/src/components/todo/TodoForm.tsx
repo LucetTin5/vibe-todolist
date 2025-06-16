@@ -265,9 +265,7 @@ export function TodoForm({
                   <button
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
-                    className={cn(
-                      'hover:text-blue-600 dark:hover:text-blue-400 transition-colors'
-                    )}
+                    className={cn('hover:text-blue-600 dark:hover:text-blue-400 transition-colors')}
                   >
                     ×
                   </button>
@@ -282,9 +280,9 @@ export function TodoForm({
           <div className="flex gap-2">
             {/* 삭제 버튼 (수정 모드에서만 표시) */}
             {initialData && onDelete && (
-              <Button 
-                type="button" 
-                variant="danger" 
+              <Button
+                type="button"
+                variant="danger"
                 onClick={() => {
                   if (window.confirm('이 할 일을 삭제하시겠습니까?')) {
                     onDelete(initialData.id)
@@ -297,13 +295,13 @@ export function TodoForm({
               </Button>
             )}
           </div>
-          
+
           <div className="flex flex-col-reverse sm:flex-row gap-3">
             <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={!formData.title.trim() || isLoading}
               className="w-full sm:w-auto"
             >

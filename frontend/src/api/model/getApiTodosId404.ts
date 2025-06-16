@@ -11,7 +11,7 @@
 - 통계 조회
 
 ## 인증
-현재 버전에서는 인증이 필요하지 않습니다.
+Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더에 'Bearer {token}' 형식으로 전달하세요.
 
 ## 에러 처리
 모든 에러 응답은 다음 형식을 따릅니다:
@@ -26,10 +26,12 @@
  */
 
 export type GetApiTodosId404 = {
-  /** 성공 여부 */
+  /** 요청 성공 여부 */
   success: boolean
-  /** 에러 메시지 */
+  /** 오류 코드 또는 메시지 */
   error: string
-  /** 상세 에러 정보 */
+  /** 사용자 친화적 오류 메시지 */
+  message: string
+  /** 상세 오류 정보 (개발용) */
   details?: string
 }

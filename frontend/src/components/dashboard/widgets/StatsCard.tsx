@@ -54,23 +54,24 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   }
 
   return (
-    <div className={cn(
-      'rounded-lg border p-3 sm:p-4 lg:p-6 transition-all duration-200 hover:shadow-md',
-      colorClasses[color],
-      className
-    )}>
+    <div
+      className={cn(
+        'rounded-lg border p-3 sm:p-4 lg:p-6 transition-all duration-200 hover:shadow-md',
+        colorClasses[color],
+        className
+      )}
+    >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <p className={cn(
-            'text-xs sm:text-sm font-medium truncate',
-            textColorClasses[color]
-          )}>
+          <p className={cn('text-xs sm:text-sm font-medium truncate', textColorClasses[color])}>
             {title}
           </p>
-          <p className={cn(
-            'text-lg sm:text-2xl lg:text-3xl font-bold mt-1',
-            valueColorClasses[color]
-          )}>
+          <p
+            className={cn(
+              'text-lg sm:text-2xl lg:text-3xl font-bold mt-1',
+              valueColorClasses[color]
+            )}
+          >
             {value}
           </p>
           {subtitle && (
@@ -80,33 +81,43 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           )}
         </div>
         {icon && (
-          <div className={cn(
-            'text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2',
-            textColorClasses[color]
-          )}>
-            <div className="w-6 h-6 sm:w-8 sm:h-8">
-              {icon}
-            </div>
+          <div
+            className={cn(
+              'text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2',
+              textColorClasses[color]
+            )}
+          >
+            <div className="w-6 h-6 sm:w-8 sm:h-8">{icon}</div>
           </div>
         )}
       </div>
-      
+
       {trend && (
         <div className="mt-4 flex items-center text-sm">
-          <span className={cn(
-            'flex items-center gap-1',
-            trend.direction === 'up' && 'text-green-600 dark:text-green-400',
-            trend.direction === 'down' && 'text-red-600 dark:text-red-400',
-            trend.direction === 'neutral' && 'text-gray-600 dark:text-gray-400'
-          )}>
+          <span
+            className={cn(
+              'flex items-center gap-1',
+              trend.direction === 'up' && 'text-green-600 dark:text-green-400',
+              trend.direction === 'down' && 'text-red-600 dark:text-red-400',
+              trend.direction === 'neutral' && 'text-gray-600 dark:text-gray-400'
+            )}
+          >
             {trend.direction === 'up' && (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L10 4.414 4.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L10 4.414 4.707 9.707a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
             )}
             {trend.direction === 'down' && (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L10 15.586l5.293-5.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L10 15.586l5.293-5.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
             )}
             {trend.value}% {trend.label}
@@ -114,11 +125,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         </div>
       )}
 
-      {children && (
-        <div className="mt-4">
-          {children}
-        </div>
-      )}
+      {children && <div className="mt-4">{children}</div>}
     </div>
   )
 }

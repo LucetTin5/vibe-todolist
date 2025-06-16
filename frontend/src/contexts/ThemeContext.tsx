@@ -30,7 +30,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
   // 시스템 테마 변경 감지
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
+
     const updateActualTheme = () => {
       if (theme === 'system') {
         setActualTheme(mediaQuery.matches ? 'dark' : 'light')
@@ -56,13 +56,13 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
   // DOM에 테마 클래스 적용
   useEffect(() => {
     const root = window.document.documentElement
-    
+
     // 기존 테마 클래스 제거
     root.classList.remove('light', 'dark')
-    
+
     // 새 테마 클래스 추가
     root.classList.add(actualTheme)
-    
+
     // localStorage에 테마 저장
     localStorage.setItem('theme', theme)
   }, [theme, actualTheme])
@@ -70,7 +70,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
   const handleSetTheme = (newTheme: Theme | ((prev: Theme) => Theme)) => {
     const resolvedTheme = typeof newTheme === 'function' ? newTheme(theme) : newTheme
     setTheme(resolvedTheme)
-    
+
     // 즉시 actualTheme 업데이트 (system이 아닌 경우)
     if (resolvedTheme !== 'system') {
       setActualTheme(resolvedTheme)
@@ -87,11 +87,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
     actualTheme,
   }
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {
