@@ -39,7 +39,21 @@ const generateWeeklyData = () => {
 export const WeeklyProgressCard: React.FC = () => {
   const weeklyData = generateWeeklyData()
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean
+    payload?: Array<{
+      payload: {
+        day: string
+        date: string
+        completed: number
+        total: number
+        completionRate: number
+      }
+    }>
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (

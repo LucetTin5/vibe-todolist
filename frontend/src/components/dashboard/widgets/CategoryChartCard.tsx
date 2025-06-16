@@ -63,6 +63,7 @@ export const CategoryChartCard: React.FC = () => {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
+            <title>카테고리 차트</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -82,7 +83,16 @@ export const CategoryChartCard: React.FC = () => {
     )
   }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  interface TooltipPayload {
+    value: number
+    payload: { color: string }
+  }
+
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) => {
     if (active && payload && payload.length) {
       const data = payload[0]
       return (
@@ -97,11 +107,6 @@ export const CategoryChartCard: React.FC = () => {
     return null
   }
 
-  const CustomBar = (props: any) => {
-    const { fill, ...rest } = props
-    return <Bar {...rest} fill={props.payload.color} radius={[4, 4, 0, 0]} />
-  }
-
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -111,6 +116,7 @@ export const CategoryChartCard: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
+          <title>카테고리 차트</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -138,7 +144,7 @@ export const CategoryChartCard: React.FC = () => {
               domain={[0, maxValue + Math.ceil(maxValue * 0.1)]}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="value" shape={<CustomBar />} maxBarSize={60} />
+            <Bar dataKey="value" maxBarSize={60} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -1,13 +1,14 @@
 import type React from 'react'
 import { useState, useMemo } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday } from 'date-fns'
+import { groupBy } from 'es-toolkit'
 import { ko } from 'date-fns/locale'
 import { Button } from '../ui/Button'
 import { TodoForm } from '../todo/TodoForm'
 import { cn } from '../../utils/cn'
 import { useTodos } from '../../hooks/useTodos'
 import { useDelayedLoading } from '../../hooks/useDelayedLoading'
-import type { PostApiTodosBody, GetApiTodosParams } from '../../api/model'
+import type { PostApiTodosBody, GetApiTodosParams, GetApiTodos200TodosItem } from '../../api/model'
 
 interface CalendarViewProps {
   filters: GetApiTodosParams
@@ -31,7 +32,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [selectedFormDate, setSelectedFormDate] = useState<Date | null>(null)
-  const [editingTodo, setEditingTodo] = useState<any>(null)
+  const [editingTodo, setEditingTodo] = useState<GetApiTodos200TodosItem | null>(null)
 
   // Todo 데이터 조회
   const { data: todosResponse, isLoading } = useTodos(filters)
@@ -49,19 +50,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   // 날짜별 todo 그룹화
   const todosByDate = useMemo(() => {
-    const grouped: Record<string, typeof todos> = {}
-
-    todos.forEach((todo) => {
-      if (todo.dueDate) {
-        const dateKey = format(new Date(todo.dueDate), 'yyyy-MM-dd')
-        if (!grouped[dateKey]) {
-          grouped[dateKey] = []
-        }
-        grouped[dateKey].push(todo)
-      }
-    })
-
-    return grouped
+    const todosWithDueDate = todos.filter(
+      (todo): todo is GetApiTodos200TodosItem & { dueDate: string } => !!todo.dueDate
+    )
+    return groupBy(todosWithDueDate, (todo) => format(new Date(todo.dueDate), 'yyyy-MM-dd'))
   }, [todos])
 
   // 특정 날짜의 todo들 가져오기
@@ -78,7 +70,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   }
 
   // Todo 아이템 클릭 핸들러 - Todo 수정
-  const handleTodoClick = (todo: any, event: React.MouseEvent) => {
+  const handleTodoClick = (todo: GetApiTodos200TodosItem, event: React.MouseEvent) => {
     event.stopPropagation() // 날짜 클릭 이벤트 방지
     setEditingTodo(todo)
     setSelectedFormDate(null)
@@ -143,6 +135,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               }
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>이전 달</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -164,6 +157,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               }
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <title>다음 달</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -256,6 +250,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       <div className="flex items-center gap-1">
                         {/* 체크박스 */}
                         <button
+                          type="button"
                           onClick={(e) => handleTodoToggle(todo.id, e)}
                           className={cn(
                             'w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center',
@@ -267,6 +262,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         >
                           {todo.completed && (
                             <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
+                              <title>완료</title>
                               <path
                                 fillRule="evenodd"
                                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -305,6 +301,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
+                          <title>수정</title>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -339,7 +336,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         onSubmit={handleSubmitTodo}
         onDelete={onDeleteTodo}
         isLoading={false}
-        initialData={editingTodo}
+        initialData={editingTodo || undefined}
         defaultValues={
           !editingTodo && selectedFormDate
             ? {

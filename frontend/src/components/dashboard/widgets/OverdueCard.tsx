@@ -12,6 +12,7 @@ export const OverdueCard: React.FC<OverdueCardProps> = ({ overdue, dueToday, due
 
   const icon = (
     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <title>마감 관리</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

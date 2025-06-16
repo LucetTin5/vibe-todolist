@@ -125,6 +125,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
             )}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <title>할 일 추가</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

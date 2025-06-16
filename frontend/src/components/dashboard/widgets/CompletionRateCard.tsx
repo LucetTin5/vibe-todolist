@@ -19,7 +19,14 @@ export const CompletionRateCard: React.FC<CompletionRateCardProps> = ({
   ]
 
   const icon = (
-    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg
+      className="w-8 h-8"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-label="완료율 아이콘"
+    >
+      <title>완료율</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -49,8 +56,8 @@ export const CompletionRateCard: React.FC<CompletionRateCardProps> = ({
               paddingAngle={2}
               dataKey="value"
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {data.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
               ))}
             </Pie>
           </PieChart>

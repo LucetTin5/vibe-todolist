@@ -104,6 +104,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           >
             {trend.direction === 'up' && (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <title>상승 추세</title>
                 <path
                   fillRule="evenodd"
                   d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L10 4.414 4.707 9.707a1 1 0 01-1.414 0z"
@@ -113,6 +114,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
             )}
             {trend.direction === 'down' && (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <title>하락 추세</title>
                 <path
                   fillRule="evenodd"
                   d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L10 15.586l5.293-5.293a1 1 0 011.414 0z"

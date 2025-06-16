@@ -30,7 +30,9 @@ export const FloatingActionButton: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
           strokeWidth={2.5}
+          aria-label="할 일 추가"
         >
+          <title>할 일 추가</title>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
       ),
@@ -50,7 +52,9 @@ export const FloatingActionButton: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
           strokeWidth={2.5}
+          aria-label="칸반 보드"
         >
+          <title>칸반 보드</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -75,6 +79,7 @@ export const FloatingActionButton: React.FC = () => {
           viewBox="0 0 24 24"
           strokeWidth={2.5}
         >
+          <title>캘린더</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -99,6 +104,7 @@ export const FloatingActionButton: React.FC = () => {
           viewBox="0 0 24 24"
           strokeWidth={2.5}
         >
+          <title>목록 보기</title>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
       ),
@@ -117,6 +123,10 @@ export const FloatingActionButton: React.FC = () => {
         <div
           className="fixed inset-0 bg-black/20 z-40 md:hidden"
           onClick={() => setIsOpen(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setIsOpen(false)}
+          role="button"
+          tabIndex={0}
+          aria-label="메뉴 닫기"
         />
       )}
 
@@ -136,6 +146,7 @@ export const FloatingActionButton: React.FC = () => {
               >
                 <Tooltip text={action.title}>
                   <button
+                    type="button"
                     onClick={action.action}
                     className={cn(
                       'w-12 h-12 rounded-full text-white shadow-lg transition-all duration-200',
@@ -155,6 +166,7 @@ export const FloatingActionButton: React.FC = () => {
 
         {/* 메인 FAB */}
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
             'w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg',
@@ -171,6 +183,7 @@ export const FloatingActionButton: React.FC = () => {
             viewBox="0 0 24 24"
             strokeWidth={2.5}
           >
+            <title>메뉴 열기/닫기</title>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         </button>

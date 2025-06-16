@@ -11,6 +11,7 @@ export const QuickActionsCard: React.FC = () => {
       description: '새로운 할 일을 빠르게 추가',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <title>할 일 추가</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -28,6 +29,7 @@ export const QuickActionsCard: React.FC = () => {
       description: '드래그 앤 드롭으로 관리',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <title>칸반 보드</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -45,6 +47,7 @@ export const QuickActionsCard: React.FC = () => {
       description: '날짜별 일정 확인',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <title>캘린더</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -62,6 +65,7 @@ export const QuickActionsCard: React.FC = () => {
       description: '전체 할 일 목록',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <title>목록 보기</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -97,6 +101,7 @@ export const QuickActionsCard: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
+          <title>빠른 액션</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -110,6 +115,7 @@ export const QuickActionsCard: React.FC = () => {
       <div className="grid grid-cols-2 gap-2 sm:gap-3">
         {actions.map((action) => (
           <button
+            type="button"
             key={action.id}
             onClick={action.action}
             className={`

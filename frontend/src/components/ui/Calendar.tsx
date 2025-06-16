@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 import { DayPicker } from 'react-day-picker'
 import { cn } from '../../utils/cn'
 
@@ -44,6 +44,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       components={{
         Chevron: ({ orientation, ...props }) => (
           <svg {...props} className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <title>{orientation === 'left' ? '이전' : '다음'}</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

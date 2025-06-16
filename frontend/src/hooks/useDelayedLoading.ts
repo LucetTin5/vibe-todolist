@@ -26,10 +26,9 @@ export function useDelayedLoading(isLoading: boolean, delay = 200): boolean {
       }, delay)
 
       return () => clearTimeout(timer)
-    } else {
-      // 로딩이 완료되면 즉시 숨김
-      setShowLoading(false)
     }
+    // 로딩이 완료되면 즉시 숨김
+    setShowLoading(false)
   }, [isLoading, delay])
 
   return showLoading

@@ -83,6 +83,7 @@ export const DashboardView = () => {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
+                    <title>집중 필요</title>
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -105,6 +106,7 @@ export const DashboardView = () => {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
+                  <title>완료율</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -182,6 +184,7 @@ export const DashboardView = () => {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
+                      <title>최근 활동</title>
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -222,6 +225,7 @@ export const DashboardView = () => {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
+                      <title>트렌드 분석</title>
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"

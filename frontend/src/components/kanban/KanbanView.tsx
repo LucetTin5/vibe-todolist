@@ -638,6 +638,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               stroke="currentColor"
                               viewBox="0 0 24 24"
                             >
+                              <title>새 컬럼 추가</title>
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"

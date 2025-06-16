@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { cn } from '../../utils/cn'
 
 interface PopoverProps {
@@ -22,11 +22,11 @@ interface PopoverContentProps {
 
 const PopoverContext = React.createContext<{
   open: boolean
-  setOpen: (open: boolean) => void
+  onOpenChange: (open: boolean) => void
   triggerRef: React.RefObject<HTMLElement | null>
 }>({
   open: false,
-  setOpen: () => {},
+  onOpenChange: () => {},
   triggerRef: { current: null },
 })
 
@@ -35,48 +35,58 @@ function Popover({ children, open: controlledOpen, onOpenChange }: PopoverProps)
   const triggerRef = useRef<HTMLElement>(null)
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
-  const setOpen = (newOpen: boolean) => {
-    if (controlledOpen === undefined) {
-      setInternalOpen(newOpen)
-    }
-    onOpenChange?.(newOpen)
-  }
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (controlledOpen === undefined) {
+        setInternalOpen(newOpen)
+      }
+      onOpenChange?.(newOpen)
+    },
+    [controlledOpen, onOpenChange]
+  )
 
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (open && triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
-        setOpen(false)
+        handleOpenChange(false)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open, setOpen])
+  }, [open, handleOpenChange])
 
   return (
-    <PopoverContext.Provider value={{ open, setOpen, triggerRef }}>
+    <PopoverContext.Provider value={{ open, onOpenChange: handleOpenChange, triggerRef }}>
       <div className="relative">{children}</div>
     </PopoverContext.Provider>
   )
 }
 
 function PopoverTrigger({ children, asChild }: PopoverTriggerProps) {
-  const { open, setOpen, triggerRef } = React.useContext(PopoverContext)
+  const { open, onOpenChange, triggerRef } = React.useContext(PopoverContext)
 
   const handleClick = () => {
-    setOpen(!open)
+    onOpenChange(!open)
   }
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
-      ref: triggerRef,
-      onClick: handleClick,
-    })
+    return React.cloneElement(
+      children as React.ReactElement<{ ref?: React.Ref<HTMLElement>; onClick?: () => void }>,
+      {
+        ref: triggerRef,
+        onClick: handleClick,
+      }
+    )
   }
 
   return (
-    <button ref={triggerRef as React.RefObject<HTMLButtonElement>} onClick={handleClick}>
+    <button
+      type="button"
+      ref={triggerRef as React.RefObject<HTMLButtonElement>}
+      onClick={handleClick}
+    >
       {children}
     </button>
   )

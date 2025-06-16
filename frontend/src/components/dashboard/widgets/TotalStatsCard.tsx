@@ -10,6 +10,7 @@ interface TotalStatsCardProps {
 export const TotalStatsCard: React.FC<TotalStatsCardProps> = ({ total, completed, active }) => {
   const icon = (
     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <title>전체 통계</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -29,12 +30,12 @@ export const TotalStatsCard: React.FC<TotalStatsCardProps> = ({ total, completed
     >
       <div className="flex justify-between items-center text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full" />
           <span className="text-gray-600 dark:text-gray-400">완료:</span>
           <span className="font-medium text-green-600 dark:text-green-400">{completed}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+          <div className="w-3 h-3 bg-blue-500 rounded-full" />
           <span className="text-gray-600 dark:text-gray-400">진행:</span>
           <span className="font-medium text-blue-600 dark:text-blue-400">{active}</span>
         </div>

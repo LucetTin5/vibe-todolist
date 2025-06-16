@@ -52,6 +52,7 @@ export const PriorityChartCard: React.FC = () => {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
+            <title>우선순위 차트</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -71,7 +72,15 @@ export const PriorityChartCard: React.FC = () => {
     )
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  interface TooltipPayload {
+    value: number
+    payload: {
+      name: string
+      color: string
+    }
+  }
+
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) => {
     if (active && payload && payload.length) {
       const data = payload[0]
       const percentage = ((data.value / total) * 100).toFixed(1)
@@ -90,12 +99,20 @@ export const PriorityChartCard: React.FC = () => {
     return null
   }
 
-  const CustomLegend = (props: any) => {
+  interface LegendPayload {
+    value: string
+    color: string
+    payload: {
+      value: number
+    }
+  }
+
+  const CustomLegend = (props: { payload?: LegendPayload[] }) => {
     const { payload } = props
     return (
       <div className="flex flex-wrap justify-center gap-4 mt-4">
-        {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center gap-2">
+        {payload?.map((entry) => (
+          <div key={entry.value} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
             <span className="text-sm text-gray-700 dark:text-gray-300">
               {entry.value} ({entry.payload.value})
@@ -115,6 +132,7 @@ export const PriorityChartCard: React.FC = () => {
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
+          <title>우선순위 차트</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -137,8 +155,8 @@ export const PriorityChartCard: React.FC = () => {
               paddingAngle={2}
               dataKey="value"
             >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {chartData.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
