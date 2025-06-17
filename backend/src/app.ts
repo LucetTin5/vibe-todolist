@@ -8,6 +8,7 @@ import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
 import { todoRoutes } from './routes/todos'
 import todoAuthRoutes from './routes/todos.auth'
+import authRoutes from './routes/auth'
 
 // OpenAPI 앱 생성
 export const app = new OpenAPIHono()
@@ -64,6 +65,10 @@ Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더�
     },
   ],
   tags: [
+    {
+      name: 'Auth',
+      description: '인증 API',
+    },
     {
       name: 'Todos',
       description: 'Todo 관리 API (Enhanced)',
@@ -200,5 +205,6 @@ app.get('/test/drizzle-todos', async (c) => {
 })
 
 // 라우트 등록 (테스트/헬스체크 엔드포인트 이후에 등록)
+app.route('/', authRoutes)
 app.route('/', todoRoutes)
 app.route('/', todoAuthRoutes)

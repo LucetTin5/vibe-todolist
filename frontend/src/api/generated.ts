@@ -76,6 +76,17 @@ import type {
   PatchAuthTodosIdToggle401,
   PatchAuthTodosIdToggle404,
   PatchAuthTodosIdToggle500,
+  PostApiAuthLogin200,
+  PostApiAuthLogin400,
+  PostApiAuthLogin401,
+  PostApiAuthLoginBody,
+  PostApiAuthRefresh200,
+  PostApiAuthRefresh401,
+  PostApiAuthRefreshBody,
+  PostApiAuthSignup201,
+  PostApiAuthSignup400,
+  PostApiAuthSignup409,
+  PostApiAuthSignupBody,
   PostApiTodos201,
   PostApiTodos400,
   PostApiTodosBody,
@@ -101,6 +112,204 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
+/**
+ * 이메일과 비밀번호로 로그인합니다.
+ * @summary 사용자 로그인
+ */
+export const postApiAuthLogin = (
+    postApiAuthLoginBody: PostApiAuthLoginBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostApiAuthLogin200>(
+      {url: `/api/auth/login`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postApiAuthLoginBody, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiAuthLoginMutationOptions = <TError = PostApiAuthLogin400 | PostApiAuthLogin401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: PostApiAuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: PostApiAuthLoginBody}, TContext> => {
+
+const mutationKey = ['postApiAuthLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthLogin>>, {data: PostApiAuthLoginBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthLogin(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthLogin>>>
+    export type PostApiAuthLoginMutationBody = PostApiAuthLoginBody
+    export type PostApiAuthLoginMutationError = PostApiAuthLogin400 | PostApiAuthLogin401
+
+    /**
+ * @summary 사용자 로그인
+ */
+export const usePostApiAuthLogin = <TError = PostApiAuthLogin400 | PostApiAuthLogin401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: PostApiAuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthLogin>>,
+        TError,
+        {data: PostApiAuthLoginBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiAuthLoginMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * 새 사용자 계정을 생성합니다.
+ * @summary 사용자 회원가입
+ */
+export const postApiAuthSignup = (
+    postApiAuthSignupBody: PostApiAuthSignupBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostApiAuthSignup201>(
+      {url: `/api/auth/signup`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postApiAuthSignupBody, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiAuthSignupMutationOptions = <TError = PostApiAuthSignup400 | PostApiAuthSignup409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSignup>>, TError,{data: PostApiAuthSignupBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSignup>>, TError,{data: PostApiAuthSignupBody}, TContext> => {
+
+const mutationKey = ['postApiAuthSignup'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthSignup>>, {data: PostApiAuthSignupBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthSignup(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthSignupMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthSignup>>>
+    export type PostApiAuthSignupMutationBody = PostApiAuthSignupBody
+    export type PostApiAuthSignupMutationError = PostApiAuthSignup400 | PostApiAuthSignup409
+
+    /**
+ * @summary 사용자 회원가입
+ */
+export const usePostApiAuthSignup = <TError = PostApiAuthSignup400 | PostApiAuthSignup409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSignup>>, TError,{data: PostApiAuthSignupBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthSignup>>,
+        TError,
+        {data: PostApiAuthSignupBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiAuthSignupMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * Refresh token을 사용하여 새로운 access token을 발급받습니다.
+ * @summary 토큰 갱신
+ */
+export const postApiAuthRefresh = (
+    postApiAuthRefreshBody: PostApiAuthRefreshBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostApiAuthRefresh200>(
+      {url: `/api/auth/refresh`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postApiAuthRefreshBody, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiAuthRefreshMutationOptions = <TError = PostApiAuthRefresh401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRefresh>>, TError,{data: PostApiAuthRefreshBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRefresh>>, TError,{data: PostApiAuthRefreshBody}, TContext> => {
+
+const mutationKey = ['postApiAuthRefresh'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthRefresh>>, {data: PostApiAuthRefreshBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthRefresh(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthRefreshMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthRefresh>>>
+    export type PostApiAuthRefreshMutationBody = PostApiAuthRefreshBody
+    export type PostApiAuthRefreshMutationError = PostApiAuthRefresh401
+
+    /**
+ * @summary 토큰 갱신
+ */
+export const usePostApiAuthRefresh = <TError = PostApiAuthRefresh401,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRefresh>>, TError,{data: PostApiAuthRefreshBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthRefresh>>,
+        TError,
+        {data: PostApiAuthRefreshBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiAuthRefreshMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
 /**
  * 우선순위별, 카테고리별, 마감일별 통계를 포함한 상세 Todo 통계를 조회합니다.
  * @summary Todo 통계 조회 (Enhanced)
