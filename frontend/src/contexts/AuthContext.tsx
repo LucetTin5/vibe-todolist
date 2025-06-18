@@ -1,10 +1,12 @@
 import type React from 'react'
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { usePostApiAuthLogin, usePostApiAuthSignup, usePostApiAuthRefresh } from '../api/generated'
+import type { PostApiAuthLogin200DataUser } from '../api/model/postApiAuthLogin200DataUser'
 
 interface User {
   id: string
   email: string
-  name: string
+  name?: string
 }
 
 interface AuthContextType {
@@ -13,7 +15,7 @@ interface AuthContextType {
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
-  signup: (email: string, password: string, name: string) => Promise<void>
+  signup: (email: string, password: string, displayName?: string) => Promise<void>
   logout: () => void
   refreshToken: () => Promise<void>
 }
@@ -33,6 +35,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // API 훅들
+  const loginMutation = usePostApiAuthLogin()
+  const signupMutation = usePostApiAuthSignup()
+  const refreshMutation = usePostApiAuthRefresh()
+
   // 로컬 스토리지에서 인증 정보 복원
   useEffect(() => {
     const savedToken = localStorage.getItem(TOKEN_KEY)
@@ -45,7 +52,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(parsedUser)
       } catch (error) {
         console.error('Failed to parse saved user data:', error)
-        // 저장된 데이터가 손상된 경우 제거
         localStorage.removeItem(TOKEN_KEY)
         localStorage.removeItem(USER_KEY)
         localStorage.removeItem(REFRESH_TOKEN_KEY)
@@ -55,114 +61,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false)
   }, [])
 
-  // 토큰 만료 체크 및 자동 갱신
-  useEffect(() => {
-    if (!token) return
-
-    // JWT 토큰 만료 체크 (실제 구현에서는 jwt-decode 라이브러리 사용 권장)
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      const currentTime = Date.now() / 1000
-
-      // 토큰이 만료되기 5분 전에 갱신 시도
-      const refreshTime = (payload.exp - 300) * 1000
-      const timeUntilRefresh = refreshTime - Date.now()
-
-      if (timeUntilRefresh > 0) {
-        const refreshTimer = setTimeout(() => {
-          refreshToken()
-        }, timeUntilRefresh)
-
-        return () => clearTimeout(refreshTimer)
-      } else if (payload.exp < currentTime) {
-        // 이미 만료된 토큰
-        logout()
-      }
-    } catch (error) {
-      console.error('Invalid token format:', error)
-      logout()
-    }
-  }, [token])
-
-  // 로그인 함수
-  const login = useCallback(async (email: string, password: string): Promise<void> => {
-    setIsLoading(true)
-
-    try {
-      // TODO: 실제 로그인 API 호출
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || '로그인에 실패했습니다.')
+  // 사용자 정보 저장 헬퍼
+  const saveUserData = useCallback(
+    (accessToken: string, refreshToken: string, userData: PostApiAuthLogin200DataUser) => {
+      const userWithName: User = {
+        id: userData.id,
+        email: userData.email,
+        name: userData.email.split('@')[0],
       }
 
-      const data = await response.json()
-      const { token: newToken, refreshToken: newRefreshToken, user: userData } = data
+      setToken(accessToken)
+      setUser(userWithName)
 
-      // 상태 업데이트
-      setToken(newToken)
-      setUser(userData)
-
-      // 로컬 스토리지에 저장
-      localStorage.setItem(TOKEN_KEY, newToken)
-      localStorage.setItem(USER_KEY, JSON.stringify(userData))
-      if (newRefreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // 회원가입 함수
-  const signup = useCallback(
-    async (email: string, password: string, name: string): Promise<void> => {
-      setIsLoading(true)
-
-      try {
-        // TODO: 실제 회원가입 API 호출
-        const response = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password, name }),
-        })
-
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.message || '회원가입에 실패했습니다.')
-        }
-
-        const data = await response.json()
-        const { token: newToken, refreshToken: newRefreshToken, user: userData } = data
-
-        // 상태 업데이트
-        setToken(newToken)
-        setUser(userData)
-
-        // 로컬 스토리지에 저장
-        localStorage.setItem(TOKEN_KEY, newToken)
-        localStorage.setItem(USER_KEY, JSON.stringify(userData))
-        if (newRefreshToken) {
-          localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
-        }
-      } catch (error) {
-        console.error('Signup error:', error)
-        throw error
-      } finally {
-        setIsLoading(false)
-      }
+      localStorage.setItem(TOKEN_KEY, accessToken)
+      localStorage.setItem(USER_KEY, JSON.stringify(userWithName))
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
     },
     []
   )
@@ -172,13 +85,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null)
     setToken(null)
 
-    // 로컬 스토리지에서 제거
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
     localStorage.removeItem(REFRESH_TOKEN_KEY)
-
-    // TODO: 서버에 로그아웃 알림 (optional)
-    // fetch('/api/auth/logout', { method: 'POST' })
   }, [])
 
   // 토큰 갱신 함수
@@ -191,34 +100,96 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
-      // TODO: 실제 토큰 갱신 API 호출
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken: savedRefreshToken }),
+      const response = await refreshMutation.mutateAsync({
+        data: { refresh_token: savedRefreshToken },
       })
 
-      if (!response.ok) {
-        throw new Error('Token refresh failed')
-      }
+      if (response.success && response.data) {
+        setToken(response.data.access_token)
+        localStorage.setItem(TOKEN_KEY, response.data.access_token)
 
-      const data = await response.json()
-      const { token: newToken, refreshToken: newRefreshToken } = data
-
-      // 새로운 토큰으로 업데이트
-      setToken(newToken)
-      localStorage.setItem(TOKEN_KEY, newToken)
-
-      if (newRefreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken)
+        if (response.data.refresh_token) {
+          localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refresh_token)
+        }
       }
     } catch (error) {
       console.error('Token refresh error:', error)
       logout()
     }
-  }, [logout])
+  }, [refreshMutation, logout])
+
+  // 토큰 만료 체크 및 자동 갱신
+  useEffect(() => {
+    if (!token) return
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const currentTime = Date.now() / 1000
+
+      const refreshTime = (payload.exp - 300) * 1000
+      const timeUntilRefresh = refreshTime - Date.now()
+
+      if (timeUntilRefresh > 0) {
+        const refreshTimer = setTimeout(() => {
+          refreshToken()
+        }, timeUntilRefresh)
+
+        return () => clearTimeout(refreshTimer)
+      }
+      if (payload.exp < currentTime) {
+        logout()
+      }
+    } catch (error) {
+      console.error('Invalid token format:', error)
+      logout()
+    }
+  }, [token, refreshToken, logout])
+
+  // 로그인 함수
+  const login = useCallback(
+    async (email: string, password: string): Promise<void> => {
+      setIsLoading(true)
+
+      try {
+        const response = await loginMutation.mutateAsync({
+          data: { email, password },
+        })
+
+        if (response.success && response.data) {
+          saveUserData(response.data.access_token, response.data.refresh_token, response.data.user)
+        }
+      } catch (error) {
+        console.error('Login error:', error)
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [loginMutation, saveUserData]
+  )
+
+  // 회원가입 함수
+  const signup = useCallback(
+    async (email: string, password: string, displayName?: string): Promise<void> => {
+      setIsLoading(true)
+
+      try {
+        const response = await signupMutation.mutateAsync({
+          data: { email, password, displayName },
+        })
+
+        if (response.success && response.data) {
+          saveUserData(response.data.access_token, response.data.refresh_token, response.data.user)
+        }
+      } catch (error) {
+        console.error('Signup error:', error)
+        throw error
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [signupMutation, saveUserData]
+  )
 
   const value: AuthContextType = {
     user,

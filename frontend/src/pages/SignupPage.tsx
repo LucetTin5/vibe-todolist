@@ -1,9 +1,9 @@
 import type React from 'react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
-import { cn } from '../utils/cn'
+import { useAuth } from '../contexts/AuthContext'
 
 interface SignupFormData {
   email: string
@@ -13,6 +13,9 @@ interface SignupFormData {
 }
 
 export const SignupPage: React.FC = () => {
+  const navigate = useNavigate()
+  const { signup, isAuthenticated, isLoading: authLoading } = useAuth()
+
   const [formData, setFormData] = useState<SignupFormData>({
     email: '',
     password: '',
@@ -22,6 +25,13 @@ export const SignupPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<Partial<SignupFormData>>({})
+
+  // 이미 로그인된 사용자는 대시보드로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, authLoading, navigate])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -85,19 +95,12 @@ export const SignupPage: React.FC = () => {
     setError(null)
 
     try {
-      // TODO: 회원가입 API 호출 구현
-      console.log('Signup attempt:', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      })
-
-      // 임시 딜레이 (실제 API 호출로 대체)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // TODO: 성공 시 리다이렉트 로직 (로그인 페이지 또는 대시보드)
+      await signup(formData.email, formData.password, formData.name)
+      // 회원가입 성공 시 useEffect에서 리다이렉트 처리
     } catch (err) {
-      setError('회원가입에 실패했습니다. 다시 시도해주세요.')
+      const errorMessage =
+        err instanceof Error ? err.message : '회원가입에 실패했습니다. 다시 시도해주세요.'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -110,9 +113,20 @@ export const SignupPage: React.FC = () => {
     formData.name &&
     Object.keys(validationErrors).length === 0
 
+  const isSubmitting = isLoading || authLoading
+
+  // 인증 로딩 중이면 로딩 화면 표시
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="w-full max-w-md space-y-8">
         {/* 헤더 */}
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
@@ -149,143 +163,61 @@ export const SignupPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             {/* 이름 입력 */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                이름
-              </label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                placeholder="이름을 입력하세요"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={cn(
-                  'appearance-none rounded-lg relative block w-full',
-                  'border border-gray-300 dark:border-gray-600',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'text-gray-900 dark:text-white',
-                  'bg-white dark:bg-gray-800',
-                  'focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10',
-                  validationErrors.name && 'border-red-500 dark:border-red-500'
-                )}
-              />
-              {validationErrors.name && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                  {validationErrors.name}
-                </p>
-              )}
-            </div>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              label="이름"
+              placeholder="이름을 입력하세요"
+              value={formData.name}
+              onChange={handleInputChange}
+              error={validationErrors.name}
+            />
 
             {/* 이메일 입력 */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                이메일 주소
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="이메일 주소를 입력하세요"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={cn(
-                  'appearance-none rounded-lg relative block w-full',
-                  'border border-gray-300 dark:border-gray-600',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'text-gray-900 dark:text-white',
-                  'bg-white dark:bg-gray-800',
-                  'focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10',
-                  validationErrors.email && 'border-red-500 dark:border-red-500'
-                )}
-              />
-              {validationErrors.email && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                  {validationErrors.email}
-                </p>
-              )}
-            </div>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              label="이메일 주소"
+              placeholder="이메일 주소를 입력하세요"
+              value={formData.email}
+              onChange={handleInputChange}
+              error={validationErrors.email}
+            />
 
             {/* 비밀번호 입력 */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                비밀번호
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                placeholder="비밀번호를 입력하세요"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={cn(
-                  'appearance-none rounded-lg relative block w-full',
-                  'border border-gray-300 dark:border-gray-600',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'text-gray-900 dark:text-white',
-                  'bg-white dark:bg-gray-800',
-                  'focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10',
-                  validationErrors.password && 'border-red-500 dark:border-red-500'
-                )}
-              />
-              {validationErrors.password && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                  {validationErrors.password}
-                </p>
-              )}
-              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                8자 이상, 대문자, 소문자, 숫자 포함
-              </p>
-            </div>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              label="비밀번호"
+              placeholder="비밀번호를 입력하세요"
+              value={formData.password}
+              onChange={handleInputChange}
+              error={validationErrors.password}
+              helperText="8자 이상, 대문자, 소문자, 숫자 포함"
+            />
 
             {/* 비밀번호 확인 입력 */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                비밀번호 확인
-              </label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                placeholder="비밀번호를 다시 입력하세요"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className={cn(
-                  'appearance-none rounded-lg relative block w-full',
-                  'border border-gray-300 dark:border-gray-600',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'text-gray-900 dark:text-white',
-                  'bg-white dark:bg-gray-800',
-                  'focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10',
-                  validationErrors.confirmPassword && 'border-red-500 dark:border-red-500'
-                )}
-              />
-              {validationErrors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                  {validationErrors.confirmPassword}
-                </p>
-              )}
-            </div>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              required
+              label="비밀번호 확인"
+              placeholder="비밀번호를 다시 입력하세요"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              error={validationErrors.confirmPassword}
+            />
           </div>
 
           {/* 에러 메시지 */}
@@ -340,39 +272,15 @@ export const SignupPage: React.FC = () => {
           </div>
 
           {/* 회원가입 버튼 */}
-          <div>
-            <Button
-              type="submit"
-              disabled={!isFormValid || isLoading}
-              className={cn(
-                'group relative w-full flex justify-center py-3 px-4',
-                'text-sm font-medium rounded-md text-white',
-                'bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'dark:bg-green-700 dark:hover:bg-green-600'
-              )}
-            >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                ) : (
-                  <svg
-                    className="h-5 w-5 text-green-500 group-hover:text-green-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <title>회원가입 아이콘</title>
-                    <path
-                      fillRule="evenodd"
-                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-              </span>
-              {isLoading ? '계정 생성 중...' : '계정 만들기'}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            disabled={!isFormValid || isSubmitting}
+            isLoading={isSubmitting}
+            size="lg"
+            className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
+          >
+            {isSubmitting ? '계정 생성 중...' : '계정 만들기'}
+          </Button>
         </form>
       </div>
     </div>

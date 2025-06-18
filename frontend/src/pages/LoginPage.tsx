@@ -1,9 +1,9 @@
 import type React from 'react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
-import { cn } from '../utils/cn'
+import { useAuth } from '../contexts/AuthContext'
 
 interface LoginFormData {
   email: string
@@ -11,12 +11,22 @@ interface LoginFormData {
 }
 
 export const LoginPage: React.FC = () => {
+  const navigate = useNavigate()
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // 이미 로그인된 사용자는 대시보드로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, authLoading, navigate])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -30,29 +40,40 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.email || !formData.password) return
+
     setIsLoading(true)
     setError(null)
 
     try {
-      // TODO: 로그인 API 호출 구현
-      console.log('Login attempt:', formData)
-
-      // 임시 딜레이 (실제 API 호출로 대체)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // TODO: 성공 시 리다이렉트 로직
+      await login(formData.email, formData.password)
+      // 로그인 성공 시 useEffect에서 리다이렉트 처리
     } catch (err) {
-      setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }
 
   const isFormValid = formData.email && formData.password
+  const isSubmitting = isLoading || authLoading
+
+  // 인증 로딩 중이면 로딩 화면 표시
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="w-full max-w-md space-y-8">
         {/* 헤더 */}
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
@@ -89,54 +110,28 @@ export const LoginPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             {/* 이메일 입력 */}
-            <div>
-              <label htmlFor="email" className="sr-only">
-                이메일 주소
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="이메일 주소"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={cn(
-                  'appearance-none rounded-lg relative block w-full',
-                  'border border-gray-300 dark:border-gray-600',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'text-gray-900 dark:text-white',
-                  'bg-white dark:bg-gray-800',
-                  'focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10'
-                )}
-              />
-            </div>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="이메일 주소"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
 
             {/* 비밀번호 입력 */}
-            <div>
-              <label htmlFor="password" className="sr-only">
-                비밀번호
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="비밀번호"
-                value={formData.password}
-                onChange={handleInputChange}
-                className={cn(
-                  'appearance-none rounded-lg relative block w-full',
-                  'border border-gray-300 dark:border-gray-600',
-                  'placeholder-gray-500 dark:placeholder-gray-400',
-                  'text-gray-900 dark:text-white',
-                  'bg-white dark:bg-gray-800',
-                  'focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10'
-                )}
-              />
-            </div>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              placeholder="비밀번호"
+              value={formData.password}
+              onChange={handleInputChange}
+            />
           </div>
 
           {/* 에러 메시지 */}
@@ -188,39 +183,15 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* 로그인 버튼 */}
-          <div>
-            <Button
-              type="submit"
-              disabled={!isFormValid || isLoading}
-              className={cn(
-                'group relative w-full flex justify-center py-3 px-4',
-                'text-sm font-medium rounded-md text-white',
-                'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
-                'dark:bg-blue-700 dark:hover:bg-blue-600'
-              )}
-            >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                ) : (
-                  <svg
-                    className="h-5 w-5 text-blue-500 group-hover:text-blue-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <title>로그인 아이콘</title>
-                    <path
-                      fillRule="evenodd"
-                      d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-              </span>
-              {isLoading ? '로그인 중...' : '로그인'}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            disabled={!isFormValid || isSubmitting}
+            isLoading={isSubmitting}
+            size="lg"
+            className="w-full"
+          >
+            {isSubmitting ? '로그인 중...' : '로그인'}
+          </Button>
         </form>
 
         {/* 소셜 로그인 (향후 확장) */}

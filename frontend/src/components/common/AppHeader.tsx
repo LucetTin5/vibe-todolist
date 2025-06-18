@@ -1,6 +1,7 @@
 import type React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ThemeToggle } from './ThemeToggle'
+import { useAuth } from '../../contexts/AuthContext'
 import { cn } from '../../utils/cn'
 
 interface AppHeaderProps {
@@ -15,9 +16,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showViewToggle = true,
 }) => {
   const navigate = useNavigate()
+  const { user, logout, isAuthenticated } = useAuth()
 
   const handleNavigate = (path: string) => {
     navigate(path)
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
   }
 
   return (
@@ -56,7 +63,43 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          {showViewToggle && (
+
+          {/* 사용자 정보 및 로그아웃 */}
+          {isAuthenticated && user && (
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:block text-sm text-gray-600 dark:text-gray-300">
+                안녕하세요, {user.name || user.email.split('@')[0]}님
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className={cn(
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100',
+                  'hover:bg-gray-100 dark:hover:bg-gray-700'
+                )}
+                title="로그아웃"
+              >
+                <span className="hidden sm:inline">로그아웃</span>
+                <svg
+                  className="w-4 h-4 sm:hidden"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <title>로그아웃</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {showViewToggle && isAuthenticated && (
             <div className={cn('flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 flex-shrink-0')}>
               <button
                 type="button"
