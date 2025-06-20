@@ -25,10 +25,13 @@ Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더�
  * OpenAPI spec version: 1.0.0
  */
 
-export type PostApiAuthSignupBody = {
-  email: string
-  /** @minLength 10 */
-  password: string
-  /** @minLength 1 */
-  name: string
+export type PostApiAuthSignup500 = {
+  /** 요청 성공 여부 */
+  success: boolean
+  /** 오류 코드 또는 메시지 */
+  error: string
+  /** 사용자 친화적 오류 메시지 */
+  message: string
+  /** 상세 오류 정보 (개발용) */
+  details?: string
 }

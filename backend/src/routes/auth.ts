@@ -12,13 +12,13 @@ const auth = new OpenAPIHono()
 // 스키마 정의
 const LoginSchema = z.object({
   email: z.string().email('유효한 이메일을 입력하세요'),
-  password: z.string().min(6, '비밀번호는 최소 6자 이상이어야 합니다'),
+  password: z.string().min(10, '비밀번호는 최소 10자 이상이어야 합니다'),
 })
 
 const SignupSchema = z.object({
   email: z.string().email('유효한 이메일을 입력하세요'),
-  password: z.string().min(6, '비밀번호는 최소 6자 이상이어야 합니다'),
-  displayName: z.string().optional(),
+  password: z.string().min(10, '비밀번호는 최소 10자 이상이어야 합니다'),
+  name: z.string().min(1, '이름을 입력해주세요'),
 })
 
 const RefreshTokenSchema = z.object({
@@ -204,12 +204,22 @@ auth.openapi(loginRoute, async (c) => {
   try {
     const { email, password } = c.req.valid('json')
 
+    console.log('Login attempt for email:', email)
+
     const { data, error } = await supabaseAdmin.auth.signInWithPassword({
       email,
       password,
     })
 
+    console.log('Supabase login response:', {
+      hasUser: !!data?.user,
+      hasSession: !!data?.session,
+      userEmail: data?.user?.email,
+      error: error?.message,
+    })
+
     if (error) {
+      console.error('Login failed:', error.message)
       return c.json(
         {
           success: false as const,
@@ -260,19 +270,28 @@ auth.openapi(loginRoute, async (c) => {
 // 회원가입 핸들러
 auth.openapi(signupRoute, async (c) => {
   try {
-    const { email, password, displayName } = c.req.valid('json')
+    const { email, password, name } = c.req.valid('json')
 
     const { data, error } = await supabaseAdmin.auth.signUp({
       email,
       password,
       options: {
         data: {
-          display_name: displayName,
+          display_name: name,
         },
       },
     })
 
+    console.log('Supabase signup response:', {
+      hasUser: !!data?.user,
+      hasSession: !!data?.session,
+      userEmail: data?.user?.email,
+      userConfirmed: data?.user?.email_confirmed_at,
+      error: error?.message,
+    })
+
     if (error) {
+      console.error('Supabase signup error:', error)
       return c.json(
         {
           success: false as const,
@@ -284,6 +303,11 @@ auth.openapi(signupRoute, async (c) => {
     }
 
     if (!data.user || !data.session) {
+      console.error('Signup failed - missing user or session:', {
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        userNeedsConfirmation: data?.user && !data?.session,
+      })
       return c.json(
         {
           success: false as const,

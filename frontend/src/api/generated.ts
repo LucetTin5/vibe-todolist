@@ -79,13 +79,16 @@ import type {
   PostApiAuthLogin200,
   PostApiAuthLogin400,
   PostApiAuthLogin401,
+  PostApiAuthLogin500,
   PostApiAuthLoginBody,
   PostApiAuthRefresh200,
   PostApiAuthRefresh401,
+  PostApiAuthRefresh500,
   PostApiAuthRefreshBody,
   PostApiAuthSignup201,
   PostApiAuthSignup400,
   PostApiAuthSignup409,
+  PostApiAuthSignup500,
   PostApiAuthSignupBody,
   PostApiTodos201,
   PostApiTodos400,
@@ -132,7 +135,7 @@ export const postApiAuthLogin = (
   
 
 
-export const getPostApiAuthLoginMutationOptions = <TError = PostApiAuthLogin400 | PostApiAuthLogin401,
+export const getPostApiAuthLoginMutationOptions = <TError = PostApiAuthLogin400 | PostApiAuthLogin401 | PostApiAuthLogin500,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: PostApiAuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: PostApiAuthLoginBody}, TContext> => {
 
@@ -159,12 +162,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostApiAuthLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthLogin>>>
     export type PostApiAuthLoginMutationBody = PostApiAuthLoginBody
-    export type PostApiAuthLoginMutationError = PostApiAuthLogin400 | PostApiAuthLogin401
+    export type PostApiAuthLoginMutationError = PostApiAuthLogin400 | PostApiAuthLogin401 | PostApiAuthLogin500
 
     /**
  * @summary 사용자 로그인
  */
-export const usePostApiAuthLogin = <TError = PostApiAuthLogin400 | PostApiAuthLogin401,
+export const usePostApiAuthLogin = <TError = PostApiAuthLogin400 | PostApiAuthLogin401 | PostApiAuthLogin500,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogin>>, TError,{data: PostApiAuthLoginBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiAuthLogin>>,
@@ -198,7 +201,7 @@ export const postApiAuthSignup = (
   
 
 
-export const getPostApiAuthSignupMutationOptions = <TError = PostApiAuthSignup400 | PostApiAuthSignup409,
+export const getPostApiAuthSignupMutationOptions = <TError = PostApiAuthSignup400 | PostApiAuthSignup409 | PostApiAuthSignup500,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSignup>>, TError,{data: PostApiAuthSignupBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSignup>>, TError,{data: PostApiAuthSignupBody}, TContext> => {
 
@@ -225,12 +228,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostApiAuthSignupMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthSignup>>>
     export type PostApiAuthSignupMutationBody = PostApiAuthSignupBody
-    export type PostApiAuthSignupMutationError = PostApiAuthSignup400 | PostApiAuthSignup409
+    export type PostApiAuthSignupMutationError = PostApiAuthSignup400 | PostApiAuthSignup409 | PostApiAuthSignup500
 
     /**
  * @summary 사용자 회원가입
  */
-export const usePostApiAuthSignup = <TError = PostApiAuthSignup400 | PostApiAuthSignup409,
+export const usePostApiAuthSignup = <TError = PostApiAuthSignup400 | PostApiAuthSignup409 | PostApiAuthSignup500,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSignup>>, TError,{data: PostApiAuthSignupBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiAuthSignup>>,
@@ -264,7 +267,7 @@ export const postApiAuthRefresh = (
   
 
 
-export const getPostApiAuthRefreshMutationOptions = <TError = PostApiAuthRefresh401,
+export const getPostApiAuthRefreshMutationOptions = <TError = PostApiAuthRefresh401 | PostApiAuthRefresh500,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRefresh>>, TError,{data: PostApiAuthRefreshBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRefresh>>, TError,{data: PostApiAuthRefreshBody}, TContext> => {
 
@@ -291,12 +294,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostApiAuthRefreshMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthRefresh>>>
     export type PostApiAuthRefreshMutationBody = PostApiAuthRefreshBody
-    export type PostApiAuthRefreshMutationError = PostApiAuthRefresh401
+    export type PostApiAuthRefreshMutationError = PostApiAuthRefresh401 | PostApiAuthRefresh500
 
     /**
  * @summary 토큰 갱신
  */
-export const usePostApiAuthRefresh = <TError = PostApiAuthRefresh401,
+export const usePostApiAuthRefresh = <TError = PostApiAuthRefresh401 | PostApiAuthRefresh500,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthRefresh>>, TError,{data: PostApiAuthRefreshBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiAuthRefresh>>,

@@ -30,6 +30,12 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     console.log(`[API Response] ${response.status} ${response.config.url}`)
+    
+    // 인증 관련 API 응답 상세 로깅
+    if (response.config.url?.includes('/auth/')) {
+      console.log(`[API Response Data] ${response.config.url}:`, response.data)
+    }
+    
     return response
   },
   async (error) => {

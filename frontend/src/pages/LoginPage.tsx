@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext'
 interface LoginFormData {
   email: string
   password: string
+  rememberMe: boolean
 }
 
 export const LoginPage: React.FC = () => {
@@ -17,6 +18,7 @@ export const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
+    rememberMe: false,
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,10 +31,10 @@ export const LoginPage: React.FC = () => {
   }, [isAuthenticated, authLoading, navigate])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
     // Clear error when user starts typing
     if (error) setError(null)
@@ -46,7 +48,7 @@ export const LoginPage: React.FC = () => {
     setError(null)
 
     try {
-      await login(formData.email, formData.password)
+      await login(formData.email, formData.password, formData.rememberMe)
       // 로그인 성공 시 useEffect에서 리다이렉트 처리
     } catch (err) {
       const errorMessage =
@@ -59,7 +61,7 @@ export const LoginPage: React.FC = () => {
     }
   }
 
-  const isFormValid = formData.email && formData.password
+  const isFormValid = formData.email.trim() && formData.password.trim()
   const isSubmitting = isLoading || authLoading
 
   // 인증 로딩 중이면 로딩 화면 표시
@@ -160,8 +162,10 @@ export const LoginPage: React.FC = () => {
             <div className="flex items-center">
               <input
                 id="remember-me"
-                name="remember-me"
+                name="rememberMe"
                 type="checkbox"
+                checked={formData.rememberMe}
+                onChange={handleInputChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
               />
               <label

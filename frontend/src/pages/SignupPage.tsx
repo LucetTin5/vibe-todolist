@@ -67,8 +67,8 @@ export const SignupPage: React.FC = () => {
     // 비밀번호 검증
     if (!formData.password) {
       errors.password = '비밀번호를 입력해주세요.'
-    } else if (formData.password.length < 8) {
-      errors.password = '비밀번호는 8자 이상이어야 합니다.'
+    } else if (formData.password.length < 10) {
+      errors.password = '비밀번호는 10자 이상이어야 합니다.'
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       errors.password = '비밀번호는 대문자, 소문자, 숫자를 포함해야 합니다.'
     }
@@ -106,12 +106,24 @@ export const SignupPage: React.FC = () => {
     }
   }
 
-  const isFormValid =
-    formData.email &&
-    formData.password &&
-    formData.confirmPassword &&
-    formData.name &&
-    Object.keys(validationErrors).length === 0
+  const isFormValid = (): boolean => {
+    const errors: Partial<SignupFormData> = {}
+
+    // 필수 필드 검증
+    if (!formData.name.trim()) errors.name = '이름을 입력해주세요.'
+    if (!formData.email) errors.email = '이메일을 입력해주세요.'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      errors.email = '올바른 이메일 형식이 아닙니다.'
+    if (!formData.password) errors.password = '비밀번호를 입력해주세요.'
+    else if (formData.password.length < 10) errors.password = '비밀번호는 10자 이상이어야 합니다.'
+    else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password))
+      errors.password = '비밀번호는 대문자, 소문자, 숫자를 포함해야 합니다.'
+    if (!formData.confirmPassword) errors.confirmPassword = '비밀번호 확인을 입력해주세요.'
+    else if (formData.password !== formData.confirmPassword)
+      errors.confirmPassword = '비밀번호가 일치하지 않습니다.'
+
+    return Object.keys(errors).length === 0
+  }
 
   const isSubmitting = isLoading || authLoading
 
@@ -202,7 +214,7 @@ export const SignupPage: React.FC = () => {
               value={formData.password}
               onChange={handleInputChange}
               error={validationErrors.password}
-              helperText="8자 이상, 대문자, 소문자, 숫자 포함"
+              helperText="10자 이상, 대문자, 소문자, 숫자 포함"
             />
 
             {/* 비밀번호 확인 입력 */}
@@ -274,7 +286,7 @@ export const SignupPage: React.FC = () => {
           {/* 회원가입 버튼 */}
           <Button
             type="submit"
-            disabled={!isFormValid || isSubmitting}
+            disabled={!isFormValid() || isSubmitting}
             isLoading={isSubmitting}
             size="lg"
             className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"

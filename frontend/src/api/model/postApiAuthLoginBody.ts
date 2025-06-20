@@ -27,6 +27,6 @@ Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더�
 
 export type PostApiAuthLoginBody = {
   email: string
-  /** @minLength 6 */
+  /** @minLength 10 */
   password: string
 }
