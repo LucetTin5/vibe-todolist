@@ -1,6 +1,6 @@
 import type React from 'react'
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { usePostApiAuthLogin, usePostApiAuthSignup, usePostApiAuthRefresh } from '../api/generated'
+import { usePostApiAuthLogin, usePostApiAuthSignup } from '../api/generated'
 import type { PostApiAuthLogin200DataUser } from '../api/model/postApiAuthLogin200DataUser'
 
 interface User {
@@ -11,7 +11,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  token: string | null
+  sessionId: string | null
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
@@ -22,9 +22,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const TOKEN_KEY = 'auth_token'
+const SESSION_ID_KEY = 'session_id'
 const USER_KEY = 'auth_user'
-const REFRESH_TOKEN_KEY = 'refresh_token'
+const EXPIRES_AT_KEY = 'expires_at'
 
 interface AuthProviderProps {
   children: React.ReactNode
@@ -32,38 +32,37 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // API 훅들
   const loginMutation = usePostApiAuthLogin()
   const signupMutation = usePostApiAuthSignup()
-  const refreshMutation = usePostApiAuthRefresh()
 
   // 로컬/세션 스토리지에서 인증 정보 복원
   useEffect(() => {
-    let savedToken = localStorage.getItem(TOKEN_KEY)
+    let savedSessionId = localStorage.getItem(SESSION_ID_KEY)
     let savedUser = localStorage.getItem(USER_KEY)
 
     // localStorage에 없으면 sessionStorage 확인
-    if (!savedToken || !savedUser) {
-      savedToken = sessionStorage.getItem(TOKEN_KEY)
+    if (!savedSessionId || !savedUser) {
+      savedSessionId = sessionStorage.getItem(SESSION_ID_KEY)
       savedUser = sessionStorage.getItem(USER_KEY)
     }
 
-    if (savedToken && savedUser) {
+    if (savedSessionId && savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser)
-        setToken(savedToken)
+        setSessionId(savedSessionId)
         setUser(parsedUser)
       } catch (error) {
         console.error('Failed to parse saved user data:', error)
-        localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(SESSION_ID_KEY)
         localStorage.removeItem(USER_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_KEY)
-        sessionStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(EXPIRES_AT_KEY)
+        sessionStorage.removeItem(SESSION_ID_KEY)
         sessionStorage.removeItem(USER_KEY)
-        sessionStorage.removeItem(REFRESH_TOKEN_KEY)
+        sessionStorage.removeItem(EXPIRES_AT_KEY)
       }
     }
 
@@ -73,9 +72,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 사용자 정보 저장 헬퍼
   const saveUserData = useCallback(
     (
-      accessToken: string,
-      refreshToken: string,
+      sessionIdValue: string,
       userData: PostApiAuthLogin200DataUser,
+      expiresAt?: number,
       rememberMe = false
     ) => {
       const userWithName: User = {
@@ -86,28 +85,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('Saving user data:', {
         userWithName,
-        hasToken: !!accessToken,
-        hasRefreshToken: !!refreshToken,
+        hasSessionId: !!sessionIdValue,
+        expiresAt,
         rememberMe,
       })
 
-      setToken(accessToken)
+      setSessionId(sessionIdValue)
       setUser(userWithName)
 
       if (rememberMe) {
         // 로그인 상태 유지 시 localStorage 사용
-        localStorage.setItem(TOKEN_KEY, accessToken)
+        localStorage.setItem(SESSION_ID_KEY, sessionIdValue)
         localStorage.setItem(USER_KEY, JSON.stringify(userWithName))
-        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+        if (expiresAt) {
+          localStorage.setItem(EXPIRES_AT_KEY, expiresAt.toString())
+        }
       } else {
         // 로그인 상태 유지하지 않을 시 sessionStorage 사용
-        sessionStorage.setItem(TOKEN_KEY, accessToken)
+        sessionStorage.setItem(SESSION_ID_KEY, sessionIdValue)
         sessionStorage.setItem(USER_KEY, JSON.stringify(userWithName))
-        sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+        if (expiresAt) {
+          sessionStorage.setItem(EXPIRES_AT_KEY, expiresAt.toString())
+        }
         // localStorage에서는 제거
-        localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(SESSION_ID_KEY)
         localStorage.removeItem(USER_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_KEY)
+        localStorage.removeItem(EXPIRES_AT_KEY)
       }
 
       console.log('User data saved to', rememberMe ? 'localStorage' : 'sessionStorage')
@@ -118,75 +121,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 로그아웃 함수
   const logout = useCallback(() => {
     setUser(null)
-    setToken(null)
+    setSessionId(null)
 
-    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(SESSION_ID_KEY)
     localStorage.removeItem(USER_KEY)
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
-    sessionStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(EXPIRES_AT_KEY)
+    sessionStorage.removeItem(SESSION_ID_KEY)
     sessionStorage.removeItem(USER_KEY)
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY)
+    sessionStorage.removeItem(EXPIRES_AT_KEY)
   }, [])
 
-  // 토큰 갱신 함수
+  // 세션 갱신 함수 (현재는 placeholder - 필요시 구현)
   const refreshToken = useCallback(async (): Promise<void> => {
-    let savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+    // 세션 기반 인증에서는 보통 자동 갱신이 됨
+    // 필요한 경우 여기서 세션 검증 로직 구현
+    console.log('Session refresh called (session-based auth)')
+  }, [])
 
-    // localStorage에 없으면 sessionStorage 확인
-    if (!savedRefreshToken) {
-      savedRefreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY)
-    }
-
-    if (!savedRefreshToken) {
-      logout()
-      return
-    }
-
-    try {
-      const response = await refreshMutation.mutateAsync({
-        data: { refresh_token: savedRefreshToken },
-      })
-
-      if (response.success && response.data) {
-        setToken(response.data.access_token)
-        localStorage.setItem(TOKEN_KEY, response.data.access_token)
-
-        if (response.data.refresh_token) {
-          localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refresh_token)
-        }
-      }
-    } catch (error) {
-      console.error('Token refresh error:', error)
-      logout()
-    }
-  }, [refreshMutation, logout])
-
-  // 토큰 만료 체크 및 자동 갱신
+  // 세션 만료 체크
   useEffect(() => {
-    if (!token) return
+    if (!sessionId) return
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      const currentTime = Date.now() / 1000
+    // 저장된 만료 시간 확인
+    let savedExpiresAt = localStorage.getItem(EXPIRES_AT_KEY)
+    if (!savedExpiresAt) {
+      savedExpiresAt = sessionStorage.getItem(EXPIRES_AT_KEY)
+    }
 
-      const refreshTime = (payload.exp - 300) * 1000
-      const timeUntilRefresh = refreshTime - Date.now()
+    if (savedExpiresAt) {
+      const expiresAt = Number.parseInt(savedExpiresAt, 10)
+      const currentTime = Math.floor(Date.now() / 1000)
 
-      if (timeUntilRefresh > 0) {
-        const refreshTimer = setTimeout(() => {
-          refreshToken()
-        }, timeUntilRefresh)
-
-        return () => clearTimeout(refreshTimer)
-      }
-      if (payload.exp < currentTime) {
+      if (expiresAt < currentTime) {
+        console.log('Session expired, logging out')
         logout()
       }
-    } catch (error) {
-      console.error('Invalid token format:', error)
-      logout()
     }
-  }, [token, refreshToken, logout])
+  }, [sessionId, logout])
 
   // 로그인 함수
   const login = useCallback(
@@ -200,9 +171,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (response.success && response.data) {
           saveUserData(
-            response.data.access_token,
-            response.data.refresh_token,
+            response.data.session_id,
             response.data.user,
+            response.data.expires_at,
             rememberMe
           )
         }
@@ -234,7 +205,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (response.success && response.data) {
           console.log('Signup successful, saving user data')
-          saveUserData(response.data.access_token, response.data.refresh_token, response.data.user)
+          saveUserData(response.data.session_id, response.data.user, response.data.expires_at)
           console.log('Signup completed successfully')
         } else {
           console.error('Signup failed: invalid response format')
@@ -251,9 +222,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
-    token,
+    sessionId,
     isLoading,
-    isAuthenticated: !!user && !!token,
+    isAuthenticated: !!user && !!sessionId,
     login,
     signup,
     logout,

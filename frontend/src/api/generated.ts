@@ -11,7 +11,7 @@
 - 통계 조회
 
 ## 인증
-Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더에 'Bearer {token}' 형식으로 전달하세요.
+Bearer 토큰을 사용한 세션 기반 인증이 필요합니다. Authorization 헤더에 'Bearer {sessionId}' 형식으로 전달하세요.
 
 ## 에러 처리
 모든 에러 응답은 다음 형식을 따릅니다:
@@ -53,6 +53,7 @@ import type {
   DeleteAuthTodosId500,
   GetApiTodos200,
   GetApiTodos400,
+  GetApiTodos401,
   GetApiTodosId200,
   GetApiTodosId404,
   GetApiTodosParams,
@@ -81,6 +82,10 @@ import type {
   PostApiAuthLogin401,
   PostApiAuthLogin500,
   PostApiAuthLoginBody,
+  PostApiAuthLogout200,
+  PostApiAuthLogout400,
+  PostApiAuthLogout500,
+  PostApiAuthLogoutBody,
   PostApiAuthRefresh200,
   PostApiAuthRefresh401,
   PostApiAuthRefresh500,
@@ -92,6 +97,7 @@ import type {
   PostApiAuthSignupBody,
   PostApiTodos201,
   PostApiTodos400,
+  PostApiTodos401,
   PostApiTodosBody,
   PostAuthTodos201,
   PostAuthTodos401,
@@ -309,6 +315,72 @@ export const usePostApiAuthRefresh = <TError = PostApiAuthRefresh401 | PostApiAu
       > => {
 
       const mutationOptions = getPostApiAuthRefreshMutationOptions(options);
+
+      return useMutation(mutationOptions , queryClient);
+    }
+    
+/**
+ * 세션을 종료하고 로그아웃합니다.
+ * @summary 사용자 로그아웃
+ */
+export const postApiAuthLogout = (
+    postApiAuthLogoutBody: PostApiAuthLogoutBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PostApiAuthLogout200>(
+      {url: `/api/auth/logout`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: postApiAuthLogoutBody, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiAuthLogoutMutationOptions = <TError = PostApiAuthLogout400 | PostApiAuthLogout500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,{data: PostApiAuthLogoutBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,{data: PostApiAuthLogoutBody}, TContext> => {
+
+const mutationKey = ['postApiAuthLogout'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthLogout>>, {data: PostApiAuthLogoutBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthLogout(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthLogout>>>
+    export type PostApiAuthLogoutMutationBody = PostApiAuthLogoutBody
+    export type PostApiAuthLogoutMutationError = PostApiAuthLogout400 | PostApiAuthLogout500
+
+    /**
+ * @summary 사용자 로그아웃
+ */
+export const usePostApiAuthLogout = <TError = PostApiAuthLogout400 | PostApiAuthLogout500,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,{data: PostApiAuthLogoutBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthLogout>>,
+        TError,
+        {data: PostApiAuthLogoutBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiAuthLogoutMutationOptions(options);
 
       return useMutation(mutationOptions , queryClient);
     }
@@ -577,7 +649,7 @@ export const getGetApiTodosQueryKey = (params?: GetApiTodosParams,) => {
     }
 
     
-export const getGetApiTodosQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiTodosQueryOptions = <TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400 | GetApiTodos401>(params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -596,10 +668,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetApiTodosQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTodos>>>
-export type GetApiTodosQueryError = GetApiTodos400
+export type GetApiTodosQueryError = GetApiTodos400 | GetApiTodos401
 
 
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400 | GetApiTodos401>(
  params: undefined |  GetApiTodosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodos>>,
@@ -609,7 +681,7 @@ export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, 
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400 | GetApiTodos401>(
  params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiTodos>>,
@@ -619,7 +691,7 @@ export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, 
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400 | GetApiTodos401>(
  params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -627,7 +699,7 @@ export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, 
  * @summary Todo 목록 조회 (Enhanced)
  */
 
-export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400>(
+export function useGetApiTodos<TData = Awaited<ReturnType<typeof getApiTodos>>, TError = GetApiTodos400 | GetApiTodos401>(
  params?: GetApiTodosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTodos>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -664,7 +736,7 @@ export const postApiTodos = (
   
 
 
-export const getPostApiTodosMutationOptions = <TError = PostApiTodos400,
+export const getPostApiTodosMutationOptions = <TError = PostApiTodos400 | PostApiTodos401,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext> => {
 
@@ -691,12 +763,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostApiTodosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiTodos>>>
     export type PostApiTodosMutationBody = PostApiTodosBody
-    export type PostApiTodosMutationError = PostApiTodos400
+    export type PostApiTodosMutationError = PostApiTodos400 | PostApiTodos401
 
     /**
  * @summary Todo 생성 (Enhanced)
  */
-export const usePostApiTodos = <TError = PostApiTodos400,
+export const usePostApiTodos = <TError = PostApiTodos400 | PostApiTodos401,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiTodos>>, TError,{data: PostApiTodosBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiTodos>>,

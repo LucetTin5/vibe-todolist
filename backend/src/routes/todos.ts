@@ -17,9 +17,13 @@ import {
   type TodoQuery,
 } from '../schemas/todo.schemas'
 import { ErrorResponseSchema } from '../types/api.types'
+import { validateSession } from '../middleware/session'
 
 const app = new OpenAPIHono()
 const todoService = new TodoService()
+
+// 모든 Todo API에 인증 미들웨어 적용
+app.use('*', validateSession)
 
 // 라우트 정의
 const getTodosRoute = createRoute({
@@ -28,6 +32,7 @@ const getTodosRoute = createRoute({
   tags: ['Todos'],
   summary: 'Todo 목록 조회 (Enhanced)',
   description: '고급 필터링, 정렬, 검색 기능이 포함된 Todo 목록을 조회합니다.',
+  security: [{ bearerAuth: [] }],
   request: {
     query: TodoQuerySchema,
   },
@@ -48,6 +53,14 @@ const getTodosRoute = createRoute({
       },
       description: '잘못된 요청',
     },
+    401: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '인증 필요',
+    },
   },
 })
 
@@ -57,6 +70,7 @@ const createTodoRoute = createRoute({
   tags: ['Todos'],
   summary: 'Todo 생성 (Enhanced)',
   description: '우선순위, 카테고리, 태그 등의 고급 기능이 포함된 Todo를 생성합니다.',
+  security: [{ bearerAuth: [] }],
   request: {
     body: {
       content: {
@@ -82,6 +96,14 @@ const createTodoRoute = createRoute({
         },
       },
       description: '잘못된 요청',
+    },
+    401: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '인증 필요',
     },
   },
 })

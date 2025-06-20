@@ -25,6 +25,10 @@ const RefreshTokenSchema = z.object({
   refresh_token: z.string(),
 })
 
+const LogoutSchema = z.object({
+  session_id: z.string(),
+})
+
 const AuthResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
@@ -44,9 +48,14 @@ const AuthSuccessResponseSchema = z.object({
       id: z.string(),
       email: z.string(),
     }),
-    access_token: z.string(),
-    refresh_token: z.string(),
+    session_id: z.string(),
+    expires_at: z.number().optional(),
   }),
+})
+
+const LogoutSuccessResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
 })
 
 // ErrorResponseSchema는 api.types.ts에서 import
@@ -199,6 +208,50 @@ const refreshRoute = createRoute({
   },
 })
 
+// 로그아웃 라우트 정의
+const logoutRoute = createRoute({
+  method: 'post',
+  path: '/api/auth/logout',
+  summary: '사용자 로그아웃',
+  description: '세션을 종료하고 로그아웃합니다.',
+  tags: ['Auth'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: LogoutSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: LogoutSuccessResponseSchema,
+        },
+      },
+      description: '로그아웃 성공',
+    },
+    400: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '잘못된 요청',
+    },
+    500: {
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: '서버 오류',
+    },
+  },
+})
+
 // 로그인 핸들러
 auth.openapi(loginRoute, async (c) => {
   try {
@@ -241,6 +294,10 @@ auth.openapi(loginRoute, async (c) => {
       )
     }
 
+    // access_token을 session_id로 사용 (Supabase 권장 방식)
+    const sessionId = data.session.access_token
+
+    // 세션 ID만 반환 (보안 강화)
     return c.json(
       {
         success: true as const,
@@ -249,8 +306,8 @@ auth.openapi(loginRoute, async (c) => {
             id: data.user.id,
             email: data.user.email || '',
           },
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
+          session_id: sessionId,
+          expires_at: data.session.expires_at,
         },
       },
       200
@@ -318,6 +375,10 @@ auth.openapi(signupRoute, async (c) => {
       )
     }
 
+    // access_token을 session_id로 사용 (Supabase 권장 방식)
+    const sessionId = data.session.access_token
+
+    // 세션 ID만 반환 (보안 강화)
     return c.json(
       {
         success: true as const,
@@ -326,8 +387,8 @@ auth.openapi(signupRoute, async (c) => {
             id: data.user.id,
             email: data.user.email || '',
           },
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
+          session_id: sessionId,
+          expires_at: data.session.expires_at,
         },
       },
       201
@@ -386,6 +447,45 @@ auth.openapi(refreshRoute, async (c) => {
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
         },
+      },
+      200
+    )
+  } catch (error) {
+    return c.json(
+      {
+        success: false as const,
+        error: error instanceof Error ? error.message : '서버 오류가 발생했습니다',
+        message: error instanceof Error ? error.message : '서버 오류가 발생했습니다',
+      },
+      500
+    )
+  }
+})
+
+// 로그아웃 핸들러
+auth.openapi(logoutRoute, async (c) => {
+  try {
+    const { session_id } = c.req.valid('json')
+
+    // Supabase에서 세션 종료
+    const { error } = await supabaseAdmin.auth.admin.signOut(session_id, 'session')
+
+    if (error) {
+      console.error('Logout error:', error.message)
+      return c.json(
+        {
+          success: false as const,
+          error: error.message,
+          message: '로그아웃에 실패했습니다',
+        },
+        400
+      )
+    }
+
+    return c.json(
+      {
+        success: true as const,
+        message: '로그아웃되었습니다',
       },
       200
     )

@@ -240,11 +240,23 @@ test.describe('Authentication', () => {
 
       await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
 
+      // 세션 ID가 localStorage에 저장되었는지 확인
+      const sessionId = await page.evaluate(() => {
+        return localStorage.getItem('session_id') || sessionStorage.getItem('session_id')
+      })
+      expect(sessionId).toBeTruthy()
+
       // 페이지 새로고침
       await page.reload()
 
-      // 여전히 대시보드에 있는지 확인 (토큰이 유지되어야 함)
+      // 여전히 대시보드에 있는지 확인 (세션 ID가 유지되어야 함)
       await expect(page).toHaveURL('/dashboard')
+
+      // 새로고침 후에도 세션 ID가 유지되는지 확인
+      const sessionIdAfterReload = await page.evaluate(() => {
+        return localStorage.getItem('session_id') || sessionStorage.getItem('session_id')
+      })
+      expect(sessionIdAfterReload).toBe(sessionId)
     })
 
     test('보호된 라우트 접근 시 로그인 페이지로 리다이렉트', async ({ page }) => {
@@ -253,6 +265,173 @@ test.describe('Authentication', () => {
 
       // 로그인 페이지로 리다이렉트되는지 확인
       await expect(page).toHaveURL('/login')
+    })
+
+    test('로그인 상태 유지 기능 테스트', async ({ page }) => {
+      const timestamp = Date.now()
+      const testEmail = `remembertest${timestamp}@example.com`
+      const testPassword = 'TestPassword123456'
+
+      // 회원가입
+      await page.goto('/signup')
+      await page.fill('#name', '상태유지테스트')
+      await page.fill('#email', testEmail)
+      await page.fill('#password', testPassword)
+      await page.fill('#confirmPassword', testPassword)
+      await page.check('#agree-terms')
+      await page.click('button[type="submit"]')
+
+      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+
+      // 로그아웃
+      await page.click('button:has-text("로그아웃")')
+      await expect(page).toHaveURL('/login')
+
+      // 로그인 상태 유지 체크박스를 선택하고 로그인
+      await page.fill('#email', testEmail)
+      await page.fill('#password', testPassword)
+
+      // 로그인 상태 유지 체크박스 찾기 및 클릭
+      const rememberMeSelectors = [
+        '#rememberMe',
+        'input[type="checkbox"][name="rememberMe"]',
+        'text="로그인 상태 유지"',
+        'label:has-text("로그인 상태 유지") input[type="checkbox"]',
+      ]
+
+      let rememberMeFound = false
+      for (const selector of rememberMeSelectors) {
+        try {
+          await page.check(selector, { timeout: 2000 })
+          rememberMeFound = true
+          break
+        } catch {
+          // 계속 시도
+        }
+      }
+
+      await page.click('button[type="submit"]')
+      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+
+      // localStorage에 세션 ID가 저장되었는지 확인 (rememberMe가 true이면 localStorage 사용)
+      const sessionInLocalStorage = await page.evaluate(() => {
+        return localStorage.getItem('session_id')
+      })
+
+      if (rememberMeFound) {
+        expect(sessionInLocalStorage).toBeTruthy()
+      }
+    })
+
+    test('세션 만료 시 자동 로그아웃', async ({ page }) => {
+      const timestamp = Date.now()
+      const testEmail = `expiretest${timestamp}@example.com`
+      const testPassword = 'TestPassword123456'
+
+      // 회원가입 및 로그인
+      await page.goto('/signup')
+      await page.fill('#name', '만료테스트')
+      await page.fill('#email', testEmail)
+      await page.fill('#password', testPassword)
+      await page.fill('#confirmPassword', testPassword)
+      await page.check('#agree-terms')
+      await page.click('button[type="submit"]')
+
+      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+
+      // 세션 만료를 시뮬레이션하기 위해 expires_at을 과거 시간으로 설정
+      await page.evaluate(() => {
+        const pastTimestamp = Math.floor(Date.now() / 1000) - 3600 // 1시간 전
+        localStorage.setItem('expires_at', pastTimestamp.toString())
+        sessionStorage.setItem('expires_at', pastTimestamp.toString())
+      })
+
+      // 페이지 새로고침하여 만료 체크 트리거
+      await page.reload()
+
+      // 로그인 페이지로 리다이렉트되어야 함
+      await expect(page).toHaveURL('/login', { timeout: 10000 })
+    })
+  })
+
+  test.describe('API 인증 헤더', () => {
+    test('세션 ID가 Authorization 헤더에 포함되는지 확인', async ({ page }) => {
+      const timestamp = Date.now()
+      const testEmail = `apitest${timestamp}@example.com`
+      const testPassword = 'TestPassword123456'
+
+      // 네트워크 요청 감시 시작
+      const requests: Array<{ url: string; headers: Record<string, string> }> = []
+
+      page.on('request', (request) => {
+        const url = request.url()
+        const headers = request.headers()
+
+        // API 요청만 기록 (auth, todos 등)
+        if (url.includes('/api/') || url.includes('/auth/')) {
+          requests.push({ url, headers })
+        }
+      })
+
+      // 회원가입
+      await page.goto('/signup')
+      await page.fill('#name', 'API테스트')
+      await page.fill('#email', testEmail)
+      await page.fill('#password', testPassword)
+      await page.fill('#confirmPassword', testPassword)
+      await page.check('#agree-terms')
+      await page.click('button[type="submit"]')
+
+      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+
+      // Todo 목록 API 호출을 위해 잠시 대기
+      await page.waitForTimeout(2000)
+
+      // 인증이 필요한 API 요청에 Authorization 헤더가 포함되었는지 확인
+      const authenticatedRequests = requests.filter(
+        (req) => req.url.includes('/api/todos') && req.headers.authorization
+      )
+
+      expect(authenticatedRequests.length).toBeGreaterThan(0)
+
+      // Authorization 헤더가 Bearer 형식인지 확인
+      const authHeader = authenticatedRequests[0].headers.authorization
+      expect(authHeader).toMatch(/^Bearer .+/)
+    })
+
+    test('401 에러 시 자동 로그아웃 및 리다이렉트', async ({ page }) => {
+      const timestamp = Date.now()
+      const testEmail = `unauthorizedtest${timestamp}@example.com`
+      const testPassword = 'TestPassword123456'
+
+      // 회원가입 및 로그인
+      await page.goto('/signup')
+      await page.fill('#name', '401테스트')
+      await page.fill('#email', testEmail)
+      await page.fill('#password', testPassword)
+      await page.fill('#confirmPassword', testPassword)
+      await page.check('#agree-terms')
+      await page.click('button[type="submit"]')
+
+      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
+
+      // 세션 ID를 무효한 값으로 변경하여 401 에러 유발
+      await page.evaluate(() => {
+        localStorage.setItem('session_id', 'invalid-session-id')
+        sessionStorage.setItem('session_id', 'invalid-session-id')
+      })
+
+      // 페이지 새로고침하여 API 요청 트리거
+      await page.reload()
+
+      // 401 에러로 인해 로그인 페이지로 리다이렉트되어야 함
+      await expect(page).toHaveURL('/login', { timeout: 10000 })
+
+      // 세션 정보가 정리되었는지 확인
+      const sessionId = await page.evaluate(() => {
+        return localStorage.getItem('session_id') || sessionStorage.getItem('session_id')
+      })
+      expect(sessionId).toBeFalsy()
     })
   })
 

@@ -41,7 +41,7 @@ TodoList 애플리케이션의 REST API입니다.
 - 통계 조회
 
 ## 인증
-Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더에 'Bearer {token}' 형식으로 전달하세요.
+Bearer 토큰을 사용한 세션 기반 인증이 필요합니다. Authorization 헤더에 'Bearer {sessionId}' 형식으로 전달하세요.
 
 ## 에러 처리
 모든 에러 응답은 다음 형식을 따릅니다:
@@ -64,6 +64,16 @@ Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더�
       description: '개발 서버',
     },
   ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'Session',
+        description: 'Supabase 세션 기반 인증',
+      },
+    },
+  },
   tags: [
     {
       name: 'Auth',

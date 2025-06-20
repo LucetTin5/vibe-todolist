@@ -11,10 +11,13 @@ export const axiosInstance = axios.create({
 // Request interceptor for auth and debugging
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 인증 토큰 자동 추가
-    const token = localStorage.getItem('auth_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // 세션 ID 자동 추가
+    let sessionId = localStorage.getItem('session_id')
+    if (!sessionId) {
+      sessionId = sessionStorage.getItem('session_id')
+    }
+    if (sessionId) {
+      config.headers.Authorization = `Bearer ${sessionId}`
     }
     
     console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`)
@@ -41,48 +44,21 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
     
-    // 401 에러 시 토큰 갱신 시도
+    // 401 에러 시 세션 만료 처리
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       
-      const refreshToken = localStorage.getItem('auth_refresh_token')
-      if (refreshToken) {
-        try {
-          const response = await axios.post('/api/auth/refresh', {
-            refresh_token: refreshToken
-          })
-          
-          const { access_token, refresh_token: newRefreshToken } = response.data.data
-          
-          // 새 토큰 저장
-          localStorage.setItem('auth_token', access_token)
-          if (newRefreshToken) {
-            localStorage.setItem('auth_refresh_token', newRefreshToken)
-          }
-          
-          // 원본 요청에 새 토큰 적용하여 재시도
-          originalRequest.headers.Authorization = `Bearer ${access_token}`
-          return axiosInstance(originalRequest)
-        } catch (refreshError) {
-          // 토큰 갱신 실패 시 로그아웃 처리
-          localStorage.removeItem('auth_token')
-          localStorage.removeItem('auth_refresh_token')
-          localStorage.removeItem('auth_user')
-          
-          // 로그인 페이지로 리다이렉트 (optional)
-          if (window.location.pathname !== '/login') {
-            window.location.href = '/login'
-          }
-        }
-      } else {
-        // refresh token이 없으면 바로 로그아웃
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_refresh_token')
-        localStorage.removeItem('auth_user')
-        
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login'
-        }
+      // 세션 기반 인증에서는 세션이 만료되면 로그아웃 처리
+      localStorage.removeItem('session_id')
+      localStorage.removeItem('auth_user')
+      localStorage.removeItem('expires_at')
+      sessionStorage.removeItem('session_id')
+      sessionStorage.removeItem('auth_user')
+      sessionStorage.removeItem('expires_at')
+      
+      // 로그인 페이지로 리다이렉트
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
       }
     }
     

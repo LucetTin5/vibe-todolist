@@ -11,7 +11,7 @@
 - 통계 조회
 
 ## 인증
-Bearer 토큰을 사용한 JWT 인증이 필요합니다. Authorization 헤더에 'Bearer {token}' 형식으로 전달하세요.
+Bearer 토큰을 사용한 세션 기반 인증이 필요합니다. Authorization 헤더에 'Bearer {sessionId}' 형식으로 전달하세요.
 
 ## 에러 처리
 모든 에러 응답은 다음 형식을 따릅니다:
@@ -38,6 +38,7 @@ export * from './getApiTodos200TodosItemCategory'
 export * from './getApiTodos200TodosItemPriority'
 export * from './getApiTodos200TodosItemStatus'
 export * from './getApiTodos400'
+export * from './getApiTodos401'
 export * from './getApiTodosCategory'
 export * from './getApiTodosFilter'
 export * from './getApiTodosId200'
@@ -107,6 +108,10 @@ export * from './postApiAuthLogin400'
 export * from './postApiAuthLogin401'
 export * from './postApiAuthLogin500'
 export * from './postApiAuthLoginBody'
+export * from './postApiAuthLogout200'
+export * from './postApiAuthLogout400'
+export * from './postApiAuthLogout500'
+export * from './postApiAuthLogoutBody'
 export * from './postApiAuthRefresh200'
 export * from './postApiAuthRefresh200Data'
 export * from './postApiAuthRefresh200DataUser'
@@ -125,6 +130,7 @@ export * from './postApiTodos201Category'
 export * from './postApiTodos201Priority'
 export * from './postApiTodos201Status'
 export * from './postApiTodos400'
+export * from './postApiTodos401'
 export * from './postApiTodosBody'
 export * from './postApiTodosBodyCategory'
 export * from './postApiTodosBodyPriority'
