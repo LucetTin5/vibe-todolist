@@ -65,3 +65,9 @@ jspm_packages/
 
 # Trash directory
 trash/
+
+# Test results
+test-results/
+playwright-report/
+coverage/
+*.lcov
