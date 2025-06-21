@@ -44,22 +44,10 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
     
-    // 401 에러 시 세션 만료 처리
+    // 401 에러 시 세션 만료 처리 - React Query 전역 에러 핸들러에서 처리됨
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      
-      // 세션 기반 인증에서는 세션이 만료되면 로그아웃 처리
-      localStorage.removeItem('session_id')
-      localStorage.removeItem('auth_user')
-      localStorage.removeItem('expires_at')
-      sessionStorage.removeItem('session_id')
-      sessionStorage.removeItem('auth_user')
-      sessionStorage.removeItem('expires_at')
-      
-      // 로그인 페이지로 리다이렉트
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
-      }
+      console.log('[401 Error] Session expired - handled by React Query global error handler')
     }
     
     console.error('[API Response Error]', error.response?.data || error.message)

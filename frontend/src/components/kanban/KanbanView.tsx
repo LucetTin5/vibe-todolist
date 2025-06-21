@@ -315,88 +315,96 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     ]
 
     return (
-      <div className={cn('hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto')}>
-        {/* 3개의 컬럼 스켈레톤 */}
-        {columnKeys.map((columnKey, columnIndex) => (
-          <div
-            key={columnKey}
-            className={cn(
-              'flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg',
-              'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
-            )}
-          >
-            {/* 컬럼 헤더 스켈레톤 */}
+      <div
+        className={cn(
+          'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto justify-center'
+        )}
+      >
+        <div className="w-full xl:container xl:mx-auto flex gap-4 lg:gap-6">
+          {/* 3개의 컬럼 스켈레톤 */}
+          {columnKeys.map((columnKey, columnIndex) => (
             <div
+              key={columnKey}
               className={cn(
-                'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
-                columnIndex === 0 && 'bg-gray-100 dark:bg-gray-700',
-                columnIndex === 1 && 'bg-blue-100 dark:bg-blue-800/30',
-                columnIndex === 2 && 'bg-green-100 dark:bg-green-800/30'
+                'flex-shrink-0 w-72 sm:w-80 lg:w-96 flex flex-col rounded-lg',
+                'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
               )}
             >
-              <div className="flex items-center justify-between">
-                <div
-                  className={cn('h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded animate-pulse')}
-                />
-                <div
-                  className={cn('h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse')}
-                />
-              </div>
-            </div>
-
-            {/* 카드 스켈레톤들 */}
-            <div
-              className={cn('flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96')}
-            >
-              {/* QuickAdd 스켈레톤 */}
+              {/* 컬럼 헤더 스켈레톤 */}
               <div
                 className={cn(
-                  'w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg animate-pulse'
+                  'px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 rounded-t-lg',
+                  columnIndex === 0 && 'bg-gray-100 dark:bg-gray-700',
+                  columnIndex === 1 && 'bg-blue-100 dark:bg-blue-800/30',
+                  columnIndex === 2 && 'bg-green-100 dark:bg-green-800/30'
                 )}
               >
-                <div className={cn('h-4 w-24 bg-gray-200 dark:bg-gray-600 rounded mx-auto')} />
+                <div className="flex items-center justify-between">
+                  <div
+                    className={cn('h-5 w-16 bg-gray-200 dark:bg-gray-600 rounded animate-pulse')}
+                  />
+                  <div
+                    className={cn(
+                      'h-6 w-8 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse'
+                    )}
+                  />
+                </div>
               </div>
 
               {/* 카드 스켈레톤들 */}
-              {cardSkeletonKeys[columnIndex]?.map((cardKey, cardIndex) => (
+              <div
+                className={cn('flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96')}
+              >
+                {/* QuickAdd 스켈레톤 */}
                 <div
-                  key={cardKey}
                   className={cn(
-                    'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
-                    'p-3 sm:p-4 shadow-sm animate-pulse'
+                    'w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg animate-pulse'
                   )}
                 >
-                  {/* 우선순위 배지 */}
-                  <div className="flex justify-end mb-2">
-                    <div className={cn('h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded-full')} />
-                  </div>
-
-                  {/* 제목 */}
-                  <div
-                    className={cn(
-                      'h-4 bg-gray-200 dark:bg-gray-600 rounded mb-2',
-                      cardIndex % 2 === 0 ? 'w-3/4' : 'w-2/3'
-                    )}
-                  />
-
-                  {/* 설명 (가끔 없음) */}
-                  {cardIndex % 3 !== 0 && (
-                    <div className={cn('h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-3')} />
-                  )}
-
-                  {/* 메타 정보 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <div className={cn('h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded')} />
-                      <div className={cn('h-4 w-8 bg-gray-200 dark:bg-gray-600 rounded')} />
-                    </div>
-                    <div className={cn('h-4 w-10 bg-gray-200 dark:bg-gray-600 rounded')} />
-                  </div>
+                  <div className={cn('h-4 w-24 bg-gray-200 dark:bg-gray-600 rounded mx-auto')} />
                 </div>
-              ))}
+
+                {/* 카드 스켈레톤들 */}
+                {cardSkeletonKeys[columnIndex]?.map((cardKey, cardIndex) => (
+                  <div
+                    key={cardKey}
+                    className={cn(
+                      'bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
+                      'p-3 sm:p-4 shadow-sm animate-pulse'
+                    )}
+                  >
+                    {/* 우선순위 배지 */}
+                    <div className="flex justify-end mb-2">
+                      <div className={cn('h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded-full')} />
+                    </div>
+
+                    {/* 제목 */}
+                    <div
+                      className={cn(
+                        'h-4 bg-gray-200 dark:bg-gray-600 rounded mb-2',
+                        cardIndex % 2 === 0 ? 'w-3/4' : 'w-2/3'
+                      )}
+                    />
+
+                    {/* 설명 (가끔 없음) */}
+                    {cardIndex % 3 !== 0 && (
+                      <div className={cn('h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2 mb-3')} />
+                    )}
+
+                    {/* 메타 정보 */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-2">
+                        <div className={cn('h-5 w-12 bg-gray-200 dark:bg-gray-600 rounded')} />
+                        <div className={cn('h-4 w-8 bg-gray-200 dark:bg-gray-600 rounded')} />
+                      </div>
+                      <div className={cn('h-4 w-10 bg-gray-200 dark:bg-gray-600 rounded')} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     )
   }
@@ -441,94 +449,98 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
           'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 md:p-4'
         )}
       >
-        {/* 모바일: 아이콘 중심 레이아웃 */}
-        <div className="block sm:hidden">
-          <div className="flex items-center justify-between mb-3">
-            {/* 통계 아이콘 */}
-            <div
-              className={cn('flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400')}
-            >
-              <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-gray-400 rounded-full" />
-                <span>{todos.length}</span>
+        <div className="w-full xl:container xl:mx-auto">
+          {/* 모바일: 아이콘 중심 레이아웃 */}
+          <div className="block sm:hidden">
+            <div className="flex items-center justify-between mb-3">
+              {/* 통계 아이콘 */}
+              <div
+                className={cn(
+                  'flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400'
+                )}
+              >
+                <div className="flex items-center space-x-1">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full" />
+                  <span>{todos.length}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="w-2 h-2 bg-blue-400 rounded-full" />
+                  <span>{columnTodos.todo.length}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="w-2 h-2 bg-yellow-400 rounded-full" />
+                  <span>{columnTodos['in-progress'].length}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="w-2 h-2 bg-green-400 rounded-full" />
+                  <span>{columnTodos.done.length}</span>
+                </div>
               </div>
-              <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-blue-400 rounded-full" />
-                <span>{columnTodos.todo.length}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-yellow-400 rounded-full" />
-                <span>{columnTodos['in-progress'].length}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 bg-green-400 rounded-full" />
-                <span>{columnTodos.done.length}</span>
-              </div>
-            </div>
 
-            {/* 필터 버튼 */}
-            <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                className={cn(
-                  'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                )}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+              {/* 필터 버튼 */}
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  className={cn(
+                    'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  )}
                 >
-                  <title>Search</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                )}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <title>Search</title>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    'p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  )}
                 >
-                  <title>Filter</title>
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <title>Filter</title>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 태블릿/데스크톱: 기존 레이아웃 */}
-        <div className="hidden sm:flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
-          {/* 왼쪽: 통계 */}
-          <div className="flex items-center space-x-6">
-            <div
-              className={cn(
-                'flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400'
-              )}
-            >
-              <span className="font-medium">전체: {todos.length}</span>
-              <span>할 일: {columnTodos.todo.length}</span>
-              <span>진행 중: {columnTodos['in-progress'].length}</span>
-              <span>완료: {columnTodos.done.length}</span>
+          {/* 태블릿/데스크톱: 기존 레이아웃 */}
+          <div className="hidden sm:flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
+            {/* 왼쪽: 통계 */}
+            <div className="flex items-center space-x-6">
+              <div
+                className={cn(
+                  'flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600 dark:text-gray-400'
+                )}
+              >
+                <span className="font-medium">전체: {todos.length}</span>
+                <span>할 일: {columnTodos.todo.length}</span>
+                <span>진행 중: {columnTodos['in-progress'].length}</span>
+                <span>완료: {columnTodos.done.length}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -690,24 +702,27 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
             {/* 태블릿/데스크톱: 가로 레이아웃 */}
             <div
               className={cn(
-                'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto scroll-smooth'
+                'hidden md:flex h-full gap-4 lg:gap-6 p-4 lg:p-6 overflow-x-auto scroll-smooth',
+                'justify-center'
               )}
             >
-              {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => (
-                <KanbanColumn
-                  key={status}
-                  status={status}
-                  title={COLUMN_CONFIG[status].title}
-                  todos={columnTodos[status]}
-                  onMoveCard={handleMoveCard}
-                  onReorderCards={handleReorderCard}
-                  onAddTodo={status === 'todo' ? () => handleOpenAddTodo('todo') : undefined}
-                  isUpdating={bulkUpdateMutation.isPending}
-                  isCreating={false}
-                  className={COLUMN_CONFIG[status].color}
-                  headerClassName={COLUMN_CONFIG[status].headerColor}
-                />
-              ))}
+              <div className="w-full xl:container xl:mx-auto flex gap-4 lg:gap-6">
+                {(Object.keys(COLUMN_CONFIG) as TodoStatus[]).map((status) => (
+                  <KanbanColumn
+                    key={status}
+                    status={status}
+                    title={COLUMN_CONFIG[status].title}
+                    todos={columnTodos[status]}
+                    onMoveCard={handleMoveCard}
+                    onReorderCards={handleReorderCard}
+                    onAddTodo={status === 'todo' ? () => handleOpenAddTodo('todo') : undefined}
+                    isUpdating={bulkUpdateMutation.isPending}
+                    isCreating={false}
+                    className={COLUMN_CONFIG[status].color}
+                    headerClassName={COLUMN_CONFIG[status].headerColor}
+                  />
+                ))}
+              </div>
             </div>
           </>
         )}

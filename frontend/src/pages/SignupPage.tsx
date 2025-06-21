@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { Alert } from '../components/ui/Alert'
 import { useAuth } from '../contexts/AuthContext'
 import { extractAuthErrorMessage } from '../utils/errorUtils'
 
@@ -26,6 +27,8 @@ export const SignupPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<Partial<SignupFormData>>({})
+  const [agreeTerms, setAgreeTerms] = useState(false)
+  const [showAlert, setShowAlert] = useState(false)
 
   // 이미 로그인된 사용자는 대시보드로 리다이렉트
   useEffect(() => {
@@ -41,13 +44,74 @@ export const SignupPage: React.FC = () => {
       [name]: value,
     }))
     // Clear errors when user starts typing
-    if (error) setError(null)
+    if (error) {
+      setError(null)
+      setShowAlert(false)
+    }
+
+    // Clear specific field validation error
     if (validationErrors[name as keyof SignupFormData]) {
       setValidationErrors((prev) => ({
         ...prev,
         [name]: undefined,
       }))
     }
+  }
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+
+    // Validate field on blur
+    const errors: Partial<SignupFormData> = { ...validationErrors }
+
+    switch (name) {
+      case 'name':
+        if (!value.trim()) {
+          errors.name = '이름을 입력해주세요.'
+        } else {
+          errors.name = undefined
+        }
+        break
+      case 'email':
+        if (!value) {
+          errors.email = '이메일을 입력해주세요.'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.email = '올바른 이메일 형식이 아닙니다.'
+        } else {
+          errors.email = undefined
+        }
+        break
+      case 'password':
+        if (!value) {
+          errors.password = '비밀번호를 입력해주세요.'
+        } else if (value.length < 10) {
+          errors.password = '비밀번호는 10자 이상이어야 합니다.'
+        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+          errors.password = '비밀번호는 대문자, 소문자, 숫자를 포함해야 합니다.'
+        } else {
+          errors.password = undefined
+        }
+        // Check password confirmation if it exists
+        if (formData.confirmPassword) {
+          if (value !== formData.confirmPassword) {
+            errors.confirmPassword = '비밀번호가 일치하지 않습니다.'
+          } else {
+            errors.confirmPassword = undefined
+          }
+        }
+        break
+      case 'confirmPassword':
+        if (!value) {
+          errors.confirmPassword = '비밀번호 확인을 입력해주세요.'
+        } else if (formData.password !== value) {
+          errors.confirmPassword = '비밀번호가 일치하지 않습니다.'
+        } else {
+          errors.confirmPassword = undefined
+        }
+        break
+    }
+
+    setValidationErrors(errors)
   }
 
   const validateForm = (): boolean => {
@@ -104,6 +168,7 @@ export const SignupPage: React.FC = () => {
         '회원가입에 실패했습니다. 다시 시도해주세요.'
       )
       setError(errorMessage)
+      setShowAlert(true)
     } finally {
       setIsLoading(false)
     }
@@ -125,7 +190,8 @@ export const SignupPage: React.FC = () => {
     else if (formData.password !== formData.confirmPassword)
       errors.confirmPassword = '비밀번호가 일치하지 않습니다.'
 
-    return Object.keys(errors).length === 0
+    // 약관 동의 확인
+    return Object.keys(errors).length === 0 && agreeTerms
   }
 
   const isSubmitting = isLoading || authLoading
@@ -188,6 +254,7 @@ export const SignupPage: React.FC = () => {
               placeholder="이름을 입력하세요"
               value={formData.name}
               onChange={handleInputChange}
+              onBlur={handleInputBlur}
               error={validationErrors.name}
             />
 
@@ -202,6 +269,7 @@ export const SignupPage: React.FC = () => {
               placeholder="이메일 주소를 입력하세요"
               value={formData.email}
               onChange={handleInputChange}
+              onBlur={handleInputBlur}
               error={validationErrors.email}
             />
 
@@ -216,6 +284,7 @@ export const SignupPage: React.FC = () => {
               placeholder="비밀번호를 입력하세요"
               value={formData.password}
               onChange={handleInputChange}
+              onBlur={handleInputBlur}
               error={validationErrors.password}
               helperText="10자 이상, 대문자, 소문자, 숫자 포함"
             />
@@ -231,30 +300,10 @@ export const SignupPage: React.FC = () => {
               placeholder="비밀번호를 다시 입력하세요"
               value={formData.confirmPassword}
               onChange={handleInputChange}
+              onBlur={handleInputBlur}
               error={validationErrors.confirmPassword}
             />
           </div>
-
-          {/* 에러 메시지 */}
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                    <title>에러</title>
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* 이용약관 동의 */}
           <div className="flex items-center">
@@ -263,6 +312,8 @@ export const SignupPage: React.FC = () => {
               name="agree-terms"
               type="checkbox"
               required
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
             />
             <label
@@ -298,6 +349,19 @@ export const SignupPage: React.FC = () => {
           </Button>
         </form>
       </div>
+
+      {/* Alert 컴포넌트 */}
+      <Alert
+        type="error"
+        title="회원가입 실패"
+        message={error || ''}
+        isOpen={showAlert}
+        onClose={() => {
+          setShowAlert(false)
+          setError(null)
+        }}
+        autoClose={false}
+      />
     </div>
   )
 }

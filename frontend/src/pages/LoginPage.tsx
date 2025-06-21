@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { Alert } from '../components/ui/Alert'
 import { useAuth } from '../contexts/AuthContext'
 import { extractAuthErrorMessage } from '../utils/errorUtils'
 
@@ -23,6 +24,7 @@ export const LoginPage: React.FC = () => {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showAlert, setShowAlert] = useState(false)
 
   // 이미 로그인된 사용자는 대시보드로 리다이렉트
   useEffect(() => {
@@ -38,7 +40,10 @@ export const LoginPage: React.FC = () => {
       [name]: type === 'checkbox' ? checked : value,
     }))
     // Clear error when user starts typing
-    if (error) setError(null)
+    if (error) {
+      setError(null)
+      setShowAlert(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,12 +62,14 @@ export const LoginPage: React.FC = () => {
         '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'
       )
       setError(errorMessage)
+      setShowAlert(true)
     } finally {
       setIsLoading(false)
     }
   }
 
   const isFormValid = formData.email.trim() && formData.password.trim()
+
   const isSubmitting = isLoading || authLoading
 
   // 인증 로딩 중이면 로딩 화면 표시
@@ -119,6 +126,7 @@ export const LoginPage: React.FC = () => {
               type="email"
               autoComplete="email"
               required
+              label="이메일 주소"
               placeholder="이메일 주소"
               value={formData.email}
               onChange={handleInputChange}
@@ -131,38 +139,18 @@ export const LoginPage: React.FC = () => {
               type="password"
               autoComplete="current-password"
               required
+              label="비밀번호"
               placeholder="비밀번호"
               value={formData.password}
               onChange={handleInputChange}
             />
           </div>
 
-          {/* 에러 메시지 */}
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                    <title>에러</title>
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* 추가 옵션 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
-                id="remember-me"
+                id="rememberMe"
                 name="rememberMe"
                 type="checkbox"
                 checked={formData.rememberMe}
@@ -170,7 +158,7 @@ export const LoginPage: React.FC = () => {
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
               />
               <label
-                htmlFor="remember-me"
+                htmlFor="rememberMe"
                 className="ml-2 block text-sm text-gray-900 dark:text-gray-300"
               >
                 로그인 상태 유지
@@ -225,6 +213,19 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Alert 컴포넌트 */}
+      <Alert
+        type="error"
+        title="로그인 실패"
+        message={error || ''}
+        isOpen={showAlert}
+        onClose={() => {
+          setShowAlert(false)
+          setError(null)
+        }}
+        autoClose={false}
+      />
     </div>
   )
 }

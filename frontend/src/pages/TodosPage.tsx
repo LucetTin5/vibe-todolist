@@ -103,7 +103,7 @@ export const TodosPage = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-6 h-full">
+    <div className="w-full xl:container xl:mx-auto px-4 py-6 h-full">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">할 일 관리</h2>

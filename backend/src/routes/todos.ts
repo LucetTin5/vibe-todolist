@@ -269,6 +269,7 @@ const getTodoStatsRoute = createRoute({
   tags: ['Todos'],
   summary: 'Todo 통계 조회 (Enhanced)',
   description: '우선순위별, 카테고리별, 마감일별 통계를 포함한 상세 Todo 통계를 조회합니다.',
+  security: [{ bearerAuth: [] }],
   responses: {
     200: {
       content: {

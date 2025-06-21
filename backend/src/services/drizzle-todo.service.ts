@@ -264,110 +264,140 @@ export class DrizzleTodoService {
    * Todo 통계 조회
    */
   async getStats(userId: string): Promise<TodoStatsResponse> {
-    // 기본 통계
-    const [totalResult] = await db
-      .select({ count: count() })
-      .from(todos)
-      .where(eq(todos.userId, userId))
+    try {
+      // 기본 통계
+      const [totalResult] = await db
+        .select({ count: count() })
+        .from(todos)
+        .where(eq(todos.userId, userId))
 
-    const [completedResult] = await db
-      .select({ count: count() })
-      .from(todos)
-      .where(and(eq(todos.userId, userId), eq(todos.status, 'completed')))
+      const [completedResult] = await db
+        .select({ count: count() })
+        .from(todos)
+        .where(and(eq(todos.userId, userId), eq(todos.status, 'completed')))
 
-    const total = totalResult.count
-    const completed = completedResult.count
-    const active = total - completed
-    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+      const total = totalResult.count
+      const completed = completedResult.count
+      const active = total - completed
+      const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
 
-    // 우선순위별 통계
-    const priorityStats = await db
-      .select({
-        priority: todos.priority,
-        count: count(),
-      })
-      .from(todos)
-      .where(eq(todos.userId, userId))
-      .groupBy(todos.priority)
+      // 우선순위별 통계
+      const priorityStats = await db
+        .select({
+          priority: todos.priority,
+          count: count(),
+        })
+        .from(todos)
+        .where(eq(todos.userId, userId))
+        .groupBy(todos.priority)
 
-    const byPriority = {
-      low: 0,
-      medium: 0,
-      high: 0,
-      urgent: 0,
-    }
+      const byPriority = {
+        low: 0,
+        medium: 0,
+        high: 0,
+        urgent: 0,
+      }
 
-    for (const stat of priorityStats) {
-      byPriority[stat.priority] = stat.count
-    }
+      for (const stat of priorityStats) {
+        byPriority[stat.priority] = stat.count
+      }
 
-    // 카테고리별 통계
-    const categoryStats = await db
-      .select({
-        category: todos.category,
-        count: count(),
-      })
-      .from(todos)
-      .where(eq(todos.userId, userId))
-      .groupBy(todos.category)
+      // 카테고리별 통계
+      const categoryStats = await db
+        .select({
+          category: todos.category,
+          count: count(),
+        })
+        .from(todos)
+        .where(eq(todos.userId, userId))
+        .groupBy(todos.category)
 
-    const byCategory = {
-      work: 0,
-      personal: 0,
-      shopping: 0,
-      health: 0,
-      other: 0,
-    }
+      const byCategory = {
+        work: 0,
+        personal: 0,
+        shopping: 0,
+        health: 0,
+        other: 0,
+      }
 
-    for (const stat of categoryStats) {
-      byCategory[stat.category] = stat.count
-    }
+      for (const stat of categoryStats) {
+        byCategory[stat.category] = stat.count
+      }
 
-    // 마감일 관련 통계 (간단 버전)
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+      // 마감일 관련 통계
+      let overdueCount = 0
+      let dueTodayCount = 0
+      let dueThisWeekCount = 0
 
-    const [overdueResult] = await db
-      .select({ count: count() })
-      .from(todos)
-      .where(
-        and(eq(todos.userId, userId), eq(todos.status, 'pending'), sql`${todos.dueDate} < ${today}`)
-      )
+      try {
+        // ISO 문자열로 변환하여 안전하게 날짜 비교
+        const now = new Date()
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000 - 1)
+        const weekFromNow = new Date(todayStart.getTime() + 7 * 24 * 60 * 60 * 1000)
 
-    const [dueTodayResult] = await db
-      .select({ count: count() })
-      .from(todos)
-      .where(
-        and(
-          eq(todos.userId, userId),
-          eq(todos.status, 'pending'),
-          sql`DATE(${todos.dueDate}) = DATE(${today})`
-        )
-      )
+        // 마감일이 지난 Todo 개수
+        const [overdueResult] = await db
+          .select({ count: count() })
+          .from(todos)
+          .where(
+            and(
+              eq(todos.userId, userId),
+              eq(todos.status, 'pending'),
+              sql`${todos.dueDate} IS NOT NULL`,
+              sql`${todos.dueDate} < ${todayStart.toISOString()}`
+            )
+          )
+        overdueCount = overdueResult.count
 
-    const [dueThisWeekResult] = await db
-      .select({ count: count() })
-      .from(todos)
-      .where(
-        and(
-          eq(todos.userId, userId),
-          eq(todos.status, 'pending'),
-          gte(todos.dueDate, today),
-          lte(todos.dueDate, weekFromNow)
-        )
-      )
+        // 오늘 마감인 Todo 개수
+        const [dueTodayResult] = await db
+          .select({ count: count() })
+          .from(todos)
+          .where(
+            and(
+              eq(todos.userId, userId),
+              eq(todos.status, 'pending'),
+              sql`${todos.dueDate} IS NOT NULL`,
+              sql`${todos.dueDate} >= ${todayStart.toISOString()}`,
+              sql`${todos.dueDate} < ${todayEnd.toISOString()}`
+            )
+          )
+        dueTodayCount = dueTodayResult.count
 
-    return {
-      total,
-      completed,
-      active,
-      completionRate,
-      byPriority,
-      byCategory,
-      overdue: overdueResult.count,
-      dueToday: dueTodayResult.count,
-      dueThisWeek: dueThisWeekResult.count,
+        // 이번 주 마감인 Todo 개수 (오늘 포함)
+        const [dueThisWeekResult] = await db
+          .select({ count: count() })
+          .from(todos)
+          .where(
+            and(
+              eq(todos.userId, userId),
+              eq(todos.status, 'pending'),
+              sql`${todos.dueDate} IS NOT NULL`,
+              sql`${todos.dueDate} >= ${todayStart.toISOString()}`,
+              sql`${todos.dueDate} < ${weekFromNow.toISOString()}`
+            )
+          )
+        dueThisWeekCount = dueThisWeekResult.count
+      } catch (dateError) {
+        console.warn('Error calculating due date stats, using defaults:', dateError)
+        // 에러 시 기본값 0 사용
+      }
+
+      return {
+        total,
+        completed,
+        active,
+        completionRate,
+        byPriority,
+        byCategory,
+        overdue: overdueCount,
+        dueToday: dueTodayCount,
+        dueThisWeek: dueThisWeekCount,
+      }
+    } catch (error) {
+      console.error('Error in getStats:', error)
+      throw error
     }
   }
 

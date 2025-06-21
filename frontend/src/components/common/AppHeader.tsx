@@ -34,28 +34,28 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         'px-3 sm:px-4 py-3 sm:py-4'
       )}
     >
-      <div className="flex items-center justify-between">
+      <div className="w-full xl:container xl:mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
           <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
             {title}
           </h1>
           {currentView === 'dashboard' && (
-            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+            <div className="hidden xl:block text-sm text-gray-600 dark:text-gray-400">
               전체 현황을 한눈에 확인하세요
             </div>
           )}
           {currentView === 'kanban' && (
-            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+            <div className="hidden xl:block text-sm text-gray-600 dark:text-gray-400">
               칸반 보드로 작업을 시각적으로 관리하세요
             </div>
           )}
           {currentView === 'calendar' && (
-            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+            <div className="hidden xl:block text-sm text-gray-600 dark:text-gray-400">
               캘린더로 일정을 한눈에 확인하세요
             </div>
           )}
           {currentView === 'todos' && (
-            <div className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+            <div className="hidden xl:block text-sm text-gray-600 dark:text-gray-400">
               할 일을 목록으로 관리하세요
             </div>
           )}

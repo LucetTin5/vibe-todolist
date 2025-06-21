@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from 'react'
 
 export type Theme = 'light' | 'dark' | 'system'
 
@@ -25,7 +32,20 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
     return defaultTheme
   })
 
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() => {
+    // 초기 actualTheme을 theme 값 기반으로 계산
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('theme') as Theme
+      const initialTheme = stored || defaultTheme
+
+      if (initialTheme === 'system') {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+        return mediaQuery.matches ? 'dark' : 'light'
+      }
+      return initialTheme === 'dark' ? 'dark' : 'light'
+    }
+    return 'light'
+  })
 
   // 시스템 테마 변경 감지
   useEffect(() => {
@@ -53,8 +73,8 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [theme])
 
-  // DOM에 테마 클래스 적용
-  useEffect(() => {
+  // DOM에 테마 클래스 적용 (useLayoutEffect로 즉시 적용)
+  useLayoutEffect(() => {
     const root = window.document.documentElement
 
     // 기존 테마 클래스 제거

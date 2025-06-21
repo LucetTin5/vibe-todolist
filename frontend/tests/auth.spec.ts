@@ -457,6 +457,18 @@ test.describe('Authentication', () => {
 
       await page.goto('/login')
 
+      // 다크모드 클래스가 적용될 때까지 대기
+      await page.waitForFunction(
+        () => {
+          return (
+            document.documentElement.classList.contains('dark') ||
+            document.body.classList.contains('dark') ||
+            window.getComputedStyle(document.body).backgroundColor.includes('rgb(17, 24, 39)')
+          ) // gray-900
+        },
+        { timeout: 5000 }
+      )
+
       // 다크모드 클래스가 적용되었는지 확인
       const isDarkMode = await page.evaluate(() => {
         return (

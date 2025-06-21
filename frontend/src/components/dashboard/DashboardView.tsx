@@ -8,6 +8,8 @@ import {
   WeeklyProgressCard,
   QuickActionsCard,
   FloatingActionButton,
+  TrendAnalysisCard,
+  RecentActivityCard,
 } from './widgets'
 import { cn } from '../../utils/cn'
 
@@ -31,7 +33,7 @@ export const DashboardView = () => {
 
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-900 overflow-auto">
-      <div className="container mx-auto p-4 sm:p-6 space-y-6">
+      <div className="w-full xl:container xl:mx-auto p-4 sm:p-6 space-y-6">
         {/* 헤더 */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -176,82 +178,10 @@ export const DashboardView = () => {
               {/* 추가 정보 카드들 */}
               <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* 최근 활동 요약 */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <title>최근 활동</title>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    최근 활동
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                      <span>오늘 완료</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">
-                        {stats?.completed || 0}개
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                      <span>이번 주 완료</span>
-                      <span className="font-medium text-blue-600 dark:text-blue-400">
-                        {Math.floor((stats?.completed || 0) * 1.2)}개
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                      <span>평균 완료율</span>
-                      <span className="font-medium text-purple-600 dark:text-purple-400">
-                        {Math.round(stats?.completionRate || 0)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <RecentActivityCard stats={stats} />
 
                 {/* 트렌드 분석 */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <title>트렌드 분석</title>
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                      />
-                    </svg>
-                    트렌드 분석
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                      <span>생산성 지수</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">
-                        +{Math.floor(Math.random() * 15) + 5}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                      <span>활동량</span>
-                      <span className="font-medium text-blue-600 dark:text-blue-400">높음</span>
-                    </div>
-                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                      <span>주간 개선도</span>
-                      <span className="font-medium text-purple-600 dark:text-purple-400">우수</span>
-                    </div>
-                  </div>
-                </div>
+                <TrendAnalysisCard stats={stats} />
               </div>
             </div>
           </div>
@@ -268,7 +198,7 @@ export const DashboardView = () => {
 const DashboardSkeleton = () => {
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-900 overflow-auto">
-      <div className="container mx-auto p-4 sm:p-6 space-y-6">
+      <div className="w-full xl:container xl:mx-auto p-4 sm:p-6 space-y-6">
         {/* 헤더 스켈레톤 */}
         <div className="flex justify-between items-center">
           <div>

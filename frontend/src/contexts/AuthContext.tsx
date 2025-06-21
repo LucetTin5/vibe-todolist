@@ -124,12 +124,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null)
     setSessionId(null)
 
+    // 스토리지 청소
     localStorage.removeItem(SESSION_ID_KEY)
     localStorage.removeItem(USER_KEY)
     localStorage.removeItem(EXPIRES_AT_KEY)
     sessionStorage.removeItem(SESSION_ID_KEY)
     sessionStorage.removeItem(USER_KEY)
     sessionStorage.removeItem(EXPIRES_AT_KEY)
+
+    console.log('Logout completed: storage cleared')
   }, [])
 
   // 세션 갱신 함수 (현재는 placeholder - 필요시 구현)

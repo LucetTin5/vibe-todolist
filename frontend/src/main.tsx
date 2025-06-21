@@ -15,6 +15,29 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes
     },
+    mutations: {
+      onError: (error: unknown) => {
+        // 401 에러 시 전역 로그아웃 처리
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response: { status: number } }
+          if (axiosError.response?.status === 401) {
+            // 캐시 초기화
+            queryClient.clear()
+            // 스토리지 정리
+            localStorage.removeItem('session_id')
+            localStorage.removeItem('auth_user')
+            localStorage.removeItem('expires_at')
+            sessionStorage.removeItem('session_id')
+            sessionStorage.removeItem('auth_user')
+            sessionStorage.removeItem('expires_at')
+            // 로그인 페이지로 리다이렉트
+            if (window.location.pathname !== '/login') {
+              window.location.href = '/login'
+            }
+          }
+        }
+      },
+    },
   },
 })
 

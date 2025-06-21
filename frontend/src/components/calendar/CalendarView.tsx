@@ -124,7 +124,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* 툴바 */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="w-full xl:container xl:mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* 월 네비게이션 */}
           <div className="flex items-center gap-2">
             <Button
@@ -177,151 +177,153 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* 캘린더 그리드 */}
       <div className="flex-1 overflow-auto p-4">
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {/* 요일 헤더 */}
-          {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
-            <div
-              key={day}
-              className={cn(
-                'p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400',
-                index === 0 && 'text-red-500 dark:text-red-400', // 일요일
-                index === 6 && 'text-blue-500 dark:text-blue-400' // 토요일
-              )}
-            >
-              {day}
-            </div>
-          ))}
-
-          {/* 날짜 셀들 */}
-          {monthDays.map((date) => {
-            const dayTodos = getTodosForDate(date)
-            const isCurrentDay = isToday(date)
-            const dayOfWeek = date.getDay()
-
-            return (
+        <div className="w-full xl:container xl:mx-auto">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+            {/* 요일 헤더 */}
+            {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
               <div
-                key={date.toISOString()}
+                key={day}
                 className={cn(
-                  'min-h-[100px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 dark:border-gray-700',
-                  'bg-white dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700',
-                  'transition-colors duration-150'
+                  'p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400',
+                  index === 0 && 'text-red-500 dark:text-red-400', // 일요일
+                  index === 6 && 'text-blue-500 dark:text-blue-400' // 토요일
                 )}
-                onClick={() => handleDateClick(date)}
               >
-                {/* 날짜 숫자 */}
-                <div className="flex justify-between items-start mb-1">
-                  <span
-                    className={cn(
-                      'text-sm font-medium',
-                      isCurrentDay &&
-                        'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs',
-                      !isCurrentDay && dayOfWeek === 0 && 'text-red-500 dark:text-red-400', // 일요일
-                      !isCurrentDay && dayOfWeek === 6 && 'text-blue-500 dark:text-blue-400', // 토요일
-                      !isCurrentDay &&
-                        dayOfWeek !== 0 &&
-                        dayOfWeek !== 6 &&
-                        'text-gray-900 dark:text-gray-100'
-                    )}
-                  >
-                    {format(date, 'd')}
-                  </span>
+                {day}
+              </div>
+            ))}
 
-                  {dayTodos.length > 0 && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {dayTodos.length}
-                    </span>
+            {/* 날짜 셀들 */}
+            {monthDays.map((date) => {
+              const dayTodos = getTodosForDate(date)
+              const isCurrentDay = isToday(date)
+              const dayOfWeek = date.getDay()
+
+              return (
+                <div
+                  key={date.toISOString()}
+                  className={cn(
+                    'min-h-[100px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 dark:border-gray-700',
+                    'bg-white dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700',
+                    'transition-colors duration-150'
                   )}
-                </div>
-
-                {/* Todo 목록 */}
-                <div className="space-y-1">
-                  {dayTodos.slice(0, 3).map((todo) => (
-                    <div
-                      key={todo.id}
+                  onClick={() => handleDateClick(date)}
+                >
+                  {/* 날짜 숫자 */}
+                  <div className="flex justify-between items-start mb-1">
+                    <span
                       className={cn(
-                        'text-xs p-1 rounded border-l-2 bg-gray-50 dark:bg-gray-700',
-                        getStatusColor(todo.status || 'todo'),
-                        'line-clamp-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
-                        'transition-colors duration-150 group'
+                        'text-sm font-medium',
+                        isCurrentDay &&
+                          'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs',
+                        !isCurrentDay && dayOfWeek === 0 && 'text-red-500 dark:text-red-400', // 일요일
+                        !isCurrentDay && dayOfWeek === 6 && 'text-blue-500 dark:text-blue-400', // 토요일
+                        !isCurrentDay &&
+                          dayOfWeek !== 0 &&
+                          dayOfWeek !== 6 &&
+                          'text-gray-900 dark:text-gray-100'
                       )}
-                      title={`${todo.title} - 클릭하여 수정`}
-                      onClick={(e) => handleTodoClick(todo, e)}
                     >
-                      <div className="flex items-center gap-1">
-                        {/* 체크박스 */}
-                        <button
-                          type="button"
-                          onClick={(e) => handleTodoToggle(todo.id, e)}
-                          className={cn(
-                            'w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center',
-                            'hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors',
-                            todo.completed
-                              ? 'bg-green-500 border-green-500 text-white'
-                              : 'border-gray-300 dark:border-gray-500'
-                          )}
-                        >
-                          {todo.completed && (
-                            <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
-                              <title>완료</title>
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          )}
-                        </button>
+                      {format(date, 'd')}
+                    </span>
 
-                        {/* 우선순위 표시 */}
-                        {todo.priority && (
+                    {dayTodos.length > 0 && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {dayTodos.length}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Todo 목록 */}
+                  <div className="space-y-1">
+                    {dayTodos.slice(0, 3).map((todo) => (
+                      <div
+                        key={todo.id}
+                        className={cn(
+                          'text-xs p-1 rounded border-l-2 bg-gray-50 dark:bg-gray-700',
+                          getStatusColor(todo.status || 'todo'),
+                          'line-clamp-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
+                          'transition-colors duration-150 group'
+                        )}
+                        title={`${todo.title} - 클릭하여 수정`}
+                        onClick={(e) => handleTodoClick(todo, e)}
+                      >
+                        <div className="flex items-center gap-1">
+                          {/* 체크박스 */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleTodoToggle(todo.id, e)}
+                            className={cn(
+                              'w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center',
+                              'hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors',
+                              todo.completed
+                                ? 'bg-green-500 border-green-500 text-white'
+                                : 'border-gray-300 dark:border-gray-500'
+                            )}
+                          >
+                            {todo.completed && (
+                              <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 20 20">
+                                <title>완료</title>
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            )}
+                          </button>
+
+                          {/* 우선순위 표시 */}
+                          {todo.priority && (
+                            <span
+                              className={cn(
+                                'w-2 h-2 rounded-full flex-shrink-0',
+                                todo.priority === 'high' && 'bg-red-400',
+                                todo.priority === 'medium' && 'bg-yellow-400',
+                                todo.priority === 'low' && 'bg-green-400'
+                              )}
+                            />
+                          )}
+
+                          {/* 제목 */}
                           <span
                             className={cn(
-                              'w-2 h-2 rounded-full flex-shrink-0',
-                              todo.priority === 'high' && 'bg-red-400',
-                              todo.priority === 'medium' && 'bg-yellow-400',
-                              todo.priority === 'low' && 'bg-green-400'
+                              'truncate flex-1',
+                              todo.completed && 'line-through opacity-60'
                             )}
-                          />
-                        )}
+                          >
+                            {todo.title}
+                          </span>
 
-                        {/* 제목 */}
-                        <span
-                          className={cn(
-                            'truncate flex-1',
-                            todo.completed && 'line-through opacity-60'
-                          )}
-                        >
-                          {todo.title}
-                        </span>
-
-                        {/* 수정 아이콘 (호버시 표시) */}
-                        <svg
-                          className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <title>수정</title>
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
+                          {/* 수정 아이콘 (호버시 표시) */}
+                          <svg
+                            className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <title>수정</title>
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
 
-                  {dayTodos.length > 3 && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                      +{dayTodos.length - 3}개 더
-                    </div>
-                  )}
+                    {dayTodos.length > 3 && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                        +{dayTodos.length - 3}개 더
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       </div>
 
@@ -367,28 +369,33 @@ const CalendarSkeleton = () => {
 
       {/* 캘린더 스켈레톤 */}
       <div className="flex-1 overflow-auto p-4">
-        <div className="grid grid-cols-7 gap-2">
-          {/* 요일 헤더 */}
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="p-2 text-center">
-              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse mx-auto" />
-            </div>
-          ))}
-
-          {/* 날짜 셀들 */}
-          {Array.from({ length: 35 }).map((_, i) => (
-            <div
-              key={i}
-              className="min-h-[120px] p-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg"
-            >
-              <div className="w-6 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse mb-2" />
-              <div className="space-y-1">
-                {Array.from({ length: Math.floor(Math.random() * 3) }).map((_, j) => (
-                  <div key={j} className="h-3 bg-gray-200 dark:bg-gray-600 rounded animate-pulse" />
-                ))}
+        <div className="w-full xl:container xl:mx-auto">
+          <div className="grid grid-cols-7 gap-2">
+            {/* 요일 헤더 */}
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div key={i} className="p-2 text-center">
+                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse mx-auto" />
               </div>
-            </div>
-          ))}
+            ))}
+
+            {/* 날짜 셀들 */}
+            {Array.from({ length: 35 }).map((_, i) => (
+              <div
+                key={i}
+                className="min-h-[120px] p-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg"
+              >
+                <div className="w-6 h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse mb-2" />
+                <div className="space-y-1">
+                  {Array.from({ length: Math.floor(Math.random() * 3) }).map((_, j) => (
+                    <div
+                      key={j}
+                      className="h-3 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
