@@ -64,16 +64,6 @@ Bearer 토큰을 사용한 세션 기반 인증이 필요합니다. Authorizatio
       description: '개발 서버',
     },
   ],
-  components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'Session',
-        description: 'Supabase 세션 기반 인증',
-      },
-    },
-  },
   tags: [
     {
       name: 'Auth',

@@ -436,6 +436,9 @@ auth.openapi(refreshRoute, async (c) => {
       )
     }
 
+    // access_token을 session_id로 사용 (Supabase 권장 방식)
+    const sessionId = data.session.access_token
+
     return c.json(
       {
         success: true as const,
@@ -444,8 +447,8 @@ auth.openapi(refreshRoute, async (c) => {
             id: data.user.id,
             email: data.user.email || '',
           },
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
+          session_id: sessionId,
+          expires_at: data.session.expires_at,
         },
       },
       200
@@ -467,8 +470,8 @@ auth.openapi(logoutRoute, async (c) => {
   try {
     const { session_id } = c.req.valid('json')
 
-    // Supabase에서 세션 종료
-    const { error } = await supabaseAdmin.auth.admin.signOut(session_id, 'session')
+    // Supabase에서 세션 종료 (JWT 토큰을 사용하여 로그아웃)
+    const { error } = await supabaseAdmin.auth.admin.signOut(session_id)
 
     if (error) {
       console.error('Logout error:', error.message)

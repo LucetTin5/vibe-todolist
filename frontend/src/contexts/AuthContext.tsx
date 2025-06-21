@@ -2,6 +2,7 @@ import type React from 'react'
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { usePostApiAuthLogin, usePostApiAuthSignup } from '../api/generated'
 import type { PostApiAuthLogin200DataUser } from '../api/model/postApiAuthLogin200DataUser'
+import { extractErrorMessage } from '../utils/errorUtils'
 
 interface User {
   id: string
@@ -178,7 +179,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           )
         }
       } catch (error) {
-        console.error('Login error:', error)
+        const errorMessage = extractErrorMessage(error, 'Unknown login error')
+        console.error('Login error:', {
+          originalError: error,
+          extractedMessage: errorMessage,
+        })
         throw error
       } finally {
         setIsLoading(false)
@@ -211,7 +216,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error('Signup failed: invalid response format')
         }
       } catch (error) {
-        console.error('Signup error:', error)
+        const errorMessage = extractErrorMessage(error, 'Unknown signup error')
+        console.error('Signup error:', {
+          originalError: error,
+          extractedMessage: errorMessage,
+        })
         throw error
       } finally {
         setIsLoading(false)

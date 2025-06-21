@@ -43,6 +43,7 @@ export class DrizzleTodoService {
   private mapRowToTodo(row: DrizzleTodo): Todo {
     return {
       id: row.id,
+      userId: row.userId,
       title: row.title,
       description: row.description || undefined,
       completed: row.status === 'completed',

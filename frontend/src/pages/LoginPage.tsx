@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { useAuth } from '../contexts/AuthContext'
+import { extractAuthErrorMessage } from '../utils/errorUtils'
 
 interface LoginFormData {
   email: string
@@ -51,10 +52,10 @@ export const LoginPage: React.FC = () => {
       await login(formData.email, formData.password, formData.rememberMe)
       // 로그인 성공 시 useEffect에서 리다이렉트 처리
     } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'
+      const errorMessage = extractAuthErrorMessage(
+        err,
+        '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'
+      )
       setError(errorMessage)
     } finally {
       setIsLoading(false)

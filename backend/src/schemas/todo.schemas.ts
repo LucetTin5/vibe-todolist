@@ -33,6 +33,10 @@ export const TodoSchema = z.object({
     example: 'todo_1737606271352',
     description: 'Todo 고유 식별자',
   }),
+  userId: z.string().openapi({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: '사용자 ID (데이터 격리용)',
+  }),
   title: z.string().min(1).max(200).openapi({
     example: '프로젝트 완료하기',
     description: 'Todo 제목 (1-200자)',

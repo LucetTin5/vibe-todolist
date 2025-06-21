@@ -395,17 +395,20 @@ app.onError((err, c) => {
 
 // 라우트 핸들러 (구체적인 경로부터 등록)
 app.openapi(getTodoStatsRoute, async (c) => {
-  const result = await todoService.getStats()
+  const userId = c.get('userId') as string
+  const result = await todoService.getStats(userId)
   return c.json(result, 200)
 })
 
 app.openapi(getTagsRoute, async (c) => {
-  const tags = await todoService.getAllTags()
+  const userId = c.get('userId') as string
+  const tags = await todoService.getAllTags(userId)
   return c.json({ tags }, 200)
 })
 
 app.openapi(deleteAllTodosRoute, async (c) => {
-  await todoService.clearTodos()
+  const userId = c.get('userId') as string
+  await todoService.clearTodos(userId)
 
   return c.json(
     {
@@ -418,8 +421,9 @@ app.openapi(deleteAllTodosRoute, async (c) => {
 
 app.openapi(bulkUpdateRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const { data } = c.req.valid('json')
-    const result = await todoService.advancedBulkUpdate(data)
+    const result = await todoService.advancedBulkUpdate(userId, data)
     return c.json(result, 200)
   } catch (error) {
     return c.json(
@@ -435,6 +439,7 @@ app.openapi(bulkUpdateRoute, async (c) => {
 
 app.openapi(getTodosRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const query = c.req.valid('query') as TodoQuery
     const {
       filter = 'all',
@@ -451,6 +456,7 @@ app.openapi(getTodosRoute, async (c) => {
     } = query
 
     const result = await todoService.getTodos(
+      userId,
       { page, limit },
       filter,
       search,
@@ -478,8 +484,9 @@ app.openapi(getTodosRoute, async (c) => {
 
 app.openapi(createTodoRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const data = c.req.valid('json')
-    const result = await todoService.createTodo(data)
+    const result = await todoService.createTodo(userId, data)
     return c.json(result, 201)
   } catch (error) {
     return c.json(
@@ -495,8 +502,9 @@ app.openapi(createTodoRoute, async (c) => {
 
 app.openapi(getTodoRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const { id } = c.req.valid('param')
-    const result = await todoService.getTodoById(id)
+    const result = await todoService.getTodoById(userId, id)
     return c.json(result, 200)
   } catch (error) {
     return c.json(
@@ -512,9 +520,10 @@ app.openapi(getTodoRoute, async (c) => {
 
 app.openapi(updateTodoRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const { id } = c.req.valid('param')
     const data = c.req.valid('json')
-    const result = await todoService.updateTodo(id, data)
+    const result = await todoService.updateTodo(userId, id, data)
     return c.json(result, 200)
   } catch (error) {
     if (error instanceof Error && error.message.includes('찾을 수 없습니다')) {
@@ -541,8 +550,9 @@ app.openapi(updateTodoRoute, async (c) => {
 
 app.openapi(deleteTodoRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const { id } = c.req.valid('param')
-    await todoService.deleteTodo(id)
+    await todoService.deleteTodo(userId, id)
 
     return c.json(
       {
@@ -565,8 +575,9 @@ app.openapi(deleteTodoRoute, async (c) => {
 
 app.openapi(toggleTodoRoute, async (c) => {
   try {
+    const userId = c.get('userId') as string
     const { id } = c.req.valid('param')
-    const result = await todoService.toggleTodo(id)
+    const result = await todoService.toggleTodo(userId, id)
     return c.json(result, 200)
   } catch (error) {
     return c.json(

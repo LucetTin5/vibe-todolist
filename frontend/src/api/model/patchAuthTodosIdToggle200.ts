@@ -31,6 +31,8 @@ import type { PatchAuthTodosIdToggle200Status } from './patchAuthTodosIdToggle20
 export type PatchAuthTodosIdToggle200 = {
   /** Todo 고유 식별자 */
   id: string
+  /** 사용자 ID (데이터 격리용) */
+  userId: string
   /**
    * Todo 제목 (1-200자)
    * @minLength 1
