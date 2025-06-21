@@ -2,6 +2,7 @@
   "name": "@todolist/root",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "workspaces": ["frontend", "backend"],
   "scripts": {
     "dev": "bun run --filter='*' dev",

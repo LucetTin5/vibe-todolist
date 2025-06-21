@@ -2,6 +2,7 @@
   "name": "@todolist/backend",
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "build": "bun build src/index.ts --outdir dist",

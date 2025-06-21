@@ -2,6 +2,7 @@
   "name": "@todolist/frontend",
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
