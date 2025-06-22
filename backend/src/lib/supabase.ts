@@ -99,6 +99,68 @@ export interface Database {
           due_date?: string | null
         }
       }
+      notification_events: {
+        Row: {
+          id: string
+          todo_id: string | null
+          user_id: string
+          type: 'due_soon' | 'overdue' | 'reminder'
+          message: string
+          scheduled_at: string
+          created_at: string
+          sent: boolean
+          metadata: Record<string, unknown>
+        }
+        Insert: {
+          id?: string
+          todo_id?: string | null
+          user_id: string
+          type: 'due_soon' | 'overdue' | 'reminder'
+          message: string
+          scheduled_at: string
+          sent?: boolean
+          metadata?: Record<string, unknown>
+        }
+        Update: {
+          sent?: boolean
+          metadata?: Record<string, unknown>
+        }
+      }
+      user_notification_settings: {
+        Row: {
+          id: string
+          user_id: string
+          browser_notifications: boolean
+          toast_notifications: boolean
+          reminder_times: string[]
+          quiet_hours_start: string
+          quiet_hours_end: string
+          weekdays_only: boolean
+          sound_enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          browser_notifications?: boolean
+          toast_notifications?: boolean
+          reminder_times?: string[]
+          quiet_hours_start?: string
+          quiet_hours_end?: string
+          weekdays_only?: boolean
+          sound_enabled?: boolean
+        }
+        Update: {
+          browser_notifications?: boolean
+          toast_notifications?: boolean
+          reminder_times?: string[]
+          quiet_hours_start?: string
+          quiet_hours_end?: string
+          weekdays_only?: boolean
+          sound_enabled?: boolean
+        }
+      }
     }
   }
 }

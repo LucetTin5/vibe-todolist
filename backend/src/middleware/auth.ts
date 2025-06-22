@@ -124,3 +124,6 @@ export const getUser = (c: Context) => {
   }
   return user
 }
+
+// 호환성을 위한 별칭 export
+export const verifyTokenMiddleware = authMiddleware
