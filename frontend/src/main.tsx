@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { NotificationProvider } from './contexts/NotificationContext'
 import './styles/globals.css'
 import App from './App.tsx'
 
@@ -52,8 +53,10 @@ createRoot(rootElement).render(
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <App />
-            <ReactQueryDevtools initialIsOpen={false} />
+            <NotificationProvider>
+              <App />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </NotificationProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>

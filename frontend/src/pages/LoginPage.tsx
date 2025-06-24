@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Alert } from '../components/ui/Alert'
 import { useAuth } from '../contexts/AuthContext'
-import { extractAuthErrorMessage } from '../utils/errorUtils'
+import { getLoginErrorMessage } from '../utils/errorUtils'
 
 interface LoginFormData {
   email: string
@@ -57,10 +57,7 @@ export const LoginPage: React.FC = () => {
       await login(formData.email, formData.password, formData.rememberMe)
       // 로그인 성공 시 useEffect에서 리다이렉트 처리
     } catch (err) {
-      const errorMessage = extractAuthErrorMessage(
-        err,
-        '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'
-      )
+      const errorMessage = getLoginErrorMessage(err)
       setError(errorMessage)
       setShowAlert(true)
     } finally {
@@ -102,9 +99,12 @@ export const LoginPage: React.FC = () => {
               />
             </svg>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            계정에 로그인
-          </h2>
+          <div className="mt-6 text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              로그인
+            </h1>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">계정에 로그인하세요</p>
+          </div>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             또는{' '}
             <Link

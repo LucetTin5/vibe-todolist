@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { usePostApiAuthLogin, usePostApiAuthSignup } from '../api/generated'
 import type { PostApiAuthLogin200DataUser } from '../api/model/postApiAuthLogin200DataUser'
 import { extractErrorMessage } from '../utils/errorUtils'
+import { setGlobalLogoutHandler } from '../orval/mutator'
 
 interface User {
   id: string
@@ -98,14 +99,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // 로그인 상태 유지 시 localStorage 사용
         localStorage.setItem(SESSION_ID_KEY, sessionIdValue)
         localStorage.setItem(USER_KEY, JSON.stringify(userWithName))
-        if (expiresAt) {
+        if (expiresAt && typeof expiresAt === 'number') {
           localStorage.setItem(EXPIRES_AT_KEY, expiresAt.toString())
         }
       } else {
         // 로그인 상태 유지하지 않을 시 sessionStorage 사용
         sessionStorage.setItem(SESSION_ID_KEY, sessionIdValue)
         sessionStorage.setItem(USER_KEY, JSON.stringify(userWithName))
-        if (expiresAt) {
+        if (expiresAt && typeof expiresAt === 'number') {
           sessionStorage.setItem(EXPIRES_AT_KEY, expiresAt.toString())
         }
         // localStorage에서는 제거
@@ -135,6 +136,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('Logout completed: storage cleared')
   }, [])
 
+  // 전역 로그아웃 핸들러 등록
+  useEffect(() => {
+    setGlobalLogoutHandler(logout)
+  }, [logout])
+
   // 세션 갱신 함수 (현재는 placeholder - 필요시 구현)
   const refreshToken = useCallback(async (): Promise<void> => {
     // 세션 기반 인증에서는 보통 자동 갱신이 됨
@@ -154,6 +160,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     if (savedExpiresAt) {
       const expiresAt = Number.parseInt(savedExpiresAt, 10)
+
+      // parseInt 실패 시 NaN 체크
+      if (Number.isNaN(expiresAt)) {
+        console.warn('Invalid expires_at value, clearing session')
+        logout()
+        return
+      }
+
       const currentTime = Math.floor(Date.now() / 1000)
 
       if (expiresAt < currentTime) {

@@ -1,4 +1,5 @@
 import type React from 'react'
+import { useState } from 'react'
 import { KanbanCard } from './KanbanCard'
 import { cn } from '../../utils/cn'
 import type { GetApiTodos200TodosItem } from '../../api/model'
@@ -38,8 +39,12 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   className = '',
   headerClassName = '',
 }) => {
+  const [isDragOver, setIsDragOver] = useState(false)
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
+    setIsDragOver(false)
+
     const cardId = e.dataTransfer.getData('text/plain')
     const fromStatus = e.dataTransfer.getData('application/status') as TodoStatus
 
@@ -52,6 +57,14 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    // 컬럼 영역을 완전히 벗어났을 때만 isDragOver를 false로 설정
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false)
+    }
   }
 
   const handleCardReorder = (
@@ -67,6 +80,8 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       className={cn(
         'flex-1 min-w-72 sm:min-w-80 lg:min-w-96 flex flex-col rounded-lg',
         'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm',
+        'transition-all duration-200',
+        isDragOver && 'border-blue-500 dark:border-blue-400 shadow-lg scale-[1.02]',
         className
       )}
     >
@@ -107,9 +122,13 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
       {/* 카드 드롭 영역 */}
       <div
-        className={cn('flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96')}
+        className={cn(
+          'flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3 overflow-y-auto min-h-96',
+          isDragOver && 'bg-blue-50 dark:bg-blue-900/20'
+        )}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
       >
         {/* 할 일 추가 영역 (todo 컬럼에만) */}
         {status === 'todo' && onAddTodo && (

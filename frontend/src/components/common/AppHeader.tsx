@@ -2,6 +2,7 @@ import type React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ThemeToggle } from './ThemeToggle'
 import { useAuth } from '../../contexts/AuthContext'
+import { useNotificationContext } from '../../contexts/NotificationContext'
 import { cn } from '../../utils/cn'
 
 interface AppHeaderProps {
@@ -17,6 +18,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const navigate = useNavigate()
   const { user, logout, isAuthenticated } = useAuth()
+  const { isConnected, connectionError } = useNotificationContext()
 
   const handleNavigate = (path: string) => {
     navigate(path)
@@ -36,9 +38,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     >
       <div className="w-full xl:container xl:mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
             {title}
-          </h1>
+          </h2>
           {currentView === 'dashboard' && (
             <div className="hidden xl:block text-sm text-gray-600 dark:text-gray-400">
               전체 현황을 한눈에 확인하세요
@@ -62,6 +64,24 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* 알림 연결 상태 표시 */}
+          {isAuthenticated && (
+            <div
+              className={cn(
+                'flex items-center gap-1 px-2 py-1 rounded-full text-xs',
+                isConnected
+                  ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
+                  : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+              )}
+              title={isConnected ? '알림 연결됨' : connectionError || '알림 연결 안됨'}
+            >
+              <div
+                className={cn('w-2 h-2 rounded-full', isConnected ? 'bg-green-500' : 'bg-red-500')}
+              />
+              <span className="hidden sm:inline">{isConnected ? '알림' : '연결 끊김'}</span>
+            </div>
+          )}
+
           <ThemeToggle />
 
           {/* 사용자 정보 및 로그아웃 */}

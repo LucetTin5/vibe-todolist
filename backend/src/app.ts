@@ -9,6 +9,7 @@ import { prettyJSON } from 'hono/pretty-json'
 import { todoRoutes } from './routes/todos'
 import todoAuthRoutes from './routes/todos.auth'
 import authRoutes from './routes/auth'
+import notificationRoutes from './routes/notifications'
 
 // OpenAPI 앱 생성
 export const app = new OpenAPIHono()
@@ -76,6 +77,10 @@ Bearer 토큰을 사용한 세션 기반 인증이 필요합니다. Authorizatio
     {
       name: 'Stats',
       description: 'Todo 통계 API',
+    },
+    {
+      name: 'Notifications',
+      description: '알림 시스템 API',
     },
   ],
 })
@@ -206,5 +211,6 @@ app.get('/test/drizzle-todos', async (c) => {
 
 // 라우트 등록 (테스트/헬스체크 엔드포인트 이후에 등록)
 app.route('/', authRoutes)
+app.route('/api/notifications', notificationRoutes) // notifications를 먼저 등록
 app.route('/', todoRoutes)
 app.route('/', todoAuthRoutes)

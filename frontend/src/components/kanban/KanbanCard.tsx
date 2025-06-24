@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { cn } from '../../utils/cn'
 import type { GetApiTodos200TodosItem } from '../../api/model'
@@ -16,8 +16,12 @@ interface KanbanCardProps {
   isUpdating: boolean
 }
 
-export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder, isUpdating }) => {
-  const [dragOverPosition, setDragOverPosition] = useState<'before' | 'after' | null>(null)
+export const KanbanCard: React.FC<KanbanCardProps> = ({
+  todo,
+  status: _status,
+  onReorder: _onReorder,
+  isUpdating,
+}) => {
   const cardRef = useRef<HTMLDivElement>(null)
 
   // 카드 등장 애니메이션
@@ -49,7 +53,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData('text/plain', todo.id)
-    e.dataTransfer.setData('application/status', status)
+    e.dataTransfer.setData('application/status', _status)
     e.dataTransfer.effectAllowed = 'move'
 
     // 드래그 시작 애니메이션
@@ -66,8 +70,6 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
   }
 
   const handleDragEnd = () => {
-    setDragOverPosition(null)
-
     // 드래그 종료 애니메이션
     if (cardRef.current) {
       gsap.to(cardRef.current, {
@@ -79,34 +81,6 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
         ease: 'power2.out',
       })
     }
-  }
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-
-    const rect = e.currentTarget.getBoundingClientRect()
-    const middleY = rect.top + rect.height / 2
-    const position = e.clientY < middleY ? 'before' : 'after'
-
-    setDragOverPosition(position)
-  }
-
-  const handleDragLeave = () => {
-    setDragOverPosition(null)
-  }
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    const draggedCardId = e.dataTransfer.getData('text/plain')
-    const draggedStatus = e.dataTransfer.getData('application/status') as TodoStatus
-
-    if (draggedCardId !== todo.id && draggedStatus === status && dragOverPosition) {
-      onReorder(draggedCardId, todo.id, dragOverPosition)
-    }
-
-    setDragOverPosition(null)
   }
 
   const getPriorityColor = (priority?: string) => {
@@ -159,22 +133,19 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({ todo, status, onReorder,
       draggable={!isUpdating}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
       className={cn(
         'relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
         'p-3 sm:p-4 cursor-move shadow-sm hover:shadow-md transition-all duration-200',
-        isUpdating && 'cursor-not-allowed opacity-75',
-        dragOverPosition === 'before' && 'border-t-2 border-t-blue-500',
-        dragOverPosition === 'after' && 'border-b-2 border-b-blue-500'
+        isUpdating && 'cursor-not-allowed opacity-75'
       )}
     >
       {/* 우선순위 배지 */}
       {todo.priority && (
         <div className="flex justify-end mb-2">
           <span
-            className={`text-xs font-medium px-2 py-1 rounded-full border ${getPriorityColor(todo.priority)}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full border ${getPriorityColor(
+              todo.priority
+            )}`}
           >
             {getPriorityLabel(todo.priority)}
           </span>

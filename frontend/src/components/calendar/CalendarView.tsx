@@ -12,6 +12,7 @@ import type { PostApiTodosBody, GetApiTodosParams, GetApiTodos200TodosItem } fro
 
 interface CalendarViewProps {
   filters: GetApiTodosParams
+  todos?: GetApiTodos200TodosItem[] // 상위에서 전달받은 todos (optimistic 포함)
   onFiltersChange: (
     filters: GetApiTodosParams | ((prev: GetApiTodosParams) => GetApiTodosParams)
   ) => void
@@ -19,24 +20,29 @@ interface CalendarViewProps {
   onUpdateTodo: (todo: { id: string } & PostApiTodosBody) => void
   onToggleTodo: (id: string) => void
   onDeleteTodo: (id: string) => void
+  isCreating?: boolean
+  isUpdating?: boolean
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
   filters,
+  todos: propTodos,
   onFiltersChange: _onFiltersChange,
   onCreateTodo,
   onUpdateTodo,
   onToggleTodo,
   onDeleteTodo,
+  isCreating = false,
+  isUpdating = false,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [selectedFormDate, setSelectedFormDate] = useState<Date | null>(null)
   const [editingTodo, setEditingTodo] = useState<GetApiTodos200TodosItem | null>(null)
 
-  // Todo 데이터 조회
+  // Todo 데이터 조회 (props로 받은 경우 우선 사용)
   const { data: todosResponse, isLoading } = useTodos(filters)
-  const todos = todosResponse?.todos || []
+  const todos = propTodos || todosResponse?.todos || []
 
   // 스켈레톤 깜빡임 방지
   const showSkeleton = useDelayedLoading(isLoading, 200)
@@ -80,6 +86,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   // Todo 체크박스 클릭 핸들러 - 상태 토글
   const handleTodoToggle = (todoId: string, event: React.MouseEvent) => {
     event.stopPropagation() // 다른 클릭 이벤트 방지
+    // 상위 컴포넌트에서 optimistic update 처리하므로 단순히 콜백만 호출
     onToggleTodo(todoId)
   }
 
@@ -97,6 +104,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       onCreateTodo(todoWithDate)
     }
 
+    setIsFormOpen(false)
+    setSelectedFormDate(null)
+    setEditingTodo(null)
+  }
+
+  // Todo 삭제 핸들러
+  const handleDeleteTodo = (id: string) => {
+    // 상위 컴포넌트에서 optimistic update 처리하므로 단순히 콜백만 호출
+    onDeleteTodo(id)
+    // 모달 닫기
     setIsFormOpen(false)
     setSelectedFormDate(null)
     setEditingTodo(null)
@@ -122,6 +139,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* 페이지 제목 */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+        <div className="w-full xl:container xl:mx-auto">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">📅 캘린더</h1>
+        </div>
+      </div>
+
       {/* 툴바 */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="w-full xl:container xl:mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -168,10 +192,24 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </Button>
           </div>
 
-          {/* 오늘 버튼 */}
-          <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
-            오늘
-          </Button>
+          {/* 액션 버튼들 */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setEditingTodo(null)
+                setSelectedFormDate(null)
+                setIsFormOpen(true)
+              }}
+            >
+              + 할 일 추가
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
+              오늘
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -180,18 +218,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         <div className="w-full xl:container xl:mx-auto">
           <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {/* 요일 헤더 */}
-            {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
-              <div
-                key={day}
-                className={cn(
-                  'p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400',
-                  index === 0 && 'text-red-500 dark:text-red-400', // 일요일
-                  index === 6 && 'text-blue-500 dark:text-blue-400' // 토요일
-                )}
-              >
-                {day}
-              </div>
-            ))}
+            <div className="contents">
+              {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
+                <div
+                  key={day}
+                  className={cn(
+                    'p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400',
+                    index === 0 && 'text-red-500 dark:text-red-400', // 일요일
+                    index === 6 && 'text-blue-500 dark:text-blue-400' // 토요일
+                  )}
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
 
             {/* 날짜 셀들 */}
             {monthDays.map((date) => {
@@ -205,7 +245,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   className={cn(
                     'min-h-[100px] sm:min-h-[120px] p-1 sm:p-2 border border-gray-200 dark:border-gray-700',
                     'bg-white dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700',
-                    'transition-colors duration-150'
+                    'transition-colors duration-150',
+                    isCurrentDay && 'today border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                   )}
                   onClick={() => handleDateClick(date)}
                 >
@@ -243,7 +284,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                           'text-xs p-1 rounded border-l-2 bg-gray-50 dark:bg-gray-700',
                           getStatusColor(todo.status || 'todo'),
                           'line-clamp-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600',
-                          'transition-colors duration-150 group'
+                          'transition-colors duration-150 group',
+                          todo.completed && 'line-through opacity-60'
                         )}
                         title={`${todo.title} - 클릭하여 수정`}
                         onClick={(e) => handleTodoClick(todo, e)}
@@ -336,8 +378,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           setEditingTodo(null)
         }}
         onSubmit={handleSubmitTodo}
-        onDelete={onDeleteTodo}
-        isLoading={false}
+        onDelete={handleDeleteTodo}
+        isLoading={isCreating || isUpdating}
         initialData={editingTodo || undefined}
         defaultValues={
           !editingTodo && selectedFormDate

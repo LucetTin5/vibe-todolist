@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Alert } from '../components/ui/Alert'
 import { useAuth } from '../contexts/AuthContext'
-import { extractAuthErrorMessage } from '../utils/errorUtils'
+import { getSignupErrorMessage } from '../utils/errorUtils'
 
 interface SignupFormData {
   email: string
@@ -163,10 +163,7 @@ export const SignupPage: React.FC = () => {
       await signup(formData.email, formData.password, formData.name)
       // 회원가입 성공 시 useEffect에서 리다이렉트 처리
     } catch (err) {
-      const errorMessage = extractAuthErrorMessage(
-        err,
-        '회원가입에 실패했습니다. 다시 시도해주세요.'
-      )
+      const errorMessage = getSignupErrorMessage(err)
       setError(errorMessage)
       setShowAlert(true)
     } finally {
@@ -226,9 +223,12 @@ export const SignupPage: React.FC = () => {
               />
             </svg>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            새 계정 만들기
-          </h2>
+          <div className="mt-6 text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              회원가입
+            </h1>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">새 계정을 만들어보세요</p>
+          </div>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             이미 계정이 있으신가요?{' '}
             <Link

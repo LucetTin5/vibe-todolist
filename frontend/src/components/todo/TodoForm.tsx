@@ -100,20 +100,6 @@ export function TodoForm({
     }))
   }
 
-  const formatDateForInput = (dateString?: string) => {
-    if (!dateString) return ''
-    // Convert ISO string to datetime-local format
-    return new Date(dateString).toISOString().slice(0, 16)
-  }
-
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setFormData((prev) => ({
-      ...prev,
-      dueDate: value ? new Date(value).toISOString() : undefined,
-    }))
-  }
-
   return (
     <Modal
       isOpen={isOpen}
@@ -124,6 +110,7 @@ export function TodoForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <Input
+          id="title"
           label="Title"
           placeholder="Enter todo title..."
           value={formData.title}
@@ -133,17 +120,18 @@ export function TodoForm({
 
         {/* Description */}
         <Textarea
+          id="description"
           label="Description"
-          placeholder="Enter description (optional)..."
+          placeholder="Add a description..."
           value={formData.description || ''}
           onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-          rows={4}
+          rows={3}
         />
 
-        {/* Priority and Category */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 min-w-0">
             <Select
+              id="priority"
               label="Priority"
               value={formData.priority || 'medium'}
               onChange={(e) =>
@@ -162,6 +150,7 @@ export function TodoForm({
 
           <div className="flex-1 min-w-0">
             <Select
+              id="category"
               label="Category"
               value={formData.category || 'other'}
               onChange={(e) =>
@@ -180,17 +169,60 @@ export function TodoForm({
           </div>
         </div>
 
-        {/* Due Date and Estimated Time */}
+        {/* Due Date and Time */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 min-w-0">
             <Input
+              id="dueDate"
               label="Due Date"
-              type="datetime-local"
-              value={formatDateForInput(formData.dueDate)}
-              onChange={handleDateChange}
+              type="date"
+              value={formData.dueDate ? formData.dueDate.split('T')[0] : ''}
+              onChange={(e) => {
+                const value = e.target.value
+                if (value) {
+                  // 기존 시간이 있으면 유지, 없으면 현재 시간 사용
+                  const existingTime = formData.dueDate
+                    ? formData.dueDate.split('T')[1]
+                    : '09:00:00.000Z'
+                  setFormData((prev) => ({
+                    ...prev,
+                    dueDate: `${value}T${existingTime}`,
+                  }))
+                } else {
+                  setFormData((prev) => ({
+                    ...prev,
+                    dueDate: undefined,
+                  }))
+                }
+              }}
             />
           </div>
 
+          <div className="flex-1 min-w-0">
+            <Input
+              id="time"
+              label="Time"
+              type="time"
+              value={formData.dueDate ? formData.dueDate.split('T')[1]?.substring(0, 5) || '' : ''}
+              onChange={(e) => {
+                const timeValue = e.target.value
+                if (timeValue) {
+                  // 날짜가 없으면 오늘 날짜 사용
+                  const dateStr = formData.dueDate
+                    ? formData.dueDate.split('T')[0]
+                    : new Date().toISOString().split('T')[0]
+                  setFormData((prev) => ({
+                    ...prev,
+                    dueDate: `${dateStr}T${timeValue}:00.000Z`,
+                  }))
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Estimated Time */}
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 min-w-0">
             <Input
               label="Estimated Time (minutes)"

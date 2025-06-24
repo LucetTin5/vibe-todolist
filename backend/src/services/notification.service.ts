@@ -163,10 +163,9 @@ class NotificationService {
     if (startTime <= endTime) {
       // 같은 날 (예: 22:00 ~ 08:00)
       return currentTime >= startTime && currentTime <= endTime
-    } else {
-      // 다음 날로 넘어가는 경우 (예: 22:00 ~ 08:00)
-      return currentTime >= startTime || currentTime <= endTime
     }
+    // 다음 날로 넘어가는 경우 (예: 22:00 ~ 08:00)
+    return currentTime >= startTime || currentTime <= endTime
   }
 
   // 평일만 알림인지 확인

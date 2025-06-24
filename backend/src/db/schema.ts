@@ -1,9 +1,9 @@
-import { pgTable, text, timestamp, uuid, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, uuid, pgEnum, integer } from 'drizzle-orm/pg-core'
 
 // Enums 정의
 export const priorityEnum = pgEnum('priority', ['urgent', 'high', 'medium', 'low'])
 export const categoryEnum = pgEnum('category', ['work', 'personal', 'shopping', 'health', 'other'])
-export const statusEnum = pgEnum('status', ['pending', 'completed'])
+export const statusEnum = pgEnum('status', ['pending', 'in_progress', 'completed'])
 
 // Profiles 테이블 (Supabase Auth Users 확장)
 export const profiles = pgTable('profiles', {
@@ -26,6 +26,7 @@ export const todos = pgTable('todos', {
   priority: priorityEnum('priority').default('medium').notNull(),
   category: categoryEnum('category').default('other').notNull(),
   status: statusEnum('status').default('pending').notNull(),
+  orderIndex: integer('order_index').default(0).notNull(),
   dueDate: timestamp('due_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

@@ -1,20 +1,34 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useLocation } from 'react-router-dom'
 import { debounce } from 'es-toolkit'
 import { TodoList } from '../components/todo'
+import { KanbanView } from '../components/kanban'
+import { CalendarView } from '../components/calendar'
 import {
   useTodos,
   useCreateTodo,
   useUpdateTodo,
   useToggleTodo,
   useDeleteTodo,
+  getTodosQueryKey,
 } from '../hooks/useTodos'
 import type { GetApiTodosParams, PostApiTodosBody } from '../api/model'
 
 export const TodosPage = () => {
+  const location = useLocation()
   const [filters, setFilters] = useState<GetApiTodosParams>({})
   const [debouncedFilters, setDebouncedFilters] = useState<GetApiTodosParams>({})
   const queryClient = useQueryClient()
+
+  // 현재 경로에 따른 뷰 모드 결정
+  const getViewMode = () => {
+    if (location.pathname.startsWith('/kanban')) return 'kanban'
+    if (location.pathname.startsWith('/calendar')) return 'calendar'
+    return 'list'
+  }
+
+  const viewMode = getViewMode()
 
   // Debounced filter update function
   const debouncedSetFilters = useMemo(
@@ -48,8 +62,8 @@ export const TodosPage = () => {
     mutation: {
       onSuccess: () => {
         // 모든 todos 관련 쿼리 무효화 (필터와 무관하게)
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodos'] })
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodosStats'] })
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
+        queryClient.invalidateQueries({ queryKey: ['/api/todos/stats'] })
       },
     },
   })
@@ -58,28 +72,94 @@ export const TodosPage = () => {
     mutation: {
       onSuccess: () => {
         // 모든 todos 관련 쿼리 무효화 (필터와 무관하게)
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodos'] })
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodosStats'] })
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
+        queryClient.invalidateQueries({ queryKey: ['/api/todos/stats'] })
       },
     },
   })
 
   const toggleTodoMutation = useToggleTodo({
     mutation: {
-      onSuccess: () => {
-        // 모든 todos 관련 쿼리 무효화 (필터와 무관하게)
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodos'] })
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodosStats'] })
+      onMutate: async (variables) => {
+        // 현재 필터에 해당하는 쿼리 키 생성
+        const queryKey = getTodosQueryKey(debouncedFilters)
+
+        // 진행 중인 쿼리 취소
+        await queryClient.cancelQueries({ queryKey })
+
+        // 이전 데이터 백업
+        const previousTodos = queryClient.getQueryData(queryKey)
+
+        // Optimistic Update
+        queryClient.setQueryData(queryKey, (old: unknown) => {
+          if (!old) return old
+          const data = old as {
+            todos: Array<{ id: string; completed: boolean; status: string }>
+          }
+          return {
+            ...data,
+            todos: data.todos.map((todo) =>
+              todo.id === variables.id
+                ? {
+                    ...todo,
+                    completed: !todo.completed,
+                    status: todo.status === 'completed' ? 'pending' : 'completed',
+                  }
+                : todo
+            ),
+          }
+        })
+
+        return { previousTodos, queryKey }
+      },
+      onError: (_err, _variables, context) => {
+        // 실패 시 이전 데이터로 롤백
+        if (context?.previousTodos && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousTodos)
+        }
+      },
+      onSettled: () => {
+        // 성공/실패 관계없이 데이터 동기화
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
+        queryClient.invalidateQueries({ queryKey: ['/api/todos/stats'] })
       },
     },
   })
 
   const deleteTodoMutation = useDeleteTodo({
     mutation: {
-      onSuccess: () => {
-        // 모든 todos 관련 쿼리 무효화 (필터와 무관하게)
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodos'] })
-        queryClient.invalidateQueries({ queryKey: ['getGetApiTodosStats'] })
+      onMutate: async (variables) => {
+        // 현재 필터에 해당하는 쿼리 키 생성
+        const queryKey = getTodosQueryKey(debouncedFilters)
+
+        // 진행 중인 쿼리 취소
+        await queryClient.cancelQueries({ queryKey })
+
+        // 이전 데이터 백업
+        const previousTodos = queryClient.getQueryData(queryKey)
+
+        // Optimistic Update
+        queryClient.setQueryData(queryKey, (old: unknown) => {
+          if (!old) return old
+          const data = old as { todos: Array<{ id: string }> }
+          return {
+            ...data,
+            todos: data.todos.filter((todo) => todo.id !== variables.id),
+          }
+        })
+
+        return { previousTodos, queryKey }
+      },
+      onError: (_err, _variables, context) => {
+        // 실패 시 이전 데이터로 롤백
+        if (context?.previousTodos && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousTodos)
+        }
+      },
+      onSettled: () => {
+        // 성공/실패 관계없이 데이터 동기화
+        queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
+        queryClient.invalidateQueries({ queryKey: ['/api/todos/stats'] })
       },
     },
   })
@@ -102,6 +182,34 @@ export const TodosPage = () => {
     deleteTodoMutation.mutate({ id })
   }
 
+  // 칸반 또는 캘린더 뷰는 전체 화면 사용
+  if (viewMode === 'kanban') {
+    return (
+      <KanbanView
+        filters={debouncedFilters}
+        onFiltersChange={handleFiltersChange}
+        onCreateTodo={handleCreateTodo}
+      />
+    )
+  }
+
+  if (viewMode === 'calendar') {
+    return (
+      <CalendarView
+        filters={debouncedFilters}
+        todos={todos}
+        onFiltersChange={handleFiltersChange}
+        onCreateTodo={handleCreateTodo}
+        onUpdateTodo={handleUpdateTodo}
+        onToggleTodo={handleToggleTodo}
+        onDeleteTodo={handleDeleteTodo}
+        isCreating={createTodoMutation.isPending}
+        isUpdating={updateTodoMutation.isPending}
+      />
+    )
+  }
+
+  // 기본 리스트 뷰
   return (
     <div className="w-full xl:container xl:mx-auto px-4 py-6 h-full">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col">

@@ -50,8 +50,8 @@ export class DrizzleTodoService {
       priority: row.priority,
       category: row.category,
       status:
-        row.status === 'completed' ? 'done' : row.status === 'pending' ? 'todo' : 'in-progress',
-      order: 0, // 기본값
+        row.status === 'completed' ? 'done' : row.status === 'in_progress' ? 'in-progress' : 'todo',
+      order: row.orderIndex || 0,
       dueDate: row.dueDate?.toISOString(),
       tags: [], // 나중에 구현
       estimatedMinutes: undefined, // 나중에 구현
@@ -70,7 +70,15 @@ export class DrizzleTodoService {
       description: data.description || null,
       priority: data.priority || 'medium',
       category: data.category || 'other',
-      status: 'completed' in data && data.completed ? 'completed' : 'pending',
+      status:
+        'completed' in data && data.completed
+          ? 'completed'
+          : data.status === 'in-progress'
+            ? 'in_progress'
+            : data.status === 'done'
+              ? 'completed'
+              : 'pending',
+      orderIndex: data.order || 0,
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
     }
   }
@@ -107,7 +115,8 @@ export class DrizzleTodoService {
     }
 
     if (status) {
-      const dbStatus = status === 'done' ? 'completed' : status === 'todo' ? 'pending' : 'pending'
+      const dbStatus =
+        status === 'done' ? 'completed' : status === 'in-progress' ? 'in_progress' : 'pending'
       conditions.push(eq(todos.status, dbStatus))
     }
 
@@ -137,6 +146,8 @@ export class DrizzleTodoService {
       orderBy = sortOrder === 'asc' ? asc(todos.priority) : desc(todos.priority)
     } else if (sortBy === 'title') {
       orderBy = sortOrder === 'asc' ? asc(todos.title) : desc(todos.title)
+    } else if (sortBy === 'order') {
+      orderBy = sortOrder === 'asc' ? asc(todos.orderIndex) : desc(todos.orderIndex)
     } else {
       orderBy = sortOrder === 'asc' ? asc(todos.createdAt) : desc(todos.createdAt)
     }
@@ -211,6 +222,16 @@ export class DrizzleTodoService {
     if (data.category !== undefined) updateData.category = data.category
     if ('completed' in data && data.completed !== undefined)
       updateData.status = data.completed ? 'completed' : 'pending'
+    if (data.status !== undefined) {
+      // Kanban status를 DB status로 변환
+      updateData.status =
+        data.status === 'done'
+          ? 'completed'
+          : data.status === 'in-progress'
+            ? 'in_progress'
+            : 'pending'
+    }
+    if (data.order !== undefined) updateData.orderIndex = data.order
     if (data.dueDate !== undefined)
       updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null
 

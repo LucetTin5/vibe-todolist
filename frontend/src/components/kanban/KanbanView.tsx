@@ -81,7 +81,13 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
                 gsap.fromTo(
                   newElement,
-                  { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, overflow: 'hidden' },
+                  {
+                    height: 0,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    opacity: 0,
+                    overflow: 'hidden',
+                  },
                   {
                     height: targetHeight,
                     paddingTop: '1rem',
@@ -150,7 +156,13 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
           gsap.fromTo(
             element,
-            { height: 0, paddingTop: 0, paddingBottom: 0, opacity: 0, overflow: 'hidden' },
+            {
+              height: 0,
+              paddingTop: 0,
+              paddingBottom: 0,
+              opacity: 0,
+              overflow: 'hidden',
+            },
             {
               height: targetHeight,
               paddingTop: '1rem',
@@ -212,6 +224,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   const bulkUpdateMutation = useBulkUpdateTodos({
     mutation: {
       onSuccess: () => {
+        // 캐시 무효화로 최신 데이터 다시 가져오기
         queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
       },
       onError: (error) => {
@@ -246,20 +259,8 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   ) => {
     if (fromStatus === toStatus && newOrder === undefined) return
 
-    // Optimistic update
-    const previousData = queryClient.getQueryData(getTodosQueryKey())
-
     try {
-      // 즉시 UI 업데이트
-      queryClient.setQueryData(getTodosQueryKey(), (old: unknown) => {
-        const oldData = old as { todos?: Array<{ id: string; status: string; order?: number }> }
-        const updatedTodos =
-          oldData?.todos?.map((todo) =>
-            todo.id === cardId ? { ...todo, status: toStatus, order: newOrder } : todo
-          ) || []
-        return { ...oldData, todos: updatedTodos }
-      })
-
+      // API 호출 먼저 실행 (optimistic update 제거)
       await bulkUpdateMutation.mutateAsync({
         data: {
           data: [
@@ -271,9 +272,9 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
           ],
         },
       })
+
+      // 성공 시 캐시 무효화는 mutation의 onSuccess에서 처리됨
     } catch (error) {
-      // Rollback on error
-      queryClient.setQueryData(getTodosQueryKey(), previousData)
       console.error('Failed to move card:', error)
       // TODO: 사용자에게 에러 알림
     }
@@ -286,7 +287,11 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     insertPosition: 'before' | 'after'
   ) => {
     // TODO: 실제 드래그 앤 드롭 리오더링 로직 구현
-    console.log('Reorder card:', { draggedCardId, targetCardId, insertPosition })
+    console.log('Reorder card:', {
+      draggedCardId,
+      targetCardId,
+      insertPosition,
+    })
   }
 
   // 할 일 생성 모달 열기

@@ -2,8 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { TodosPage } from '../pages/TodosPage'
 import { LoginPage } from '../pages/LoginPage'
 import { SignupPage } from '../pages/SignupPage'
-import { KanbanView } from '../components/kanban'
-import { CalendarView } from '../components/calendar'
 import { DashboardView } from '../components/dashboard'
 import { ProtectedRoute, GuestOnlyRoute } from '../components/auth/ProtectedRoute'
 
@@ -46,10 +44,18 @@ export const AppRoutes = () => {
         }
       />
       <Route
+        path="/list"
+        element={
+          <ProtectedRoute>
+            <TodosPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/kanban"
         element={
           <ProtectedRoute>
-            <KanbanView filters={{}} onFiltersChange={() => {}} onCreateTodo={() => {}} />
+            <TodosPage />
           </ProtectedRoute>
         }
       />
@@ -57,14 +63,7 @@ export const AppRoutes = () => {
         path="/calendar"
         element={
           <ProtectedRoute>
-            <CalendarView
-              filters={{}}
-              onFiltersChange={() => {}}
-              onCreateTodo={() => {}}
-              onUpdateTodo={() => {}}
-              onToggleTodo={() => {}}
-              onDeleteTodo={() => {}}
-            />
+            <TodosPage />
           </ProtectedRoute>
         }
       />
