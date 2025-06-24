@@ -13,6 +13,7 @@
 - **고급 상태 관리**: 우선순위, 카테고리, 상태, 태그 시스템
 - **드래그 앤 드롭**: 직관적인 태스크 관리
 - **실시간 동기화**: React Query 기반 서버 상태 관리
+- **스마트 알림**: 브라우저 알림, 미리 알림, 설정 관리
 
 ### 🔐 인증 & 보안
 
@@ -22,9 +23,17 @@
 
 ### 📊 대시보드 & 분석
 
-- **8개 위젯**: 통계 카드, 차트, 빠른 액션 등
+- **9개 위젯**: 통계 카드, 차트, 빠른 액션, 알림 설정 등
 - **인터랙티브 차트**: Recharts 기반 데이터 시각화
 - **실시간 통계**: 완료율, 우선순위별 분석, 트렌드 분석
+
+### 🔔 알림 시스템
+
+- **브라우저 알림**: 권한 요청 및 자동 알림 표시
+- **미리 알림**: 마감 시간 전 다중 알림 (15분, 1시간, 1일 등)
+- **소리 알림**: 알림음 on/off 설정
+- **조용한 시간**: 특정 시간대 알림 비활성화
+- **알림 설정 관리**: 개인화된 알림 환경 설정
 
 ### 🎨 사용자 경험
 
@@ -59,7 +68,6 @@
 
 - **[Bun Workspaces](https://bun.sh/docs/install/workspaces)** - 모노레포 관리
 - **[Biome](https://biomejs.dev/)** 1.9.4 - 린터 & 포맷터
-- **[Playwright](https://playwright.dev/)** 1.53.0 - E2E 테스트
 
 ## 📁 프로젝트 구조
 
@@ -67,7 +75,7 @@
 todolist/
 ├── backend/              # Hono API 서버 (포트: 3300)
 │   ├── src/
-│   │   ├── routes/       # API 라우트 (todos, auth)
+│   │   ├── routes/       # API 라우트 (todos, auth, notifications)
 │   │   ├── services/     # 비즈니스 로직
 │   │   ├── db/          # Drizzle ORM 설정
 │   │   ├── schemas/     # Zod 스키마
@@ -142,7 +150,6 @@ bun run dev
 ```bash
 bun run dev          # 모든 워크스페이스 개발 서버 실행
 bun run build        # 모든 워크스페이스 빌드
-bun run test         # 모든 테스트 실행
 bun run format       # 코드 포맷팅
 bun run lint         # 린팅 검사
 bun run lint:fix     # 린팅 자동 수정
@@ -169,7 +176,6 @@ bun run dev          # Vite 개발 서버
 bun run build        # 프로덕션 빌드
 bun run preview      # 빌드 미리보기
 bun run orval        # OpenAPI 클라이언트 재생성
-bun run test:e2e     # Playwright E2E 테스트
 ```
 
 ## 🎨 뷰 모드
@@ -194,9 +200,10 @@ bun run test:e2e     # Playwright E2E 테스트
 
 ### 📊 대시보드 뷰
 
-- 8개 위젯으로 구성된 종합 대시보드
+- 9개 위젯으로 구성된 종합 대시보드
 - 실시간 통계 및 차트
 - 빠른 액션 버튼
+- 알림 설정 카드 및 관리
 
 ## 🔐 인증 플로우
 
@@ -204,20 +211,6 @@ bun run test:e2e     # Playwright E2E 테스트
 2. **세션 관리**: JWT 토큰 기반
 3. **보호된 라우트**: 인증 상태 확인
 4. **자동 리프레시**: 토큰 갱신 자동화
-
-## 🧪 테스트
-
-```bash
-# E2E 테스트 실행
-cd frontend
-bun run test:e2e
-
-# 헤드리스 모드로 테스트
-bun run test:e2e:ui
-
-# 브라우저 모드로 테스트
-bun run test:e2e:headed
-```
 
 ## 📚 문서 및 참고사항
 
