@@ -12,6 +12,7 @@ class NotificationManager {
   private isInitialized = false
   private checkInterval: Timer | null = null
   private readonly CHECK_INTERVAL_MS = 60000 // 1분마다 체크
+  private lastCheckTime = new Date()
 
   async initialize(): Promise<void> {
     if (this.isInitialized) {
@@ -48,31 +49,82 @@ class NotificationManager {
 
   private async checkAndSendDueNotifications(): Promise<void> {
     try {
-      // 향후 Supabase에서 due date가 임박한 todos 조회
-      // 현재는 로그만 출력
-      console.log('Checking for due notifications...', new Date().toISOString())
+      this.lastCheckTime = new Date()
+      console.log('Checking for due notifications...', this.lastCheckTime.toISOString())
 
-      // 예시: 알림이 필요한 경우 SSE로 전송
-      // const notifications = await notificationService.getPendingNotifications()
-      // for (const notification of notifications) {
-      //   await sseManager.sendToUser(notification.user_id, {
-      //     type: notification.type,
-      //     message: notification.message,
-      //     todo_id: notification.todo_id,
-      //     timestamp: new Date().toISOString()
-      //   })
-      // }
+      // 실제 pending notifications 조회
+      const notifications = await notificationService.getPendingNotifications()
+
+      for (const notification of notifications) {
+        // userId가 null인 경우 스킵
+        if (!notification.userId) {
+          console.log('Skipping notification with null userId')
+          continue
+        }
+
+        // 사용자 설정 확인
+        const userSettings = await notificationService.getUserNotificationSettings(
+          notification.userId
+        )
+
+        // 조용한 시간 체크
+        if (userSettings && (await notificationService.isQuietHours(notification.userId))) {
+          console.log(`Skipping notification for user ${notification.userId} - quiet hours`)
+          continue
+        }
+
+        // 주말 알림 설정 체크
+        if (
+          userSettings &&
+          !(await notificationService.shouldNotifyOnWeekend(notification.userId))
+        ) {
+          console.log(`Skipping notification for user ${notification.userId} - weekdays only`)
+          continue
+        }
+
+        // 브라우저 알림이 활성화된 경우에만 SSE로 전송
+        if (userSettings?.browserNotifications) {
+          await sseManager.sendToUser(notification.userId, {
+            type: notification.type as 'due_soon' | 'overdue' | 'reminder' | 'system',
+            message: notification.message,
+            todo_id: notification.todoId || undefined,
+            timestamp: new Date().toISOString(),
+            metadata: notification.metadata,
+          })
+        }
+
+        // 알림을 전송됨으로 표시
+        await notificationService.markNotificationAsSent(notification.id)
+
+        console.log(`Notification sent to user ${notification.userId}: ${notification.message}`)
+      }
+
+      if (notifications.length > 0) {
+        console.log(`Processed ${notifications.length} pending notifications`)
+      }
     } catch (error) {
       console.error('Error checking due notifications:', error)
     }
   }
 
   async getSystemStats(): Promise<SystemStats> {
-    return {
-      active_connections: sseManager.getActiveConnectionCount(),
-      pending_notifications: 0, // 향후 Supabase에서 조회
-      system_status: this.isInitialized ? 'running' : 'stopped',
-      last_check: new Date().toISOString(),
+    try {
+      const stats = await notificationService.getNotificationStats()
+
+      return {
+        active_connections: sseManager.getActiveConnectionCount(),
+        pending_notifications: stats.pending_notifications,
+        system_status: this.isInitialized ? 'running' : 'stopped',
+        last_check: this.lastCheckTime.toISOString(),
+      }
+    } catch (error) {
+      console.error('Error getting system stats:', error)
+      return {
+        active_connections: sseManager.getActiveConnectionCount(),
+        pending_notifications: 0,
+        system_status: 'error',
+        last_check: this.lastCheckTime.toISOString(),
+      }
     }
   }
 
@@ -94,12 +146,20 @@ class NotificationManager {
   async sendNotificationToUser(
     userId: string,
     notification: {
-      type: 'due_soon' | 'overdue' | 'reminder'
+      type: 'due_soon' | 'overdue' | 'reminder' | 'system'
       message: string
       todo_id?: string
     }
   ): Promise<void> {
     try {
+      // 사용자 설정 확인
+      const userSettings = await notificationService.getUserNotificationSettings(userId)
+
+      if (!userSettings?.browserNotifications) {
+        console.log(`User ${userId} has browser notifications disabled`)
+        return
+      }
+
       await sseManager.sendToUser(userId, {
         ...notification,
         timestamp: new Date().toISOString(),
@@ -124,6 +184,32 @@ class NotificationManager {
     } catch (error) {
       console.error('Failed to broadcast notification:', error)
     }
+  }
+
+  // 특정 할일에 대한 알림 스케줄링
+  async scheduleNotificationsForTodo(todoId: string, userId: string, dueDate: Date): Promise<void> {
+    try {
+      await notificationService.scheduleNotificationForTodo(todoId, userId, dueDate)
+      console.log(`Scheduled notifications for todo ${todoId}`)
+    } catch (error) {
+      console.error(`Failed to schedule notifications for todo ${todoId}:`, error)
+    }
+  }
+
+  // 할일 삭제 시 관련 알림들 삭제
+  async deleteNotificationsForTodo(todoId: string): Promise<void> {
+    try {
+      await notificationService.deleteNotificationsForTodo(todoId)
+      console.log(`Deleted notifications for todo ${todoId}`)
+    } catch (error) {
+      console.error(`Failed to delete notifications for todo ${todoId}:`, error)
+    }
+  }
+
+  // 강제로 알림 체크 실행 (테스트용)
+  async forceNotificationCheck(): Promise<void> {
+    console.log('Forcing notification check...')
+    await this.checkAndSendDueNotifications()
   }
 }
 

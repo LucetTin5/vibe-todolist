@@ -15,6 +15,7 @@ import type {
   Category,
   Status,
 } from '../schemas/todo.schemas'
+import { notificationManager } from './notification-manager'
 
 interface PaginationOptions {
   page: number
@@ -207,6 +208,11 @@ export class DrizzleTodoService {
 
     const [newTodo] = await db.insert(todos).values(insertData).returning()
 
+    // 마감일이 있으면 알림 스케줄링
+    if (newTodo.dueDate) {
+      await notificationManager.scheduleNotificationsForTodo(newTodo.id, userId, newTodo.dueDate)
+    }
+
     return this.mapRowToTodo(newTodo)
   }
 
@@ -241,13 +247,29 @@ export class DrizzleTodoService {
       .where(and(eq(todos.id, id), eq(todos.userId, userId)))
       .returning()
 
-    return updatedTodo ? this.mapRowToTodo(updatedTodo) : null
+    if (!updatedTodo) return null
+
+    // 마감일 변경 시 알림 재스케줄링
+    if (data.dueDate !== undefined) {
+      // 기존 알림 삭제
+      await notificationManager.deleteNotificationsForTodo(id)
+
+      // 새 마감일이 있으면 새 알림 생성
+      if (updatedTodo.dueDate) {
+        await notificationManager.scheduleNotificationsForTodo(id, userId, updatedTodo.dueDate)
+      }
+    }
+
+    return this.mapRowToTodo(updatedTodo)
   }
 
   /**
    * Todo 삭제
    */
   async deleteTodo(userId: string, id: string): Promise<boolean> {
+    // 관련 알림들 먼저 삭제
+    await notificationManager.deleteNotificationsForTodo(id)
+
     const result = await db
       .delete(todos)
       .where(and(eq(todos.id, id), eq(todos.userId, userId)))
@@ -277,6 +299,13 @@ export class DrizzleTodoService {
       .set({ status: newStatus })
       .where(and(eq(todos.id, id), eq(todos.userId, userId)))
       .returning()
+
+    // 완료 상태로 변경되면 알림 삭제, 미완료로 되돌리면 알림 재생성
+    if (newStatus === 'completed') {
+      await notificationManager.deleteNotificationsForTodo(id)
+    } else if (currentTodo.dueDate) {
+      await notificationManager.scheduleNotificationsForTodo(id, userId, currentTodo.dueDate)
+    }
 
     return this.mapRowToTodo(updatedTodo)
   }
@@ -426,6 +455,14 @@ export class DrizzleTodoService {
    * 모든 Todo 삭제 (사용자별)
    */
   async deleteAllTodos(userId: string): Promise<number> {
+    // 먼저 사용자의 모든 알림 삭제
+    const userTodos = await db.select({ id: todos.id }).from(todos).where(eq(todos.userId, userId))
+
+    // 각 할일의 알림들 삭제
+    for (const todo of userTodos) {
+      await notificationManager.deleteNotificationsForTodo(todo.id)
+    }
+
     const result = await db
       .delete(todos)
       .where(eq(todos.userId, userId))

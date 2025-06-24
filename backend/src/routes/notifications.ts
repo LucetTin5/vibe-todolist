@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { authMiddleware, getUser } from '../middleware/auth'
 import { getSessionInfo } from '../middleware/session'
 import { sseManager } from '../utils/sse-manager'
+import { notificationService } from '../services/notification.service'
+import { notificationManager } from '../services/notification-manager'
 import { ErrorResponseSchema } from '../types/api.types'
 
 const app = new OpenAPIHono()
@@ -107,26 +109,61 @@ const getSettingsRoute = createRoute({
 })
 
 app.openapi(getSettingsRoute, async (c) => {
-  const user = getUser(c) as { id: string }
+  try {
+    const user = getUser(c) as { id: string }
 
-  // 기본 설정 반환 (향후 Supabase에서 가져올 예정)
-  const defaultSettings = {
-    browser_notifications: true,
-    toast_notifications: true,
-    reminder_times: ['09:00', '18:00'],
-    quiet_hours_start: '22:00',
-    quiet_hours_end: '08:00',
-    weekdays_only: false,
-    sound_enabled: true,
+    // 실제 설정 조회
+    const settings = await notificationService.getUserNotificationSettings(user.id)
+
+    if (!settings) {
+      // 설정이 없으면 기본 설정 생성
+      const defaultSettings = await notificationService.createDefaultUserNotificationSettings(
+        user.id
+      )
+
+      return c.json(
+        {
+          success: true as const,
+          data: {
+            browser_notifications: defaultSettings.browserNotifications ?? true,
+            toast_notifications: defaultSettings.toastNotifications ?? true,
+            reminder_times: defaultSettings.reminderTimes || ['1h', '30m'],
+            quiet_hours_start: defaultSettings.quietHoursStart || '22:00:00',
+            quiet_hours_end: defaultSettings.quietHoursEnd || '08:00:00',
+            weekdays_only: defaultSettings.weekdaysOnly ?? false,
+            sound_enabled: defaultSettings.soundEnabled ?? true,
+          },
+        },
+        200
+      )
+    }
+
+    return c.json(
+      {
+        success: true as const,
+        data: {
+          browser_notifications: settings.browserNotifications ?? true,
+          toast_notifications: settings.toastNotifications ?? true,
+          reminder_times: settings.reminderTimes || ['1h', '30m'],
+          quiet_hours_start: settings.quietHoursStart || '22:00:00',
+          quiet_hours_end: settings.quietHoursEnd || '08:00:00',
+          weekdays_only: settings.weekdaysOnly ?? false,
+          sound_enabled: settings.soundEnabled ?? true,
+        },
+      },
+      200
+    )
+  } catch (error) {
+    console.error('Error getting notification settings:', error)
+    return c.json(
+      {
+        success: false as const,
+        error: 'Internal server error',
+        message: 'Failed to get notification settings',
+      },
+      401
+    )
   }
-
-  return c.json(
-    {
-      success: true as const,
-      data: defaultSettings,
-    },
-    200
-  )
 })
 
 // 알림 설정 업데이트 라우트
@@ -164,23 +201,70 @@ const updateSettingsRoute = createRoute({
         },
       },
     },
+    500: {
+      description: '서버 오류',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
   },
 })
 
 app.openapi(updateSettingsRoute, async (c) => {
-  const user = getUser(c) as { id: string }
-  const body = await c.req.json()
+  try {
+    const user = getUser(c) as { id: string }
+    const body = await c.req.json()
 
-  // 향후 Supabase에 저장할 예정
-  console.log(`Updating notification settings for user ${user.id}:`, body)
+    console.log(`Updating notification settings for user ${user.id}:`, body)
 
-  return c.json(
-    {
-      success: true as const,
-      message: '알림 설정이 업데이트되었습니다.',
-    },
-    200
-  )
+    // 설정 변환 (API 형식 -> DB 형식)
+    const updateData: any = {}
+
+    if (body.browser_notifications !== undefined) {
+      updateData.browserNotifications = body.browser_notifications
+    }
+    if (body.toast_notifications !== undefined) {
+      updateData.toastNotifications = body.toast_notifications
+    }
+    if (body.reminder_times !== undefined) {
+      updateData.reminderTimes = body.reminder_times
+    }
+    if (body.quiet_hours_start !== undefined) {
+      updateData.quietHoursStart = body.quiet_hours_start
+    }
+    if (body.quiet_hours_end !== undefined) {
+      updateData.quietHoursEnd = body.quiet_hours_end
+    }
+    if (body.weekdays_only !== undefined) {
+      updateData.weekdaysOnly = body.weekdays_only
+    }
+    if (body.sound_enabled !== undefined) {
+      updateData.soundEnabled = body.sound_enabled
+    }
+
+    // 실제 설정 업데이트
+    await notificationService.updateUserNotificationSettings(user.id, updateData)
+
+    return c.json(
+      {
+        success: true as const,
+        message: '알림 설정이 업데이트되었습니다.',
+      },
+      200
+    )
+  } catch (error) {
+    console.error('Error updating notification settings:', error)
+    return c.json(
+      {
+        success: false as const,
+        error: 'Internal server error',
+        message: 'Failed to update notification settings',
+      },
+      500
+    )
+  }
 })
 
 export default app
