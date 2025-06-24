@@ -267,4 +267,287 @@ app.openapi(updateSettingsRoute, async (c) => {
   }
 })
 
+// 강제 알림 체크 라우트 (테스트용)
+const forceCheckRoute = createRoute({
+  method: 'post',
+  path: '/force-check',
+  tags: ['Notifications'],
+  middleware: [authMiddleware],
+  responses: {
+    200: {
+      description: '강제 알림 체크 성공',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    401: {
+      description: '인증 실패',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: '서버 오류',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+})
+
+app.openapi(forceCheckRoute, async (c) => {
+  try {
+    console.log('Force notification check requested')
+
+    // 강제 알림 체크 실행
+    await notificationManager.forceNotificationCheck()
+
+    return c.json(
+      {
+        success: true as const,
+        message: '알림 체크가 실행되었습니다.',
+      },
+      200
+    )
+  } catch (error) {
+    console.error('Error during force notification check:', error)
+    return c.json(
+      {
+        success: false as const,
+        error: 'Internal server error',
+        message: 'Failed to execute notification check',
+      },
+      500
+    )
+  }
+})
+
+// Todo 알림 스케줄링 라우트
+const scheduleRoute = createRoute({
+  method: 'post',
+  path: '/schedule',
+  tags: ['Notifications'],
+  middleware: [authMiddleware],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: z.object({
+            todoId: z.string(),
+            dueDate: z.string(),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: '알림 스케줄링 성공',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    401: {
+      description: '인증 실패',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: '서버 오류',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+})
+
+app.openapi(scheduleRoute, async (c) => {
+  try {
+    const user = getUser(c) as { id: string }
+    const { todoId, dueDate } = await c.req.json()
+
+    console.log(`Scheduling notifications for todo ${todoId}, user ${user.id}, due: ${dueDate}`)
+
+    // 알림 스케줄링 실행
+    await notificationManager.scheduleNotificationsForTodo(todoId, user.id, new Date(dueDate))
+
+    return c.json(
+      {
+        success: true as const,
+        message: '알림이 스케줄링되었습니다.',
+      },
+      200
+    )
+  } catch (error) {
+    console.error('Error scheduling notifications:', error)
+    return c.json(
+      {
+        success: false as const,
+        error: 'Internal server error',
+        message: 'Failed to schedule notifications',
+      },
+      500
+    )
+  }
+})
+
+// Todo 알림 삭제 라우트
+const deleteTodoNotificationsRoute = createRoute({
+  method: 'delete',
+  path: '/todo/{todoId}',
+  tags: ['Notifications'],
+  middleware: [authMiddleware],
+  request: {
+    params: z.object({
+      todoId: z.string(),
+    }),
+  },
+  responses: {
+    200: {
+      description: '알림 삭제 성공',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    401: {
+      description: '인증 실패',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: '서버 오류',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+})
+
+app.openapi(deleteTodoNotificationsRoute, async (c) => {
+  try {
+    const { todoId } = c.req.param()
+
+    console.log(`Deleting notifications for todo ${todoId}`)
+
+    // 알림 삭제 실행
+    await notificationManager.deleteNotificationsForTodo(todoId)
+
+    return c.json(
+      {
+        success: true as const,
+        message: '알림이 삭제되었습니다.',
+      },
+      200
+    )
+  } catch (error) {
+    console.error('Error deleting notifications:', error)
+    return c.json(
+      {
+        success: false as const,
+        error: 'Internal server error',
+        message: 'Failed to delete notifications',
+      },
+      500
+    )
+  }
+})
+
+// 시스템 통계 조회 라우트 (관리자용)
+const statsRoute = createRoute({
+  method: 'get',
+  path: '/stats',
+  tags: ['Notifications'],
+  middleware: [authMiddleware],
+  responses: {
+    200: {
+      description: '시스템 통계 조회 성공',
+      content: {
+        'application/json': {
+          schema: z.object({
+            success: z.literal(true),
+            data: z.object({
+              active_connections: z.number(),
+              pending_notifications: z.number(),
+              system_status: z.enum(['running', 'stopped', 'error']),
+              last_check: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    401: {
+      description: '인증 실패',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: '서버 오류',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+})
+
+app.openapi(statsRoute, async (c) => {
+  try {
+    console.log('System stats requested')
+
+    // 시스템 통계 조회
+    const stats = await notificationManager.getSystemStats()
+
+    return c.json(
+      {
+        success: true as const,
+        data: stats,
+      },
+      200
+    )
+  } catch (error) {
+    console.error('Error getting system stats:', error)
+    return c.json(
+      {
+        success: false as const,
+        error: 'Internal server error',
+        message: 'Failed to get system stats',
+      },
+      500
+    )
+  }
+})
+
 export default app

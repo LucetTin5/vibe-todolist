@@ -1,33 +1,22 @@
-import { useState, useId } from 'react'
+import { useState, useId, useEffect } from 'react'
 import { useBrowserNotifications } from '../../hooks/useBrowserNotifications'
+import { useNotificationContext } from '../../contexts/NotificationContext'
+import { Button } from '../ui/Button'
 
-interface NotificationSettingsData {
-  browser_notifications: boolean
-  toast_notifications: boolean
-  reminder_times: string[]
-  quiet_hours_start: string
-  quiet_hours_end: string
-  weekdays_only: boolean
-  sound_enabled: boolean
-}
-
-interface NotificationSettingsProps {
-  onSettingsChange?: (settings: Partial<NotificationSettingsData>) => void
-}
-
-export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsProps) => {
-  const [settings, setSettings] = useState<NotificationSettingsData>({
-    browser_notifications: true,
-    toast_notifications: true,
-    reminder_times: ['09:00', '18:00'],
-    quiet_hours_start: '22:00',
-    quiet_hours_end: '08:00',
-    weekdays_only: false,
-    sound_enabled: true,
-  })
+export const NotificationSettings = () => {
+  const {
+    notificationSettings,
+    updateNotificationSettings,
+    settingsLoading,
+    settingsError,
+    showToast,
+  } = useNotificationContext()
 
   const { isSupported, requestPermission, getPermissionMessage, canShowNotifications } =
     useBrowserNotifications()
+
+  const [localSettings, setLocalSettings] = useState(notificationSettings)
+  const [saving, setSaving] = useState(false)
 
   // useId로 고유 ID 생성
   const browserNotificationId = useId()
@@ -39,58 +28,160 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
   const weekdaysOnlyId = useId()
   const soundEnabledId = useId()
 
-  // 설정 변경 핸들러
-  const handleSettingChange = <K extends keyof NotificationSettingsData>(
+  // 서버 설정이 로드되면 로컬 상태 업데이트
+  useEffect(() => {
+    if (notificationSettings) {
+      setLocalSettings(notificationSettings)
+    }
+  }, [notificationSettings])
+
+  // 로컬 설정 변경 핸들러
+  const handleLocalSettingChange = <K extends keyof NonNullable<typeof notificationSettings>>(
     key: K,
-    value: NotificationSettingsData[K]
+    value: NonNullable<typeof notificationSettings>[K]
   ) => {
-    const newSettings = { ...settings, [key]: value }
-    setSettings(newSettings)
-    onSettingsChange?.({ [key]: value })
+    if (!localSettings) return
+    setLocalSettings((prev) => (prev ? { ...prev, [key]: value } : null))
+  }
+
+  // 설정 저장
+  const handleSaveSettings = async () => {
+    if (!localSettings || !notificationSettings) return
+
+    setSaving(true)
+    try {
+      // 변경된 설정만 추출
+      const changes: Partial<typeof notificationSettings> = {}
+      for (const key of Object.keys(localSettings)) {
+        const k = key as keyof typeof notificationSettings
+        if (JSON.stringify(localSettings[k]) !== JSON.stringify(notificationSettings[k])) {
+          changes[k] = localSettings[k] as any
+        }
+      }
+
+      if (Object.keys(changes).length === 0) {
+        showToast('info', '설정', '변경된 설정이 없습니다.')
+        return
+      }
+
+      await updateNotificationSettings(changes)
+      showToast('success', '설정 저장', '알림 설정이 성공적으로 저장되었습니다.')
+    } catch (error) {
+      console.error('Failed to save notification settings:', error)
+      showToast('error', '설정 저장 실패', '알림 설정 저장에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // 변경사항 취소
+  const handleCancelChanges = () => {
+    setLocalSettings(notificationSettings)
   }
 
   // 브라우저 알림 토글 (권한 요청 포함)
   const handleBrowserNotificationToggle = async () => {
-    if (!settings.browser_notifications) {
+    if (!localSettings) return
+
+    if (!localSettings.browser_notifications) {
       // 켜려고 할 때 권한 확인/요청
       if (!canShowNotifications()) {
         const result = await requestPermission()
         if (result !== 'granted') {
+          showToast('warning', '권한 필요', '브라우저 알림을 사용하려면 권한이 필요합니다.')
           return // 권한이 거부되면 설정 변경하지 않음
         }
       }
     }
 
-    handleSettingChange('browser_notifications', !settings.browser_notifications)
+    handleLocalSettingChange('browser_notifications', !localSettings.browser_notifications)
   }
 
   // 알림 시간 추가
   const addReminderTime = () => {
-    const newTime = '12:00' // 기본값
-    if (!settings.reminder_times.includes(newTime)) {
-      handleSettingChange('reminder_times', [...settings.reminder_times, newTime])
+    if (!localSettings) return
+    const newTime = '1h' // 기본값: 1시간 전
+    if (!localSettings.reminder_times.includes(newTime)) {
+      handleLocalSettingChange('reminder_times', [...localSettings.reminder_times, newTime])
     }
   }
 
   // 알림 시간 제거
   const removeReminderTime = (timeToRemove: string) => {
-    handleSettingChange(
+    if (!localSettings) return
+    handleLocalSettingChange(
       'reminder_times',
-      settings.reminder_times.filter((time) => time !== timeToRemove)
+      localSettings.reminder_times.filter((time) => time !== timeToRemove)
     )
   }
 
   // 알림 시간 변경
   const updateReminderTime = (index: number, newTime: string) => {
-    const newTimes = [...settings.reminder_times]
+    if (!localSettings) return
+    const newTimes = [...localSettings.reminder_times]
     newTimes[index] = newTime
-    handleSettingChange('reminder_times', newTimes)
+    handleLocalSettingChange('reminder_times', newTimes)
+  }
+
+  // 시간 형식 변환 (HH:MM:SS -> HH:MM)
+  const formatTimeForInput = (timeString: string) => {
+    return timeString.slice(0, 5) // "HH:MM:SS" -> "HH:MM"
+  }
+
+  // 시간 형식 변환 (HH:MM -> HH:MM:SS)
+  const formatTimeForServer = (timeString: string) => {
+    return `${timeString}:00` // "HH:MM" -> "HH:MM:SS"
+  }
+
+  const hasChanges =
+    localSettings &&
+    notificationSettings &&
+    JSON.stringify(localSettings) !== JSON.stringify(notificationSettings)
+
+  if (settingsLoading) {
+    return (
+      <div className="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4" />
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (settingsError) {
+    return (
+      <div className="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="text-red-600 dark:text-red-400">
+          <h3 className="text-lg font-semibold mb-2">설정 로드 실패</h3>
+          <p>{settingsError}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!localSettings) {
+    return null
   }
 
   return (
     <div className="space-y-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">알림 설정</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">알림 설정</h3>
+        {hasChanges && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleCancelChanges} disabled={saving}>
+              취소
+            </Button>
+            <Button variant="primary" size="sm" onClick={handleSaveSettings} disabled={saving}>
+              {saving ? '저장 중...' : '저장'}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* 브라우저 알림 설정 */}
@@ -114,14 +205,14 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
             disabled={!isSupported}
             aria-describedby={`${browserNotificationId}-desc`}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-              settings.browser_notifications && canShowNotifications()
+              localSettings.browser_notifications && canShowNotifications()
                 ? 'bg-blue-600'
                 : 'bg-gray-200 dark:bg-gray-600'
             }`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                settings.browser_notifications && canShowNotifications()
+                localSettings.browser_notifications && canShowNotifications()
                   ? 'translate-x-6'
                   : 'translate-x-1'
               }`}
@@ -155,14 +246,16 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
         <button
           id={toastNotificationId}
           type="button"
-          onClick={() => handleSettingChange('toast_notifications', !settings.toast_notifications)}
+          onClick={() =>
+            handleLocalSettingChange('toast_notifications', !localSettings.toast_notifications)
+          }
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-            settings.toast_notifications ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+            localSettings.toast_notifications ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
           }`}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              settings.toast_notifications ? 'translate-x-6' : 'translate-x-1'
+              localSettings.toast_notifications ? 'translate-x-6' : 'translate-x-1'
             }`}
           />
         </button>
@@ -174,19 +267,25 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
           htmlFor={reminderTimesId}
           className="text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          알림 시간
+          마감일 알림 시간
         </label>
         <div id={reminderTimesId} className="space-y-2">
-          {settings.reminder_times.map((time, index) => (
+          {localSettings.reminder_times.map((time, index) => (
             <div key={index} className="flex items-center gap-2">
-              <input
-                type="time"
+              <select
                 value={time}
                 onChange={(e) => updateReminderTime(index, e.target.value)}
                 aria-label={`알림 시간 ${index + 1}`}
                 className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              />
-              {settings.reminder_times.length > 1 && (
+              >
+                <option value="1h">1시간 전</option>
+                <option value="2h">2시간 전</option>
+                <option value="6h">6시간 전</option>
+                <option value="1d">1일 전</option>
+                <option value="3d">3일 전</option>
+                <option value="1w">1주일 전</option>
+              </select>
+              {localSettings.reminder_times.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeReminderTime(time)}
@@ -213,6 +312,9 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
             + 알림 시간 추가
           </button>
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          마감일 전에 알림을 받을 시간을 설정하세요.
+        </p>
       </div>
 
       {/* 조용한 시간 설정 */}
@@ -227,8 +329,10 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
           <input
             id={quietHoursStartId}
             type="time"
-            value={settings.quiet_hours_start}
-            onChange={(e) => handleSettingChange('quiet_hours_start', e.target.value)}
+            value={formatTimeForInput(localSettings.quiet_hours_start)}
+            onChange={(e) =>
+              handleLocalSettingChange('quiet_hours_start', formatTimeForServer(e.target.value))
+            }
             aria-label="조용한 시간 시작"
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           />
@@ -236,8 +340,10 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
           <input
             id={quietHoursEndId}
             type="time"
-            value={settings.quiet_hours_end}
-            onChange={(e) => handleSettingChange('quiet_hours_end', e.target.value)}
+            value={formatTimeForInput(localSettings.quiet_hours_end)}
+            onChange={(e) =>
+              handleLocalSettingChange('quiet_hours_end', formatTimeForServer(e.target.value))
+            }
             aria-label="조용한 시간 종료"
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           />
@@ -264,14 +370,14 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
         <button
           id={weekdaysOnlyId}
           type="button"
-          onClick={() => handleSettingChange('weekdays_only', !settings.weekdays_only)}
+          onClick={() => handleLocalSettingChange('weekdays_only', !localSettings.weekdays_only)}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-            settings.weekdays_only ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+            localSettings.weekdays_only ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
           }`}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              settings.weekdays_only ? 'translate-x-6' : 'translate-x-1'
+              localSettings.weekdays_only ? 'translate-x-6' : 'translate-x-1'
             }`}
           />
         </button>
@@ -293,14 +399,14 @@ export const NotificationSettings = ({ onSettingsChange }: NotificationSettingsP
         <button
           id={soundEnabledId}
           type="button"
-          onClick={() => handleSettingChange('sound_enabled', !settings.sound_enabled)}
+          onClick={() => handleLocalSettingChange('sound_enabled', !localSettings.sound_enabled)}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-            settings.sound_enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+            localSettings.sound_enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
           }`}
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              settings.sound_enabled ? 'translate-x-6' : 'translate-x-1'
+              localSettings.sound_enabled ? 'translate-x-6' : 'translate-x-1'
             }`}
           />
         </button>

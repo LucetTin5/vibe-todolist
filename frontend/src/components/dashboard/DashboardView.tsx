@@ -10,6 +10,7 @@ import {
   FloatingActionButton,
   TrendAnalysisCard,
   RecentActivityCard,
+  NotificationSettingsCard,
 } from './widgets'
 import { cn } from '../../utils/cn'
 
@@ -182,6 +183,38 @@ export const DashboardView = () => {
 
                 {/* 트렌드 분석 */}
                 <TrendAnalysisCard stats={stats} />
+              </div>
+            </div>
+          </div>
+
+          {/* 알림 설정 섹션 */}
+          <div className="mt-6 sm:mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <NotificationSettingsCard />
+              </div>
+
+              {/* 추가 설정 카드들을 위한 공간 */}
+              <div className="lg:col-span-2">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    📋 시스템 정보
+                  </h3>
+                  <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex justify-between">
+                      <span>버전</span>
+                      <span className="font-mono">v1.0.0</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>마지막 업데이트</span>
+                      <span>{new Date().toLocaleDateString('ko-KR')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>데이터 동기화</span>
+                      <span className="text-green-600 dark:text-green-400">정상</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -2,7 +2,9 @@ import { createContext, useContext, useEffect, type ReactNode } from 'react'
 import { useNotifications } from '../hooks/useNotifications'
 import { useBrowserNotifications } from '../hooks/useBrowserNotifications'
 import { useToast } from '../hooks/useToast'
+import { useNotificationSettings } from '../hooks/useNotificationSettings'
 import { ToastContainer } from '../components/notifications/ToastContainer'
+import type { NotificationSettings } from '../api/notifications'
 
 interface NotificationContextValue {
   // SSE 연결 상태
@@ -28,12 +30,11 @@ interface NotificationContextValue {
   ) => void
   clearAllToasts: () => void
 
-  // 알림 설정 (향후 구현)
-  notificationSettings: {
-    browser_notifications: boolean
-    toast_notifications: boolean
-    sound_enabled: boolean
-  }
+  // 알림 설정
+  notificationSettings: NotificationSettings | null
+  updateNotificationSettings: (settings: Partial<NotificationSettings>) => Promise<void>
+  settingsLoading: boolean
+  settingsError: string | null
 }
 
 const NotificationContext = createContext<NotificationContextValue | null>(null)
@@ -62,16 +63,16 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     showReminder,
   } = useToast()
 
-  // 기본 알림 설정 (향후 사용자 설정으로 교체)
-  const notificationSettings = {
-    browser_notifications: true,
-    toast_notifications: true,
-    sound_enabled: true,
-  }
+  const {
+    settings: notificationSettings,
+    loading: settingsLoading,
+    error: settingsError,
+    updateSettings: updateNotificationSettings,
+  } = useNotificationSettings()
 
   // SSE로부터 받은 알림을 처리
   useEffect(() => {
-    if (!lastNotification) return
+    if (!lastNotification || !notificationSettings) return
 
     const { type, message, todo_id } = lastNotification
 
@@ -136,6 +137,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     }
   }, [
     lastNotification,
+    notificationSettings,
     canShowNotifications,
     showTodoNotification,
     showDueSoon,
@@ -150,7 +152,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     message: string,
     type: 'due_soon' | 'overdue' | 'reminder'
   ) => {
-    if (canShowNotifications()) {
+    if (canShowNotifications() && notificationSettings?.browser_notifications) {
       showTodoNotification(type, message)
     }
   }
@@ -161,6 +163,13 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     message: string,
     options?: { duration?: number; onClick?: () => void }
   ) => {
+    // 설정 확인 (알림 관련 타입의 경우)
+    if (['due_soon', 'overdue', 'reminder'].includes(type)) {
+      if (!notificationSettings?.toast_notifications) {
+        return // 토스트 알림이 비활성화된 경우 표시하지 않음
+      }
+    }
+
     switch (type) {
       case 'success':
         return showSuccess(title, message, options)
@@ -191,6 +200,9 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     showToast,
     clearAllToasts,
     notificationSettings,
+    updateNotificationSettings,
+    settingsLoading,
+    settingsError,
   }
 
   return (

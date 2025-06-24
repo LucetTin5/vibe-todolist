@@ -13,6 +13,8 @@ import {
   useDeleteTodo,
   getTodosQueryKey,
 } from '../hooks/useTodos'
+import { scheduleNotificationsForTodo, deleteNotificationsForTodo } from '../api/notifications'
+import { useNotificationContext } from '../contexts/NotificationContext'
 import type { GetApiTodosParams, PostApiTodosBody } from '../api/model'
 
 export const TodosPage = () => {
@@ -20,6 +22,7 @@ export const TodosPage = () => {
   const [filters, setFilters] = useState<GetApiTodosParams>({})
   const [debouncedFilters, setDebouncedFilters] = useState<GetApiTodosParams>({})
   const queryClient = useQueryClient()
+  const { showToast } = useNotificationContext()
 
   // 현재 경로에 따른 뷰 모드 결정
   const getViewMode = () => {
@@ -60,20 +63,50 @@ export const TodosPage = () => {
 
   const createTodoMutation = useCreateTodo({
     mutation: {
-      onSuccess: () => {
+      onSuccess: async (response, variables) => {
         // 모든 todos 관련 쿼리 무효화 (필터와 무관하게)
         queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
         queryClient.invalidateQueries({ queryKey: ['/api/todos/stats'] })
+
+        // 마감일이 있는 경우 알림 스케줄링
+        if (variables.data.dueDate && response?.id) {
+          try {
+            await scheduleNotificationsForTodo(response.id, variables.data.dueDate)
+            console.log('Notifications scheduled for todo:', response.id)
+          } catch (error) {
+            console.error('Failed to schedule notifications:', error)
+            showToast('warning', '알림 설정', '할 일은 생성되었지만 알림 설정에 실패했습니다.')
+          }
+        }
       },
     },
   })
 
   const updateTodoMutation = useUpdateTodo({
     mutation: {
-      onSuccess: () => {
+      onSuccess: async (_response, variables) => {
         // 모든 todos 관련 쿼리 무효화 (필터와 무관하게)
         queryClient.invalidateQueries({ queryKey: getTodosQueryKey() })
         queryClient.invalidateQueries({ queryKey: ['/api/todos/stats'] })
+
+        // 마감일이 변경된 경우 알림 재스케줄링
+        if (variables.data.dueDate) {
+          try {
+            await scheduleNotificationsForTodo(variables.id, variables.data.dueDate)
+            console.log('Notifications rescheduled for todo:', variables.id)
+          } catch (error) {
+            console.error('Failed to reschedule notifications:', error)
+            showToast('warning', '알림 설정', '할 일은 수정되었지만 알림 설정에 실패했습니다.')
+          }
+        } else {
+          // 마감일이 제거된 경우 알림 삭제
+          try {
+            await deleteNotificationsForTodo(variables.id)
+            console.log('Notifications deleted for todo:', variables.id)
+          } catch (error) {
+            console.error('Failed to delete notifications:', error)
+          }
+        }
       },
     },
   })
@@ -149,6 +182,15 @@ export const TodosPage = () => {
         })
 
         return { previousTodos, queryKey }
+      },
+      onSuccess: async (_response, variables) => {
+        // 알림 삭제
+        try {
+          await deleteNotificationsForTodo(variables.id)
+          console.log('Notifications deleted for todo:', variables.id)
+        } catch (error) {
+          console.error('Failed to delete notifications:', error)
+        }
       },
       onError: (_err, _variables, context) => {
         // 실패 시 이전 데이터로 롤백
