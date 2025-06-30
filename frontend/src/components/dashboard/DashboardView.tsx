@@ -1,4 +1,6 @@
 import { useTodoStats } from '../../hooks/useTodos'
+import { useOnboarding } from '../../hooks/useOnboarding'
+import { OnboardingTour, defaultTourSteps } from '../common/OnboardingTour'
 import {
   TotalStatsCard,
   CompletionRateCard,
@@ -16,6 +18,7 @@ import { cn } from '../../utils/cn'
 
 export const DashboardView = () => {
   const { data: stats, isLoading, error } = useTodoStats()
+  const { onboardingState, completeTour, skipTour, startTour } = useOnboarding()
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -223,6 +226,33 @@ export const DashboardView = () => {
 
       {/* 플로팅 액션 버튼 (모바일에서만 표시) */}
       <FloatingActionButton />
+
+      {/* 온보딩 투어 */}
+      <OnboardingTour
+        steps={defaultTourSteps}
+        isVisible={onboardingState.showTour}
+        onComplete={completeTour}
+        onSkip={skipTour}
+      />
+
+      {/* 신규 사용자를 위한 도움말 버튼 */}
+      {onboardingState.tourCompleted && (
+        <button
+          onClick={startTour}
+          className="fixed bottom-20 right-4 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none z-50"
+          title="도움말 투어 다시 보기"
+          aria-label="도움말 투어 시작"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   )
 }

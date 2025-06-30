@@ -135,13 +135,13 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       onDragEnd={handleDragEnd}
       className={cn(
         'relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700',
-        'p-3 sm:p-4 cursor-move shadow-sm hover:shadow-md transition-all duration-200',
+        'h-40 flex flex-col p-3 sm:p-4 cursor-move shadow-sm hover:shadow-md transition-all duration-200',
         isUpdating && 'cursor-not-allowed opacity-75'
       )}
     >
-      {/* 우선순위 배지 */}
-      {todo.priority && (
-        <div className="flex justify-end mb-2">
+      {/* 상단: 우선순위 배지 (고정) */}
+      <div className="flex justify-end mb-2 flex-shrink-0">
+        {todo.priority && (
           <span
             className={`text-xs font-medium px-2 py-1 rounded-full border ${getPriorityColor(
               todo.priority
@@ -149,88 +149,100 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
           >
             {getPriorityLabel(todo.priority)}
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* 제목 */}
+      {/* 중간: 제목 (고정) */}
       <h4
         className={cn(
-          'font-medium text-gray-900 dark:text-gray-100 mb-2 line-clamp-2 text-sm sm:text-base'
+          'font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2 text-sm sm:text-base flex-shrink-0'
         )}
       >
         {todo.title}
       </h4>
 
-      {/* 설명 */}
-      {todo.description && (
-        <p className={cn('text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2')}>
-          {todo.description}
-        </p>
-      )}
+      {/* 중간: 설명 (유연한 크기) */}
+      <div className="flex-1 min-h-0 mb-3">
+        {todo.description && (
+          <p
+            className={cn('text-xs sm:text-sm text-gray-600 dark:text-gray-400 overflow-hidden')}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {todo.description}
+          </p>
+        )}
+      </div>
 
-      {/* 메타 정보 */}
-      <div
-        className={cn('flex items-center justify-between text-xs text-gray-500 dark:text-gray-400')}
-      >
-        <div className="flex items-center space-x-2">
-          {/* 카테고리 */}
-          {todo.category && (
-            <span
-              className={cn(
-                'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded'
-              )}
-            >
-              {todo.category}
-            </span>
-          )}
+      {/* 하단: 메타 정보 (고정) */}
+      <div className="flex-shrink-0">
+        {/* 첫 번째 줄: 카테고리와 마감일 */}
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
+            {/* 카테고리 */}
+            {todo.category && (
+              <span
+                className={cn(
+                  'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded text-xs flex-shrink-0'
+                )}
+              >
+                {todo.category}
+              </span>
+            )}
+          </div>
 
-          {/* 태그들 */}
-          {todo.tags && todo.tags.length > 0 && (
-            <div className="flex items-center space-x-1">
-              {todo.tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className={cn(
-                    'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded text-xs'
-                  )}
-                >
-                  #{tag}
-                </span>
-              ))}
-              {todo.tags.length > 2 && (
-                <span className={cn('text-gray-400 dark:text-gray-500')}>
-                  +{todo.tags.length - 2}
-                </span>
-              )}
+          {/* 마감일 */}
+          {todo.dueDate && (
+            <div className="flex items-center space-x-1 flex-shrink-0">
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <title>Calendar</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span
+                className={cn(
+                  'text-xs',
+                  new Date(todo.dueDate) < new Date() &&
+                    'text-red-500 dark:text-red-400 font-medium'
+                )}
+              >
+                {formatDate(todo.dueDate)}
+              </span>
             </div>
           )}
         </div>
 
-        {/* 마감일 */}
-        {todo.dueDate && (
-          <div className="flex items-center space-x-1">
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <title>Calendar</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span
-              className={cn(
-                new Date(todo.dueDate) < new Date() && 'text-red-500 dark:text-red-400'
-              )}
-            >
-              {formatDate(todo.dueDate)}
-            </span>
+        {/* 두 번째 줄: 태그들 */}
+        {todo.tags && todo.tags.length > 0 && (
+          <div className="flex items-center space-x-1 min-w-0">
+            {todo.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className={cn(
+                  'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded text-xs flex-shrink-0'
+                )}
+              >
+                #{tag}
+              </span>
+            ))}
+            {todo.tags.length > 2 && (
+              <span className={cn('text-gray-400 dark:text-gray-500 text-xs flex-shrink-0')}>
+                +{todo.tags.length - 2}
+              </span>
+            )}
           </div>
         )}
       </div>

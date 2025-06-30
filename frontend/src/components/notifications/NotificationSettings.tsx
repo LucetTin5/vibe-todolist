@@ -2,6 +2,7 @@ import { useState, useId, useEffect } from 'react'
 import { useBrowserNotifications } from '../../hooks/useBrowserNotifications'
 import { useNotificationContext } from '../../contexts/NotificationContext'
 import { Button } from '../ui/Button'
+import type { NotificationSettings as INotificationSettings } from '../../api/notifications'
 
 export const NotificationSettings = () => {
   const {
@@ -51,11 +52,11 @@ export const NotificationSettings = () => {
     setSaving(true)
     try {
       // 변경된 설정만 추출
-      const changes: Partial<typeof notificationSettings> = {}
+      const changes: Partial<INotificationSettings> = {}
       for (const key of Object.keys(localSettings)) {
-        const k = key as keyof typeof notificationSettings
+        const k = key as keyof INotificationSettings
         if (JSON.stringify(localSettings[k]) !== JSON.stringify(notificationSettings[k])) {
-          changes[k] = localSettings[k] as any
+          ;(changes as Record<string, unknown>)[k] = localSettings[k]
         }
       }
 

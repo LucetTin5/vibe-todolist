@@ -13,6 +13,7 @@ interface ThemeContextValue {
   theme: Theme
   setTheme: (theme: Theme | ((prev: Theme) => Theme)) => void
   actualTheme: 'light' | 'dark' // 실제 적용되는 테마 (system 해석 후)
+  toggleTheme: () => void // 테마 토글 함수 추가
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
@@ -101,10 +102,25 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
     }
   }
 
+  const toggleTheme = () => {
+    switch (theme) {
+      case 'light':
+        handleSetTheme('dark')
+        break
+      case 'dark':
+        handleSetTheme('system')
+        break
+      case 'system':
+        handleSetTheme('light')
+        break
+    }
+  }
+
   const value: ThemeContextValue = {
     theme,
     setTheme: handleSetTheme,
     actualTheme,
+    toggleTheme,
   }
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

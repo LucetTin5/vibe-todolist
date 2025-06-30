@@ -220,7 +220,7 @@ app.openapi(updateSettingsRoute, async (c) => {
     console.log(`Updating notification settings for user ${user.id}:`, body)
 
     // 설정 변환 (API 형식 -> DB 형식)
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
 
     if (body.browser_notifications !== undefined) {
       updateData.browserNotifications = body.browser_notifications

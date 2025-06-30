@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ThemeToggle } from './ThemeToggle'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotificationContext } from '../../contexts/NotificationContext'
+import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation'
 import { cn } from '../../utils/cn'
 
 interface AppHeaderProps {
@@ -19,6 +20,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const navigate = useNavigate()
   const { user, logout, isAuthenticated } = useAuth()
   const { isConnected, connectionError } = useNotificationContext()
+
+  // 키보드 접근성 설정
+  const { focusElement } = useKeyboardNavigation({
+    onSearch: () => {
+      // 검색 입력 필드에 포커스
+      focusElement('input[type="search"], input[placeholder*="검색"]')
+    },
+    onEscape: () => {
+      // 현재 포커스된 요소의 blur 처리
+      const activeElement = document.activeElement as HTMLElement
+      if (activeElement?.blur) {
+        activeElement.blur()
+      }
+    },
+  })
 
   const handleNavigate = (path: string) => {
     navigate(path)
@@ -125,13 +141,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 type="button"
                 onClick={() => handleNavigate('/dashboard')}
                 className={cn(
-                  'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  'px-2 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                   'flex items-center space-x-1 sm:space-x-2',
+                  'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none',
                   currentView === 'dashboard'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-blue-500 text-white shadow-lg transform scale-105 ring-2 ring-blue-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                 )}
-                title="대시보드"
+                title="대시보드 (Ctrl+1)"
+                aria-label="대시보드로 이동, 단축키: Ctrl+1"
+                aria-current={currentView === 'dashboard' ? 'page' : undefined}
               >
                 <svg
                   className="w-4 h-4"
@@ -154,13 +173,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 type="button"
                 onClick={() => handleNavigate('/todos')}
                 className={cn(
-                  'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  'px-2 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                   'flex items-center space-x-1 sm:space-x-2',
+                  'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none',
                   currentView === 'todos'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-blue-500 text-white shadow-lg transform scale-105 ring-2 ring-blue-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                 )}
-                title="목록 보기"
+                title="목록 보기 (Ctrl+2)"
+                aria-label="할 일 목록으로 이동, 단축키: Ctrl+2"
+                aria-current={currentView === 'todos' ? 'page' : undefined}
               >
                 <svg
                   className="w-4 h-4"
@@ -183,13 +205,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 type="button"
                 onClick={() => handleNavigate('/kanban')}
                 className={cn(
-                  'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  'px-2 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                   'flex items-center space-x-1 sm:space-x-2',
+                  'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none',
                   currentView === 'kanban'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-blue-500 text-white shadow-lg transform scale-105 ring-2 ring-blue-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                 )}
-                title="칸반 보드"
+                title="칸반 보드 (Ctrl+3)"
+                aria-label="칸반 보드로 이동, 단축키: Ctrl+3"
+                aria-current={currentView === 'kanban' ? 'page' : undefined}
               >
                 <svg
                   className="w-4 h-4"
@@ -212,13 +237,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 type="button"
                 onClick={() => handleNavigate('/calendar')}
                 className={cn(
-                  'px-2 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  'px-2 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                   'flex items-center space-x-1 sm:space-x-2',
+                  'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none',
                   currentView === 'calendar'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-blue-500 text-white shadow-lg transform scale-105 ring-2 ring-blue-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-gray-100'
                 )}
-                title="캘린더"
+                title="캘린더 (Ctrl+4)"
+                aria-label="캘린더로 이동, 단축키: Ctrl+4"
+                aria-current={currentView === 'calendar' ? 'page' : undefined}
               >
                 <svg
                   className="w-4 h-4"

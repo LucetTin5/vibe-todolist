@@ -21,6 +21,37 @@ export function TodoItem({
 }: TodoItemProps) {
   const [showActions, setShowActions] = useState(false)
 
+  // 키보드 이벤트 핸들러
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const { key, ctrlKey, metaKey } = event
+    const isModifierPressed = ctrlKey || metaKey
+
+    switch (key) {
+      case 'Enter':
+      case ' ':
+        // 스페이스바나 엔터로 완료/미완료 토글
+        event.preventDefault()
+        onToggle(todo.id)
+        break
+      case 'e':
+      case 'E':
+        // E키로 편집
+        if (!isModifierPressed) {
+          event.preventDefault()
+          onEdit(todo)
+        }
+        break
+      case 'Delete':
+      case 'Backspace':
+        // Delete나 Backspace로 삭제
+        if (key === 'Delete' || isModifierPressed) {
+          event.preventDefault()
+          onDelete(todo.id)
+        }
+        break
+    }
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
       year: 'numeric',
@@ -35,6 +66,7 @@ export function TodoItem({
     <div
       className={[
         'group relative bg-white rounded-lg border shadow-sm transition-shadow hover:shadow-md p-4',
+        'focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
         todo.completed ? 'border-green-200 bg-green-50' : 'border-gray-200',
         isDeleting ? 'opacity-50' : '',
       ]
@@ -42,6 +74,9 @@ export function TodoItem({
         .join(' ')}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
+      onKeyDown={handleKeyDown}
+      role="listitem"
+      aria-label={`할 일: ${todo.title}${todo.completed ? ' (완료됨)' : ''}`}
     >
       <div className="flex items-start gap-3">
         {/* Checkbox */}
@@ -50,7 +85,7 @@ export function TodoItem({
           onClick={() => onToggle(todo.id)}
           disabled={isToggling}
           className={[
-            'flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+            'flex-shrink-0 mt-0.5 w-5 h-5 rounded border-2 transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none',
             todo.completed
               ? 'bg-green-500 border-green-500 text-white'
               : 'border-gray-300 hover:border-green-500',
@@ -58,7 +93,8 @@ export function TodoItem({
           ]
             .filter(Boolean)
             .join(' ')}
-          title={todo.completed ? 'Mark as incomplete' : 'Mark as complete'}
+          title={todo.completed ? '미완료로 표시' : '완료로 표시'}
+          aria-label={`${todo.title} ${todo.completed ? '미완료로 변경' : '완료로 변경'}`}
         >
           {isToggling ? (
             <svg
@@ -94,10 +130,10 @@ export function TodoItem({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Title */}
+          {/* Level 1: 핵심 정보 - 제목 */}
           <h3
             className={[
-              'text-sm font-medium text-gray-900',
+              'text-base font-semibold text-gray-900 dark:text-gray-100',
               todo.completed ? 'line-through opacity-75' : '',
             ]
               .filter(Boolean)
@@ -106,12 +142,12 @@ export function TodoItem({
             {todo.title}
           </h3>
 
-          {/* Description */}
+          {/* Level 3: 부가 정보 - 설명 */}
           {todo.description && (
             <p
               className={[
-                'mt-1 text-sm text-gray-600',
-                todo.completed ? 'line-through opacity-75' : '',
+                'mt-1 text-sm text-gray-600 dark:text-gray-400 opacity-70',
+                todo.completed ? 'line-through opacity-50' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
@@ -120,76 +156,98 @@ export function TodoItem({
             </p>
           )}
 
-          {/* Enhanced Fields */}
-          <div className="mt-3 flex flex-wrap gap-2">
-            {/* Priority Badge */}
+          {/* Level 2: 중요 메타데이터 */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {/* 우선순위 - 색상 + 아이콘으로 강화 */}
             <span
               className={[
-                'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
+                'inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full border',
                 todo.priority === 'urgent'
-                  ? 'bg-red-100 text-red-800'
+                  ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'
                   : todo.priority === 'high'
-                    ? 'bg-orange-100 text-orange-800'
+                    ? 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800'
                     : todo.priority === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800',
+                      ? 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800'
+                      : 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700',
               ].join(' ')}
             >
-              {(todo.priority || 'medium').charAt(0).toUpperCase() +
-                (todo.priority || 'medium').slice(1)}
+              {todo.priority === 'urgent' && '🔥'}
+              {todo.priority === 'high' && '⚡'}
+              {todo.priority === 'medium' && '📝'}
+              {todo.priority === 'low' && '📋'}
+              {!todo.priority && '📝'}
+              <span className="ml-1">
+                {(todo.priority || 'medium').charAt(0).toUpperCase() +
+                  (todo.priority || 'medium').slice(1)}
+              </span>
             </span>
 
-            {/* Category Badge */}
-            <span
-              className="inline-flex items-center px-2 py-1 text-xs font-medium 
-                             bg-blue-100 text-blue-800 rounded-full"
-            >
-              {(todo.category || 'other').charAt(0).toUpperCase() +
-                (todo.category || 'other').slice(1)}
-            </span>
-
-            {/* Due Date */}
+            {/* 마감일 - 긴급한 경우 강조 */}
             {todo.dueDate && (
               <span
                 className={[
                   'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
                   new Date(todo.dueDate) < new Date() && !todo.completed
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-green-100 text-green-800',
+                    ? 'bg-red-100 text-red-800 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 animate-pulse'
+                    : 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
                 ].join(' ')}
               >
                 📅 {formatDate(todo.dueDate)}
               </span>
             )}
+          </div>
 
-            {/* Estimated Time */}
+          {/* Level 3: 부가 정보 */}
+          <div className="mt-2 flex flex-wrap gap-2 opacity-80">
+            {/* 카테고리 */}
+            <span
+              className="inline-flex items-center px-2 py-0.5 text-xs font-medium 
+                             bg-blue-100 text-blue-800 rounded-md border border-blue-200
+                             dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
+            >
+              {(todo.category || 'other').charAt(0).toUpperCase() +
+                (todo.category || 'other').slice(1)}
+            </span>
+
+            {/* 예상 소요시간 */}
             {todo.estimatedMinutes && (
               <span
-                className="inline-flex items-center px-2 py-1 text-xs font-medium 
-                               bg-purple-100 text-purple-800 rounded-full"
+                className="inline-flex items-center px-2 py-0.5 text-xs font-medium 
+                               bg-purple-100 text-purple-800 rounded-md border border-purple-200
+                               dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800"
               >
                 ⏱️ {todo.estimatedMinutes}m
               </span>
             )}
           </div>
 
-          {/* Tags */}
+          {/* Tags - Level 3 부가 정보 */}
           {todo.tags && todo.tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {todo.tags.map((tag) => (
+            <div className="mt-2 flex flex-wrap gap-1 opacity-60">
+              {todo.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center px-2 py-0.5 text-xs font-medium 
-                             bg-gray-100 text-gray-700 rounded-md"
+                             bg-gray-100 text-gray-700 rounded-md
+                             dark:bg-gray-800 dark:text-gray-300"
                 >
                   #{tag}
                 </span>
               ))}
+              {todo.tags.length > 3 && (
+                <span
+                  className="inline-flex items-center px-2 py-0.5 text-xs font-medium 
+                                 bg-gray-100 text-gray-500 rounded-md
+                                 dark:bg-gray-800 dark:text-gray-400"
+                >
+                  +{todo.tags.length - 3}
+                </span>
+              )}
             </div>
           )}
 
-          {/* Timestamps */}
-          <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
+          {/* Timestamps - 최하위 정보 */}
+          <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400 opacity-60">
             <span>Created: {formatDate(todo.createdAt)}</span>
             {todo.updatedAt !== todo.createdAt && (
               <span>Updated: {formatDate(todo.updatedAt)}</span>
@@ -210,7 +268,9 @@ export function TodoItem({
             variant="ghost"
             size="sm"
             onClick={() => onEdit(todo)}
-            className="text-gray-600 hover:text-blue-600"
+            className="text-gray-600 hover:text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            aria-label={`${todo.title} 편집`}
+            title="편집 (E)"
           >
             <svg
               className="h-4 w-4"
@@ -232,7 +292,9 @@ export function TodoItem({
             size="sm"
             onClick={() => onDelete(todo.id)}
             disabled={isDeleting}
-            className="text-gray-600 hover:text-red-600"
+            className="text-gray-600 hover:text-red-600 focus:ring-2 focus:ring-red-500 focus:outline-none"
+            aria-label={`${todo.title} 삭제`}
+            title="삭제 (Delete)"
           >
             {isDeleting ? (
               <svg
